@@ -69,6 +69,7 @@ class AuthService extends ChangeNotifier {
     required String email,
     required String currentPassword,
   }) async {
+    await supabaseAuth.reauthenticate(currentPassword);
     await supabaseAuth.updateUser(UserAttributes(password: newPassword));
     notifyListeners();
   }

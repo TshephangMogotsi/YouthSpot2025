@@ -64,13 +64,18 @@ class AuthService {
     await supabaseAuth.updateUser(UserAttributes(data: {'username': username}));
   }
 
-  Future<void> deleteAccount() async {
+  Future<void> deleteAccount({
+    required String email,
+    required String password,
+  }) async {
     await Supabase.instance.client.rpc('delete_user');
     await supabaseAuth.signOut();
   }
 
   Future<void> resetPasswordFromCurrentPassword({
     required String newPassword,
+    required String email,
+    required String currentPassword,
   }) async {
     await supabaseAuth.updateUser(UserAttributes(password: newPassword));
   }

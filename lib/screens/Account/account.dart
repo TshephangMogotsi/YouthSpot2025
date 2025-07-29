@@ -1,3 +1,4 @@
+import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/config/font_constants.dart';
 import 'package:youthspot/global_widgets/primary_padding.dart';
@@ -40,16 +41,16 @@ class Account extends StatelessWidget {
               },
             ),
             const Height10(),
-             SettingsListTile(
+            SettingsListTile(
               title: 'Account Settings',
               assetImage: 'assets/icon/Settings/SettingsIcon.png',
               ontap: () {
                 //push not using pushname
-                  Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const AccountSettings(),
-                          ),
-                        );
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AccountSettings(),
+                  ),
+                );
               },
             ),
             const Height10(),
@@ -70,18 +71,23 @@ class Account extends StatelessWidget {
             const Height20(),
             const Height20(),
             const Height20(),
-         
-            Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE0E0E0),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              width: double.infinity,
-              child: const Text(
-                "Logout",
-                style: AppTextStyles.primaryBigSemiBold,
+            GestureDetector(
+              onTap: () async {
+                await authService.value.signOut();
+              },
+              child: Container(
+                alignment: Alignment.center,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0E0E0),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                width: double.infinity,
+                child: const Text(
+                  "Logout",
+                  style: AppTextStyles.primaryBigSemiBold,
+                ),
               ),
             ),
           ],

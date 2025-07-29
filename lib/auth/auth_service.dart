@@ -1,76 +1,77 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
 
 ValueNotifier<AuthService> authService =
     ValueNotifier<AuthService>(AuthService());
 
 class AuthService {
-  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  final GoTrueClient supabaseAuth = Supabase.instance.client.auth;
 
-  User? get currentUser => firebaseAuth.currentUser;
+  User? get currentUser => supabaseAuth.currentUser;
 
-  Stream<User?> get authStateChanges => firebaseAuth.authStateChanges();
+  Stream<AuthState> get authStateChanges => supabaseAuth.onAuthStateChange;
 
-  Future<UserCredential> signIn({
+  Future<AuthResponse> signIn({
     required String email,
     required String password,
   }) async {
-    return await firebaseAuth.signInWithEmailAndPassword(
+    return await supabaseAuth.signInWithPassword(
       email: email,
       password: password,
     );
   }
 
-  Future<UserCredential> createAccount({
+  Future<AuthResponse> createAccount({
     required String email,
     required String password,
+    required String username,
+    required String fullName,
+    required String gender,
+    required String dateOfBirth,
+    required String mobileNumber,
   }) async {
-    return await firebaseAuth.createUserWithEmailAndPassword(
+    final AuthResponse res = await supabaseAuth.signUp(
       email: email,
       password: password,
     );
+
+    if (res.user != null) {
+      await Supabase.instance.client.from('profiles').insert({
+        'id': res.user!.id,
+        'username': username,
+        'full_name': fullName,
+        'gender': gender,
+        'date_of_birth': dateOfBirth,
+        'mobile_number': mobileNumber,
+      });
+    }
+
+    return res;
   }
 
   Future<void> signOut() async {
-    await firebaseAuth.signOut();
+    await supabaseAuth.signOut();
   }
 
   Future<void> resetPassword({required String email}) async {
-    await firebaseAuth.sendPasswordResetEmail(email: email);
+    await supabaseAuth.resetPasswordForEmail(email);
   }
 
   //update username
   Future<void> updateUsername({
     required String username,
   }) async {
-    await currentUser!.updateDisplayName(username);
+    await supabaseAuth.updateUser(UserAttributes(data: {'username': username}));
   }
 
-  Future<void> deleteAccount({
-    required String email,
-    required String password,
-  }) async {
-    AuthCredential credential = EmailAuthProvider.credential(
-      email: email,
-      password: password,
-    );
-    //sensitive operation - reauthenticate user before deleting account
-    await currentUser!.reauthenticateWithCredential(credential);
-    await currentUser!.delete();
-    await firebaseAuth.signOut();
+  Future<void> deleteAccount() async {
+    await Supabase.instance.client.rpc('delete_user');
+    await supabaseAuth.signOut();
   }
 
   Future<void> resetPasswordFromCurrentPassword({
-    required String currentPassword,
     required String newPassword,
-    required String email,
   }) async {
-    AuthCredential credential = EmailAuthProvider.credential(
-      email: email,
-      password: currentPassword,
-    );
-    //sensitive operation - reauthenticate user before updating password
-    await currentUser!.reauthenticateWithCredential(credential);
-    await currentUser!.updatePassword(newPassword);
+    await supabaseAuth.updateUser(UserAttributes(password: newPassword));
   }
 }

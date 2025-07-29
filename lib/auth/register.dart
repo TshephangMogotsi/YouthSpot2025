@@ -1,6 +1,6 @@
 import 'package:youthspot/auth/auth_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key, required this.onToggle});
@@ -16,6 +16,11 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController controllerPassword = TextEditingController();
   final TextEditingController controllerConfirmPassword =
       TextEditingController();
+  final TextEditingController controllerFullName = TextEditingController();
+  final TextEditingController controllerGender = TextEditingController();
+  final TextEditingController controllerDateOfBirth = TextEditingController();
+  final TextEditingController controllerMobileNumber = TextEditingController();
+  final TextEditingController controllerUsername = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String errorMessage = '';
 
@@ -26,6 +31,11 @@ class _RegisterPageState extends State<RegisterPage> {
     controllerEmail.dispose();
     controllerPassword.dispose();
     controllerConfirmPassword.dispose();
+    controllerFullName.dispose();
+    controllerGender.dispose();
+    controllerDateOfBirth.dispose();
+    controllerMobileNumber.dispose();
+    controllerUsername.dispose();
     super.dispose();
   }
 
@@ -34,16 +44,19 @@ class _RegisterPageState extends State<RegisterPage> {
       await authService.value.createAccount(
         email: controllerEmail.text.trim(),
         password: controllerPassword.text.trim(),
+        fullName: controllerFullName.text.trim(),
+        gender: controllerGender.text.trim(),
+        dateOfBirth: controllerDateOfBirth.text.trim(),
+        mobileNumber: controllerMobileNumber.text.trim(),
+        username: controllerUsername.text.trim(),
       );
-    } on FirebaseAuthException catch (e) {
+    } on AuthException catch (e) {
       setState(() {
-        errorMessage = e.message ?? 'An unknown error occurred';
+        errorMessage = e.message;
         debugPrint(errorMessage);
       });
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +91,82 @@ class _RegisterPageState extends State<RegisterPage> {
               const Center(child: Text('🔑', style: TextStyle(fontSize: 36))),
               const SizedBox(height: 24),
 
+              // Username
+              TextFormField(
+                controller: controllerUsername,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('Username'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your username';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // Full Name
+              TextFormField(
+                controller: controllerFullName,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('Full Name'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your full name';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // Gender
+              TextFormField(
+                controller: controllerGender,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('Gender'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your gender';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // Date of Birth
+              TextFormField(
+                controller: controllerDateOfBirth,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('Date of Birth'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your date of birth';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // Mobile Number
+              TextFormField(
+                controller: controllerMobileNumber,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('Mobile Number'),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your mobile number';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
               // Email
               TextFormField(
                 controller: controllerEmail,
@@ -102,7 +191,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 controller: controllerPassword,
                 obscureText: !_isPasswordVisible,
                 style: const TextStyle(color: Colors.white),
-                 decoration: _inputDecoration('Password', isPassword: true),
+                decoration: _inputDecoration('Password', isPassword: true),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
@@ -119,8 +208,10 @@ class _RegisterPageState extends State<RegisterPage> {
               // Confirm Password
               TextFormField(
                 controller: controllerConfirmPassword,
+                obscureText: !_isPasswordVisible,
                 style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration('Confirm Password', isPassword: true),
+                decoration:
+                    _inputDecoration('Confirm Password', isPassword: true),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please confirm your password';

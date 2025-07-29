@@ -65,12 +65,16 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> resetPasswordFromCurrentPassword({
-    required String newPassword,
-    required String email,
-    required String currentPassword,
-  }) async {
-    await supabaseAuth.reauthenticate(currentPassword);
-    await supabaseAuth.updateUser(UserAttributes(password: newPassword));
-    notifyListeners();
-  }
+  required String newPassword,
+  required String email,
+  required String currentPassword,
+}) async {
+  // Optional: You could re-login manually here to validate the current password
+  await supabaseAuth.signInWithPassword(email: email, password: currentPassword);
+
+  // If sign-in succeeded, proceed to update the password
+  await supabaseAuth.updateUser(UserAttributes(password: newPassword));
+  notifyListeners();
+}
+
 }

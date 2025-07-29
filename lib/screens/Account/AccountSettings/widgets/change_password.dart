@@ -21,6 +21,10 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
+  bool _currentPasswordVisible = false;
+  bool _newPasswordVisible = false;
+  bool _confirmPasswordVisible = false;
+
   int step = 0;
   bool isForward = true; // track animation direction
   bool _isLoading = false;
@@ -232,9 +236,10 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
         const SizedBox(height: 8),
         TextField(
           controller: currentPasswordController,
-          obscureText: true,
+          obscureText: !_currentPasswordVisible,
           decoration: InputDecoration(
-            hintText: '********',
+            hintText: 'Current password',
+            hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
             filled: true,
             fillColor: Colors.grey.shade200,
             contentPadding: const EdgeInsets.symmetric(
@@ -245,8 +250,22 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _currentPasswordVisible
+                    ? Icons.visibility
+                    : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                setState(() {
+                  _currentPasswordVisible = !_currentPasswordVisible;
+                });
+              },
+            ),
           ),
         ),
+
         const SizedBox(height: 20),
         Row(
           children: [
@@ -317,11 +336,13 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
         const SizedBox(height: 8),
         TextField(
           controller: newPasswordController,
-          obscureText: true,
+          obscureText: !_currentPasswordVisible,
           decoration: InputDecoration(
-            hintText: '********',
+            hintText: 'Enter current password',
+            hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
             filled: true,
             fillColor: Colors.grey.shade200,
+
             contentPadding: const EdgeInsets.symmetric(
               vertical: 14,
               horizontal: 12,
@@ -330,16 +351,31 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _currentPasswordVisible
+                    ? Icons.visibility
+                    : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                setState(() {
+                  _currentPasswordVisible = !_currentPasswordVisible;
+                });
+              },
+            ),
           ),
         ),
+
         const SizedBox(height: 12),
         const Text('Confirm Password', style: AppTextStyles.primaryBold),
         const SizedBox(height: 8),
         TextField(
           controller: confirmPasswordController,
-          obscureText: true,
+          obscureText: !_confirmPasswordVisible,
           decoration: InputDecoration(
-            hintText: '********',
+            hintText: 'Re-enter new password',
+            hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
             filled: true,
             fillColor: Colors.grey.shade200,
             contentPadding: const EdgeInsets.symmetric(
@@ -350,8 +386,22 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _confirmPasswordVisible
+                    ? Icons.visibility
+                    : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                setState(() {
+                  _confirmPasswordVisible = !_confirmPasswordVisible;
+                });
+              },
+            ),
           ),
         ),
+
         const SizedBox(height: 20),
         Row(
           children: [

@@ -11,7 +11,10 @@ class AuthService extends ChangeNotifier {
     required String email,
     required String password,
   }) async {
-    final res = await supabaseAuth.signInWithPassword(email: email, password: password);
+    final res = await supabaseAuth.signInWithPassword(
+      email: email,
+      password: password,
+    );
     notifyListeners();
     return res;
   }
@@ -64,17 +67,19 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> resetPasswordFromCurrentPassword({
-  required String newPassword,
-  required String email,
-  required String currentPassword,
-}) async {
-  // Optional: You could re-login manually here to validate the current password
-  await supabaseAuth.signInWithPassword(email: email, password: currentPassword);
+  Future<void> reauthenticateUser({required String currentPassword}) async {
+    final email = supabaseAuth.currentUser?.email;
+    if (email == null || email.isEmpty) {
+      throw Exception("User email is missing. Please log in again.");
+    }
+    await supabaseAuth.signInWithPassword(
+      email: email,
+      password: currentPassword,
+    );
+  }
 
-  // If sign-in succeeded, proceed to update the password
-  await supabaseAuth.updateUser(UserAttributes(password: newPassword));
-  notifyListeners();
-}
-
+  Future<void> updatePassword({required String newPassword}) async {
+    await supabaseAuth.updateUser(UserAttributes(password: newPassword));
+    notifyListeners();
+  }
 }

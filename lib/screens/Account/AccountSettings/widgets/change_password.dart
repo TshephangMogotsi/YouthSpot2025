@@ -3,6 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'dart:async'; // <-- Add this import!
 import 'package:provider/provider.dart';
 import 'package:youthspot/auth/auth_service.dart';
+import '../../../../auth/auth_switcher.dart';
 import '../../../../config/font_constants.dart';
 
 class ResetPasswordDialog extends StatefulWidget {
@@ -42,7 +43,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
   void startLogoutCountdown() {
     logoutCountdown = 5;
     _logoutTimer?.cancel();
-    _logoutTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _logoutTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (!mounted) {
         timer.cancel();
         return;
@@ -52,10 +53,23 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
       });
       if (logoutCountdown <= 0) {
         timer.cancel();
+
+        // Sign out the user
+        await context.read<AuthService>().signOut();
+
+        // Close the dialog first
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+        }
+
+        // Use the root navigator to replace the whole stack with the login/auth screen
         if (mounted) {
-          Navigator.pop(context);
-          // Call your logout logic here
-          context.read<AuthService>().signOut();
+          Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => const AuthSwitcher(),
+            ), // <-- Replace with your login/auth page
+            (route) => false,
+          );
         }
       }
     });
@@ -87,12 +101,11 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     });
 
     try {
-      await context.read<AuthService>().resetPasswordFromCurrentPassword(
-            email: '', // Not needed for reauthentication
-            currentPassword: currentPasswordController.text,
-            newPassword:
-                currentPasswordController.text, // Temporary, won't be used
-          );
+      await context.read<AuthService>().reauthenticateUser(
+        currentPassword: currentPasswordController.text,
+      );
+      _goToPage(1);
+
       _goToPage(1);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -126,12 +139,15 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     });
 
     try {
-      await context.read<AuthService>().resetPasswordFromCurrentPassword(
-            email: '', // Not needed
-            currentPassword:
-                currentPasswordController.text, // Already validated
-            newPassword: newPasswordController.text,
-          );
+      // await context.read<AuthService>().resetPasswordFromCurrentPassword(
+      //       email: '', // Not needed
+      //       currentPassword:
+      //           currentPasswordController.text, // Already validated
+      //       newPassword: newPasswordController.text,
+      //     );
+      await context.read<AuthService>().updatePassword(
+        newPassword: newPasswordController.text,
+      );
       _goToPage(2);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -202,8 +218,10 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Reset password',
-            style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600)),
+        Text(
+          'Reset password',
+          style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 10),
         const Text(
           'Your password will be replaced with a new one. Once set, you will be automatically logged out and asked to log in again.',
@@ -219,8 +237,10 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
             hintText: '********',
             filled: true,
             fillColor: Colors.grey.shade200,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -241,9 +261,12 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('Cancel',
-                    style: AppTextStyles.primaryBold
-                        .copyWith(color: const Color(0xFF626262))),
+                child: Text(
+                  'Cancel',
+                  style: AppTextStyles.primaryBold.copyWith(
+                    color: const Color(0xFF626262),
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -259,9 +282,12 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : Text('Next',
-                        style: AppTextStyles.primaryBold
-                            .copyWith(color: Colors.white)),
+                    : Text(
+                        'Next',
+                        style: AppTextStyles.primaryBold.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -277,11 +303,15 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Set New Password',
-            style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600)),
+        Text(
+          'Set New Password',
+          style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 10),
-        const Text('Enter and confirm your new password below.',
-            style: AppTextStyles.primaryRegular),
+        const Text(
+          'Enter and confirm your new password below.',
+          style: AppTextStyles.primaryRegular,
+        ),
         const SizedBox(height: 20),
         const Text('New Password', style: AppTextStyles.primaryBold),
         const SizedBox(height: 8),
@@ -292,8 +322,10 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
             hintText: '********',
             filled: true,
             fillColor: Colors.grey.shade200,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -310,8 +342,10 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
             hintText: '********',
             filled: true,
             fillColor: Colors.grey.shade200,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -332,9 +366,12 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('Back',
-                    style: AppTextStyles.primaryBold
-                        .copyWith(color: const Color(0xFF626262))),
+                child: Text(
+                  'Back',
+                  style: AppTextStyles.primaryBold.copyWith(
+                    color: const Color(0xFF626262),
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -350,9 +387,12 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : Text('Save',
-                        style: AppTextStyles.primaryBold
-                            .copyWith(color: Colors.white)),
+                    : Text(
+                        'Save',
+                        style: AppTextStyles.primaryBold.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],

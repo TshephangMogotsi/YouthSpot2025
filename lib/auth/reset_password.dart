@@ -1,3 +1,4 @@
+import 'package:provider/provider.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -23,21 +24,23 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   String? error;
 
   Future<void> resetPassword() async {
-    try {
-      await authService.value.resetPassword(
-        email: emailController.text.trim(),
-      );
-      setState(() {
-        isSubmitted = true;
-        error = null;
-      });
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        error = e.message ?? 'An unknown error occurred';
-        if (kDebugMode) print(error);
-      });
-    }
+  final auth = Provider.of<AuthService>(context, listen: false);
+  try {
+    await auth.resetPassword(
+      email: emailController.text.trim(),
+    );
+    setState(() {
+      isSubmitted = true;
+      error = null;
+    });
+  } on FirebaseAuthException catch (e) {
+    setState(() {
+      error = e.message ?? 'An unknown error occurred';
+      if (kDebugMode) print(error);
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

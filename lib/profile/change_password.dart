@@ -1,5 +1,6 @@
-import 'package:youthspot/auth/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:youthspot/auth/auth_service.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -23,22 +24,21 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     super.dispose();
   }
 
-  void updatePassword() async {
+  Future<void> updatePassword() async {
+    final auth = Provider.of<AuthService>(context, listen: false);
     try {
-      await authService.value.resetPasswordFromCurrentPassword(
+      await auth.resetPasswordFromCurrentPassword(
         email: emailController.text.trim(),
         currentPassword: currentPasswordController.text.trim(),
         newPassword: newPasswordController.text.trim(),
       );
-      //show snackbar success
-      voidShowSnackbarSuccess();
+      _showSnackbarSuccess();
     } catch (e) {
-      //show snackbar error
-      voidShowSnackbarFailure();
+      _showSnackbarFailure();
     }
   }
 
-  voidShowSnackbarSuccess() {
+  void _showSnackbarSuccess() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         behavior: SnackBarBehavior.floating,
@@ -48,7 +48,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     );
   }
 
-  voidShowSnackbarFailure() {
+  void _showSnackbarFailure() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         behavior: SnackBarBehavior.floating,
@@ -90,10 +90,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               const SizedBox(height: 16),
               const Icon(Icons.lock, size: 48, color: Colors.amber),
               const SizedBox(height: 32),
-              _buildInputField(
-                emailController,
-                'Email',
-              ),
+              _buildInputField(emailController, 'Email'),
               const SizedBox(height: 16),
               _buildInputField(currentPasswordController, 'Current Password',
                   obscureText: true),

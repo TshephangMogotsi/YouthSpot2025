@@ -1,4 +1,5 @@
 import 'package:youthspot/auth/auth_layout.dart';
+import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/firebase_options.dart';
 import 'package:youthspot/services/services_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -113,6 +114,9 @@ class MyApp extends StatelessWidget {
                 Provider.of<UserProvider>(context, listen: false),
               )..initializeQuotePoints(), // Register MotivationalQuotesProvider
             ),
+             ChangeNotifierProvider(
+          create: (_) => AuthService(), // Add your AuthService here
+        ),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

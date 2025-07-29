@@ -1,4 +1,6 @@
+import 'package:provider/provider.dart';
 import 'package:youthspot/auth/auth_service.dart';
+import 'package:youthspot/auth/auth_switcher.dart';
 import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/config/font_constants.dart';
 import 'package:youthspot/global_widgets/primary_padding.dart';
@@ -23,10 +25,7 @@ class Account extends StatelessWidget {
           children: [
             const Padding(
               padding: EdgeInsets.only(left: 20),
-              child: Text(
-                'Account',
-                style: AppTextStyles.title,
-              ),
+              child: Text('Account', style: AppTextStyles.title),
             ),
             const SizedBox(height: 20),
             ProfileListTile(
@@ -34,9 +33,7 @@ class Account extends StatelessWidget {
               assetImage: 'assets/icon/Settings/ProfilePicture.png',
               ontap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const ProfilePage(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const ProfilePage()),
                 );
               },
             ),
@@ -64,21 +61,26 @@ class Account extends StatelessWidget {
               assetImage: 'assets/icon/Settings/DescriptionIcon.png',
             ),
             const Height10(),
-            const ThemeModeListTile(
-              title: 'Day Mode',
-              initialValue: false,
-            ),
+            const ThemeModeListTile(title: 'Day Mode', initialValue: false),
             const Height20(),
             const Height20(),
             const Height20(),
             GestureDetector(
               onTap: () async {
-                await authService.value.signOut();
+                final auth = Provider.of<AuthService>(context, listen: false);
+                await auth.signOut();
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const AuthSwitcher()),
+                  (route) => false,
+                );
               },
+
               child: Container(
                 alignment: Alignment.center,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 18,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFE0E0E0),
                   borderRadius: BorderRadius.circular(10),
@@ -109,7 +111,6 @@ class SettingsListTile extends StatelessWidget {
   final String assetImage;
   final VoidCallback? ontap;
 
-
   @override
   Widget build(BuildContext context) {
     return PrimaryContainer(
@@ -120,15 +121,11 @@ class SettingsListTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           //icon image
-
           Image.asset(assetImage, width: 40, height: 40),
           //wallpaper image
           const Width20(),
 
-          Text(
-            title,
-            style: AppTextStyles.primaryBigSemiBold,
-          ),
+          Text(title, style: AppTextStyles.primaryBigSemiBold),
         ],
       ),
     );
@@ -157,17 +154,11 @@ class ProfileListTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           //icon image
-          CircleAvatar(
-            radius: 25,
-            backgroundImage: AssetImage(assetImage),
-          ),
+          CircleAvatar(radius: 25, backgroundImage: AssetImage(assetImage)),
           //wallpaper image
           const Width20(),
 
-          Text(
-            title,
-            style: AppTextStyles.primaryBigSemiBold,
-          ),
+          Text(title, style: AppTextStyles.primaryBigSemiBold),
         ],
       ),
     );

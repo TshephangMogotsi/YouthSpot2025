@@ -1,3 +1,4 @@
+import 'package:provider/provider.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -33,34 +34,31 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   Future<void> signIn() async {
-    if (!_formKey.currentState!.validate()) return;
+  if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+  setState(() => _isLoading = true);
 
-    try {
-      await authService.value.signIn(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-    } on FirebaseAuthException catch (e) {
-      final errorMessage = e.message ?? 'An unknown error occurred';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: pinkClr,
-          content: Text(
-            errorMessage,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
+  try {
+    final auth = Provider.of<AuthService>(context, listen: false);
+    await auth.signIn(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: pinkClr,
+        content: Text(
+          e.toString(),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
         ),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
+      ),
+    );
+  } finally {
+    setState(() => _isLoading = false);
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

@@ -4,6 +4,7 @@ import 'package:youthspot/global_widgets/primary_padding.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
 import 'package:youthspot/screens/Account/AccountSettings/account_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:youthspot/screens/Account/profile.dart';
 
 import '../../global_widgets/primary_container.dart';
 
@@ -27,9 +28,16 @@ class Account extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const ProfileListTile(
+            ProfileListTile(
               title: 'My Profile',
               assetImage: 'assets/icon/Settings/ProfilePicture.png',
+              ontap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilePage(),
+                  ),
+                );
+              },
             ),
             const Height10(),
              SettingsListTile(

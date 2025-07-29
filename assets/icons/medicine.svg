@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="110.04mm" height="106.04mm" version="1.1" viewBox="0 0 110.04 106.04" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(-393.11 -63.316)">
+  <g transform="translate(228.08)">
+   <g transform="matrix(.97071 0 0 .97071 1.5818 1.8843)" fill="none" stroke="#ccc" stroke-width="4.1207">
+    <rect transform="rotate(-45)" x="-67.573" y="129.64" width="120.54" height="53.775" ry="26.887"/>
+    <path d="m86.505 96.833 38.024 38.024"/>
+    <g>
+     <rect transform="rotate(-90)" x="-170.47" y="170.44" width="75.09" height="109.24" ry="16.967"/>
+     <rect transform="rotate(-90)" x="-83.202" y="170.44" width="17.856" height="109.24" ry="5.9394"/>
+     <rect transform="rotate(-90)" x="-95.377" y="187.57" width="12.175" height="74.977"/>
+     <path d="m266.13 136.73a20.534 21.22 0 0 1-10.267 18.377 20.534 21.22 0 0 1-20.534 0 20.534 21.22 0 0 1-10.267-18.377h20.534z"/>
+     <path d="m225.06 136.73h-52.98"/>
+    </g>
+    <path d="m251.75 119.09c1.7254 3.0883 1.0561 7.0109-1.5874 9.3031-2.6435 2.2922-6.4981 2.2922-9.1416 0-2.6435-2.2922-3.3129-6.2148-1.5874-9.3031l6.1582-11.719z"/>
+   </g>
+  </g>
+  <circle cx="216.05" cy="114.34" r="51.021" fill="none" stroke="#ccc" stroke-width="4"/>
+  <path d="m175.66 114.34h80.786" fill="none" stroke="#ccc" stroke-width="4"/>
+ </g>
+</svg>

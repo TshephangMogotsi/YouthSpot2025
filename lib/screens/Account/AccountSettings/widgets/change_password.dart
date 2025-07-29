@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:async'; // <-- Add this import!
+import 'package:provider/provider.dart';
+import 'package:youthspot/auth/auth_service.dart';
 import '../../../../config/font_constants.dart';
 
 class ResetPasswordDialog extends StatefulWidget {
@@ -20,6 +22,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
 
   int step = 0;
   bool isForward = true; // track animation direction
+  bool _isLoading = false;
 
   int logoutCountdown = 5; // seconds until logout
   Timer? _logoutTimer;
@@ -40,13 +43,20 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     logoutCountdown = 5;
     _logoutTimer?.cancel();
     _logoutTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       setState(() {
         logoutCountdown--;
       });
       if (logoutCountdown <= 0) {
         timer.cancel();
-        Navigator.pop(context);
-        // Call your logout logic here
+        if (mounted) {
+          Navigator.pop(context);
+          // Call your logout logic here
+          context.read<AuthService>().signOut();
+        }
       }
     });
   }
@@ -59,6 +69,84 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
   void dispose() {
     stopLogoutCountdown();
     super.dispose();
+  }
+
+  Future<void> _validateCurrentPassword() async {
+    if (currentPasswordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter your current password'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await context.read<AuthService>().resetPasswordFromCurrentPassword(
+            email: '', // Not needed for reauthentication
+            currentPassword: currentPasswordController.text,
+            newPassword:
+                currentPasswordController.text, // Temporary, won't be used
+          );
+      _goToPage(1);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Invalid current password: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _changePassword() async {
+    if (newPasswordController.text != confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Passwords do not match'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await context.read<AuthService>().resetPasswordFromCurrentPassword(
+            email: '', // Not needed
+            currentPassword:
+                currentPasswordController.text, // Already validated
+            newPassword: newPasswordController.text,
+          );
+      _goToPage(2);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error changing password: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -161,7 +249,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
-                onPressed: () => _goToPage(1),
+                onPressed: _isLoading ? null : _validateCurrentPassword,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF4E4E),
                   padding: const EdgeInsets.symmetric(vertical: 14),
@@ -169,9 +257,11 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('Next',
-                    style: AppTextStyles.primaryBold
-                        .copyWith(color: Colors.white)),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text('Next',
+                        style: AppTextStyles.primaryBold
+                            .copyWith(color: Colors.white)),
               ),
             ),
           ],
@@ -250,10 +340,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: handle password change logic here
-                  _goToPage(2); // Go to congratulations page
-                },
+                onPressed: _isLoading ? null : _changePassword,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF4E4E),
                   padding: const EdgeInsets.symmetric(vertical: 14),
@@ -261,9 +348,11 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('Save',
-                    style: AppTextStyles.primaryBold
-                        .copyWith(color: Colors.white)),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text('Save',
+                        style: AppTextStyles.primaryBold
+                            .copyWith(color: Colors.white)),
               ),
             ),
           ],
@@ -284,8 +373,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
             width: double.infinity,
             child: Text(
               'Congratulations!',
-              style: AppTextStyles.title
-                  .copyWith( color: Colors.green),
+              style: AppTextStyles.title.copyWith(color: Colors.green),
               textAlign: TextAlign.center,
             ),
           ),
@@ -296,7 +384,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
             repeat: false,
             reverse: false,
             animate: true,
-            fit: BoxFit.contain
+            fit: BoxFit.contain,
           ),
           const SizedBox(height: 10),
           SizedBox(
@@ -311,8 +399,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                   TextSpan(
                     text: '$logoutCountdown',
                     style: AppTextStyles.primaryBold.copyWith(
-                      fontSize: AppTextStyles.primaryBigBold.fontSize! +
-                          4, // Slightly larger
+                      fontSize: AppTextStyles.primaryBigBold.fontSize! + 4,
                     ),
                   ),
                   const TextSpan(

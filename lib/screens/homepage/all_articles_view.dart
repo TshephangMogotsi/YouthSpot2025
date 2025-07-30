@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:youthspot/global_widgets/primary_padding.dart';
+import 'package:youthspot/global_widgets/primary_scaffold.dart';
 import 'package:youthspot/providers/articles_provider.dart';
 import 'package:youthspot/screens/homepage/article_view.dart';
-import 'package:youthspot/screens/homepage/news_article.dart';
+import 'package:youthspot/screens/homepage/news_article_list_tile.dart';
 
 class AllArticlesView extends StatefulWidget {
   const AllArticlesView({super.key});
@@ -23,30 +25,31 @@ class _AllArticlesViewState extends State<AllArticlesView> {
   @override
   Widget build(BuildContext context) {
     final articlesProvider = Provider.of<ArticlesProvider>(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('All Articles'),
-      ),
-      body: ListView.builder(
-        itemCount: articlesProvider.allArticles.length,
-        itemBuilder: (context, index) {
-          final article = articlesProvider.allArticles[index];
-          return NewsArticle(
-            imgURL: article.imageUrl,
-            title: article.title,
-            duration: '10 min read',
-            author: article.author,
-            articleId: article.id,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ArticleView(article: article),
-                ),
-              );
-            },
-          );
-        },
+    return PrimaryScaffold(
+      child: PrimaryPadding(
+        child: ListView.builder(
+          itemCount: articlesProvider.allArticles.length,
+          itemBuilder: (context, index) {
+            final article = articlesProvider.allArticles[index];
+            return Container(
+              margin: const EdgeInsets.only(bottom: 15.0),
+              child: NewsArticleListTile(
+                imgURL: article.imageUrl,
+                title: article.title,
+                duration: '10 min read',
+                author: article.author,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ArticleView(article: article),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -23,14 +23,10 @@ class _AppEntryState extends State<AppEntry> with WidgetsBindingObserver {
   // Define the pages for the bottom navigation bar
   static const List<Widget> _widgetOptions = <Widget>[
     HomePage(),
-    DocumentPage(), // Home
-    ArticlePage(), // Resources
+    DocumentPage(), // Resources
     ServicesScreen(), // Services
-    Account(), // Leaderboard
-    // DocumentPage(),
-    // Services(),
-    // Leaderboard(),
-    // Settings(),
+    Placeholder(), // Leaderboard
+    Account(), // Account
   ];
 
   @override

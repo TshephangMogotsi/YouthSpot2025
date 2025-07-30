@@ -9,10 +9,10 @@ class ServiceListItem extends StatelessWidget {
 
   Future<void> _launchMaps(double? lat, double? lon) async {
     if (lat == null || lon == null) return;
-    final uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lon');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
+    final uri = Uri.parse('geo:$lat,$lon');
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
       throw 'Could not launch $uri';
     }
   }

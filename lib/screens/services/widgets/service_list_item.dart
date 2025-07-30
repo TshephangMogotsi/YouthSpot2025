@@ -17,6 +17,15 @@ class ServiceListItem extends StatelessWidget {
     }
   }
 
+  Future<void> _launchDialer(String phoneNumber) async {
+    final uri = Uri.parse('tel:$phoneNumber');
+    try {
+      await launchUrl(uri);
+    } catch (e) {
+      throw 'Could not launch $uri';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -31,7 +40,16 @@ class ServiceListItem extends StatelessWidget {
               children: [
                 if (service.location != null) Text('Location: ${service.location}'),
                 if (service.contacts != null && service.contacts!.isNotEmpty)
-                  Text('Contacts: ${service.contacts!.join(", ")}'),
+                  Wrap(
+                    spacing: 8.0,
+                    runSpacing: 4.0,
+                    children: service.contacts!
+                        .map((contact) => ActionChip(
+                              label: Text(contact),
+                              onPressed: () => _launchDialer(contact),
+                            ))
+                        .toList(),
+                  ),
                 if (service.type != null) Text('Type: ${service.type}'),
                 if (service.latitude != null && service.longitude != null)
                   IconButton(

@@ -50,6 +50,7 @@
 		<string>https</string>
 		<string>http</string>
 		<string>comgooglemaps</string>
+		<string>tel</string>
 	</array>
 </dict>
 </plist>

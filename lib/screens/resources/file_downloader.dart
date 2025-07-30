@@ -20,6 +20,7 @@ class FileDownloader {
           directory = Directory('/storage/emulated/0/Download');
         } else {
           print('Storage permission denied');
+          await _showPermissionDeniedDialog(context);
           return;
         }
       } else if (Platform.isIOS) {
@@ -89,5 +90,32 @@ class FileDownloader {
         );
       },
     ) ?? false;
+  }
+
+  Future<void> _showPermissionDeniedDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Permission Denied'),
+          content: const Text('Storage permission is required to download files. Please enable it in the app settings.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Open Settings'),
+              onPressed: () {
+                openAppSettings();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

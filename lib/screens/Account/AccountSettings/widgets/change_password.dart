@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'dart:async'; // <-- Add this import!
+import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:youthspot/auth/auth_service.dart';
+import 'package:youthspot/config/constants.dart';
+import '../../../../auth/auth_switcher.dart';
 import '../../../../config/font_constants.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ResetPasswordDialog extends StatefulWidget {
   const ResetPasswordDialog({super.key});
@@ -20,12 +23,33 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
+  String? _errorMessage;
+
+  bool _currentPasswordVisible = false;
+  bool _newPasswordVisible = false;
+  bool _confirmPasswordVisible = false;
+
   int step = 0;
-  bool isForward = true; // track animation direction
+  bool isForward = true;
   bool _isLoading = false;
 
-  int logoutCountdown = 5; // seconds until logout
+  int logoutCountdown = 5;
   Timer? _logoutTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Clear error message when user types
+    currentPasswordController.addListener(() => _clearError());
+    newPasswordController.addListener(() => _clearError());
+    confirmPasswordController.addListener(() => _clearError());
+  }
+
+  void _clearError() {
+    if (_errorMessage != null) {
+      setState(() => _errorMessage = null);
+    }
+  }
 
   void _goToPage(int index) {
     setState(() {
@@ -42,7 +66,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
   void startLogoutCountdown() {
     logoutCountdown = 5;
     _logoutTimer?.cancel();
-    _logoutTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _logoutTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (!mounted) {
         timer.cancel();
         return;
@@ -52,10 +76,18 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
       });
       if (logoutCountdown <= 0) {
         timer.cancel();
+
+        await context.read<AuthService>().signOut();
+
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+        }
+
         if (mounted) {
-          Navigator.pop(context);
-          // Call your logout logic here
-          context.read<AuthService>().signOut();
+          Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const AuthSwitcher()),
+            (route) => false,
+          );
         }
       }
     });
@@ -68,17 +100,42 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
   @override
   void dispose() {
     stopLogoutCountdown();
+    currentPasswordController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
+  /// --- Parse and Map Supabase Errors ---
+  String _parseSupabaseError(dynamic e) {
+    if (e is AuthException) {
+      return e.message;
+    } else if (e is PostgrestException) {
+      return e.message;
+    } else if (e is String) {
+      return e;
+    } else {
+      return 'An unexpected error occurred. Please try again.';
+    }
+  }
+
+  String _mapFriendlyMessage(String raw) {
+    if (raw.toLowerCase().contains('invalid login credentials') ||
+        raw.toLowerCase().contains('password authentication failed')) {
+      return 'Incorrect password. Please try again.';
+    }
+    if (raw.toLowerCase().contains('weak password')) {
+      return 'Your new password is too weak. Please choose a stronger one.';
+    }
+    return 'An error occurred. Please try again.';
+  }
+
+  /// --- Step 1: Validate Current Password ---
   Future<void> _validateCurrentPassword() async {
     if (currentPasswordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter your current password'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      setState(() {
+        _errorMessage = 'Please enter your current password.';
+      });
       return;
     }
 
@@ -87,20 +144,13 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     });
 
     try {
-      await context.read<AuthService>().resetPasswordFromCurrentPassword(
-            email: '', // Not needed for reauthentication
-            currentPassword: currentPasswordController.text,
-            newPassword:
-                currentPasswordController.text, // Temporary, won't be used
-          );
+      await context.read<AuthService>().reauthenticateUser(
+        currentPassword: currentPasswordController.text,
+      );
       _goToPage(1);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Invalid current password: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      final friendly = _mapFriendlyMessage(_parseSupabaseError(e));
+      setState(() => _errorMessage = friendly);
     } finally {
       if (mounted) {
         setState(() {
@@ -110,14 +160,19 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     }
   }
 
+  /// --- Step 2: Change Password ---
   Future<void> _changePassword() async {
     if (newPasswordController.text != confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Passwords do not match'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      setState(() {
+        _errorMessage = 'New password and confirmation do not match.';
+      });
+      return;
+    }
+
+    if (newPasswordController.text.length < 8) {
+      setState(() {
+        _errorMessage = 'Your new password must be at least 8 characters long.';
+      });
       return;
     }
 
@@ -126,20 +181,13 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     });
 
     try {
-      await context.read<AuthService>().resetPasswordFromCurrentPassword(
-            email: '', // Not needed
-            currentPassword:
-                currentPasswordController.text, // Already validated
-            newPassword: newPasswordController.text,
-          );
+      await context.read<AuthService>().updatePassword(
+        newPassword: newPasswordController.text,
+      );
       _goToPage(2);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error changing password: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      final friendly = _mapFriendlyMessage(_parseSupabaseError(e));
+      setState(() => _errorMessage = friendly);
     } finally {
       if (mounted) {
         setState(() {
@@ -149,38 +197,62 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      alignment: Alignment.bottomCenter,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      contentPadding: const EdgeInsets.all(20),
-      backgroundColor: Colors.white,
-      content: ClipRRect(
-        child: AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) {
-              final isNewChild = child.key == ValueKey(step);
-              if (isNewChild) {
-                final offsetAnimation = Tween<Offset>(
-                  begin: isForward ? const Offset(1, 0) : const Offset(-1, 0),
-                  end: Offset.zero,
-                ).animate(animation);
-                return SlideTransition(position: offsetAnimation, child: child);
-              } else {
-                return FadeTransition(opacity: animation, child: child);
-              }
-            },
-            child: _getStepWidget(context),
+ @override
+Widget build(BuildContext context) {
+  return AlertDialog(
+    alignment: Alignment.bottomCenter,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+    insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+  
+    backgroundColor: Colors.white,
+    content: SizedBox(
+      width: double.maxFinite,
+      child: Stack(
+        children: [
+          // Main content with padding
+          ClipRRect(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) {
+                  final isNewChild = child.key == ValueKey(step);
+                  if (isNewChild) {
+                    final offsetAnimation = Tween<Offset>(
+                      begin: isForward ? const Offset(1, 0) : const Offset(-1, 0),
+                      end: Offset.zero,
+                    ).animate(animation);
+                    return SlideTransition(position: offsetAnimation, child: child);
+                  } else {
+                    return FadeTransition(opacity: animation, child: child);
+                  }
+                },
+                child: _getStepWidget(context),
+              ),
+            ),
           ),
-        ),
+
+          // Full overlay (no padding)
+          if (_isLoading)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: .4),
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _getStepWidget(BuildContext context) {
     switch (step) {
@@ -195,15 +267,17 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     }
   }
 
-  // Step 1: Current password
+  /// --- Step 1 UI: Current Password ---
   Widget _buildCurrentPasswordStep(BuildContext context, {Key? key}) {
     return Column(
       key: key,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Reset password',
-            style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600)),
+        Text(
+          'Reset password',
+          style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 10),
         const Text(
           'Your password will be replaced with a new one. Once set, you will be automatically logged out and asked to log in again.',
@@ -214,19 +288,34 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
         const SizedBox(height: 8),
         TextField(
           controller: currentPasswordController,
-          obscureText: true,
+          obscureText: !_currentPasswordVisible,
           decoration: InputDecoration(
-            hintText: '********',
+            hintText: 'Current password',
+            hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
             filled: true,
             fillColor: Colors.grey.shade200,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _currentPasswordVisible
+                    ? Icons.visibility
+                    : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () => setState(
+                () => _currentPasswordVisible = !_currentPasswordVisible,
+              ),
+            ),
           ),
         ),
+        if (_errorMessage != null) _buildErrorBox(),
         const SizedBox(height: 20),
         Row(
           children: [
@@ -241,9 +330,12 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('Cancel',
-                    style: AppTextStyles.primaryBold
-                        .copyWith(color: const Color(0xFF626262))),
+                child: Text(
+                  'Cancel',
+                  style: AppTextStyles.primaryBold.copyWith(
+                    color: const Color(0xFF626262),
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -257,11 +349,13 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text('Next',
-                        style: AppTextStyles.primaryBold
-                            .copyWith(color: Colors.white)),
+                child: 
+                     Text(
+                        'Next',
+                        style: AppTextStyles.primaryBold.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -270,33 +364,48 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     );
   }
 
-  // Step 2: New password & confirmation
+  /// --- Step 2 UI: New Password ---
   Widget _buildNewPasswordStep(BuildContext context, {Key? key}) {
     return Column(
       key: key,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Set New Password',
-            style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600)),
+        Text(
+          'Set New Password',
+          style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 10),
-        const Text('Enter and confirm your new password below.',
-            style: AppTextStyles.primaryRegular),
+        const Text(
+          'Enter and confirm your new password below.',
+          style: AppTextStyles.primaryRegular,
+        ),
         const SizedBox(height: 20),
         const Text('New Password', style: AppTextStyles.primaryBold),
         const SizedBox(height: 8),
         TextField(
           controller: newPasswordController,
-          obscureText: true,
+          obscureText: !_newPasswordVisible,
           decoration: InputDecoration(
-            hintText: '********',
+            hintText: 'New password',
+            hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
             filled: true,
             fillColor: Colors.grey.shade200,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _newPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () =>
+                  setState(() => _newPasswordVisible = !_newPasswordVisible),
             ),
           ),
         ),
@@ -305,19 +414,34 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
         const SizedBox(height: 8),
         TextField(
           controller: confirmPasswordController,
-          obscureText: true,
+          obscureText: !_confirmPasswordVisible,
           decoration: InputDecoration(
-            hintText: '********',
+            hintText: 'Re-enter new password',
+            hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
             filled: true,
             fillColor: Colors.grey.shade200,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _confirmPasswordVisible
+                    ? Icons.visibility
+                    : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () => setState(
+                () => _confirmPasswordVisible = !_confirmPasswordVisible,
+              ),
+            ),
           ),
         ),
+        if (_errorMessage != null) _buildErrorBox(),
         const SizedBox(height: 20),
         Row(
           children: [
@@ -332,9 +456,12 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('Back',
-                    style: AppTextStyles.primaryBold
-                        .copyWith(color: const Color(0xFF626262))),
+                child: Text(
+                  'Back',
+                  style: AppTextStyles.primaryBold.copyWith(
+                    color: const Color(0xFF626262),
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -348,11 +475,13 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text('Save',
-                        style: AppTextStyles.primaryBold
-                            .copyWith(color: Colors.white)),
+                child: 
+                     Text(
+                        'Save',
+                        style: AppTextStyles.primaryBold.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -361,6 +490,31 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     );
   }
 
+  Widget _buildErrorBox() {
+    return Column(
+      children: [
+        Height20(),
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.red.shade100,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            _errorMessage!,
+            style: const TextStyle(
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// --- Step 3 UI: Success ---
   Widget _buildCongratulationsStep(BuildContext context, {Key? key}) {
     return Container(
       width: double.maxFinite,

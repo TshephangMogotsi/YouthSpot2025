@@ -1,3 +1,4 @@
+import 'package:provider/provider.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 
@@ -13,25 +14,22 @@ class AuthLayout extends StatelessWidget {
 
   final Widget? pageifNotConnected;
 
-  @override
+   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: authService,
-      builder: (context, authService, child) {
-        return StreamBuilder(
-          stream: authService.authStateChanges,
-          builder: (context, snapshot) {
-            Widget page;
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              page = const AppLoadingPage();
-            } else if (snapshot.hasData) {
-              page = const AppNavigationLayout();
-            } else {
-              page = pageifNotConnected ?? const AuthSwitcher();
-            }
-            return page;
-          },
-        );
+    final auth = Provider.of<AuthService>(context, listen: true);
+
+    return StreamBuilder(
+      stream: auth.authStateChanges,
+      builder: (context, snapshot) {
+        Widget page;
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          page = const AppLoadingPage();
+        } else if (snapshot.hasData) {
+          page = const AppNavigationLayout();
+        } else {
+          page = pageifNotConnected ?? const AuthSwitcher();
+        }
+        return page;
       },
     );
   }

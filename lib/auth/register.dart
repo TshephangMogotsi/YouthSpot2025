@@ -1,3 +1,4 @@
+import 'package:provider/provider.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -40,23 +41,25 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void register() async {
-    try {
-      await authService.value.createAccount(
-        email: controllerEmail.text.trim(),
-        password: controllerPassword.text.trim(),
-        fullName: controllerFullName.text.trim(),
-        gender: controllerGender.text.trim(),
-        dateOfBirth: controllerDateOfBirth.text.trim(),
-        mobileNumber: controllerMobileNumber.text.trim(),
-        username: controllerUsername.text.trim(),
-      );
-    } on AuthException catch (e) {
-      setState(() {
-        errorMessage = e.message;
-        debugPrint(errorMessage);
-      });
-    }
+  final auth = Provider.of<AuthService>(context, listen: false);
+  try {
+    await auth.createAccount(
+      email: controllerEmail.text.trim(),
+      password: controllerPassword.text.trim(),
+      fullName: controllerFullName.text.trim(),
+      gender: controllerGender.text.trim(),
+      dateOfBirth: controllerDateOfBirth.text.trim(),
+      mobileNumber: controllerMobileNumber.text.trim(),
+      username: controllerUsername.text.trim(),
+    );
+  } on AuthException catch (e) {
+    setState(() {
+      errorMessage = e.message;
+      debugPrint(errorMessage);
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

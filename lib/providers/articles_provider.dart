@@ -17,10 +17,8 @@ class ArticlesProvider with ChangeNotifier {
 
   Future<void> loadInitialArticles() async {
     if (_articles.isEmpty) {
-      final response = await supabase
-          .from('articles')
-          .select('*, authors(name), categories(name)')
-          .limit(10);
+      final response =
+          await supabase.from('articles').select().limit(10);
       _articles = (response as List)
           .map((article) => Article.fromMap(article))
           .toList();
@@ -30,9 +28,7 @@ class ArticlesProvider with ChangeNotifier {
 
   Future<void> fetchAllArticles() async {
     if (_allArticles.isEmpty) {
-      final response = await supabase
-          .from('articles')
-          .select('*, authors(name), categories(name)');
+      final response = await supabase.from('articles').select();
       _allArticles = (response as List)
           .map((article) => Article.fromMap(article))
           .toList();

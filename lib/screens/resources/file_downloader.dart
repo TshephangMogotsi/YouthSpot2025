@@ -7,37 +7,36 @@ import 'package:permission_handler/permission_handler.dart';
 class FileDownloader {
   final Dio _dio = Dio();
 
+  Future<bool> _requestPermission(Permission permission) async {
+    if (await permission.isGranted) {
+      return true;
+    } else {
+      var result = await permission.request();
+      if (result == PermissionStatus.granted) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Future<void> downloadFile(BuildContext context, String url, String fileName, Function(int, int) onProgress) async {
     try {
       Directory? directory;
 
-      // Check if the platform is iOS or Android
       if (Platform.isAndroid) {
-        // For Android, request permission and use the public Download folder
-        if (await Permission.storage.request().isGranted) {
+        if (await _requestPermission(Permission.storage)) {
           directory = Directory('/storage/emulated/0/Download');
+        } else {
+          // Handle permission denial
+          return;
         }
       } else if (Platform.isIOS) {
-        // For iOS, use the app's Documents directory
         directory = await getApplicationDocumentsDirectory();
       }
 
       if (directory != null) {
-        // Get the file path
-        String savePath = await _getUniqueFilePath(directory.path, fileName, promptIfExists: false);
+        String savePath = await _getUniqueFilePath(directory.path, fileName);
 
-        // Check if the file already exists
-        File file = File(savePath);
-        if (await file.exists()) {
-          // Show confirmation dialog
-          bool shouldDownload = await _showDownloadConfirmationDialog(context, fileName);
-          if (!shouldDownload) {
-            return; // If user cancels, stop the download
-          }
-        }
-
-        // Proceed to download the file if user confirms
-        savePath = await _getUniqueFilePath(directory.path, fileName, promptIfExists: true);
         await _dio.download(
           url,
           savePath,
@@ -55,21 +54,19 @@ class FileDownloader {
     }
   }
 
-  Future<String> _getUniqueFilePath(String directoryPath, String fileName, {bool promptIfExists = false}) async {
+  Future<String> _getUniqueFilePath(String directoryPath, String fileName) async {
     String filePath = '$directoryPath/$fileName';
     String fileExtension = '';
     String baseFileName = fileName;
 
-    // Extract file extension and base file name
     if (fileName.contains('.')) {
       fileExtension = fileName.substring(fileName.lastIndexOf('.'));
       baseFileName = fileName.substring(0, fileName.lastIndexOf('.'));
     }
 
     int fileSuffix = 1;
-    // Check if the file exists and append a number in parentheses if necessary
-    while (await File(filePath).exists() && promptIfExists) {
-      filePath = '$directoryPath/$baseFileName ($fileSuffix)$fileExtension';
+    while (await File(filePath).exists()) {
+      filePath = '$directoryPath/$baseFileName($fileSuffix)$fileExtension';
       fileSuffix++;
     }
 

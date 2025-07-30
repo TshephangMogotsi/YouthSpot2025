@@ -166,11 +166,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                   await supabase.functions.invoke('delete-user-soft', body: {'userId': userId});
                 }
                 await supabase.auth.signOut();
-                // Show loading inside slider
-                await Future.delayed(const Duration(seconds: 1));
                 _goToPage(2); // Go to success step
-                await Future.delayed(const Duration(seconds: 3));
-                Navigator.pop(context); // Close dialog
                 return null;
               },
               borderRadius: 10,
@@ -208,6 +204,12 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
 
   /// Step 3: Success animation
   Widget _buildSuccessStep(BuildContext context, {Key? key}) {
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    });
+
     return Column(
       key: key,
       mainAxisSize: MainAxisSize.min,

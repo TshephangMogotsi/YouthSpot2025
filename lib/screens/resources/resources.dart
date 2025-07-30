@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:youthspot/db/models/resource_model.dart';
+import 'package:youthspot/services/resource_service.dart';
 
 import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
@@ -10,7 +11,6 @@ import '../../global_widgets/primary_padding.dart';
 import '../../global_widgets/primary_scaffold.dart';
 import '../../services/services_locator.dart';
 import 'file_downloader.dart';
-import 'file_model.dart';
 import 'pdf_veiwer.dart';
 
 class DocumentPage extends StatefulWidget {
@@ -21,66 +21,100 @@ class DocumentPage extends StatefulWidget {
 }
 
 class _DocumentPageState extends State<DocumentPage> {
-  final List<String> categories = [
-    'health',
-    'ready_to_work',
-    'relationships',
-  ];
+  final ResourceService _resourceService = ResourceService();
 
-  final List<String> ready2workSubcategories = [
-    'entrepreneurship_skills',
-    'people_skills',
-    'work_skills',
-    'money_skills',
-  ];
+  List<ResourceCategory> _categories = [];
+  List<ResourceSubcategory> _subcategories = [];
+  List<Resource> _resources = [];
 
-  List<PDFDocument> documents = [];
-  String? selectedCategory = 'All'; // Default selection for "All"
-  String? selectedSubcategory;
-  bool isLoading = true;
-  Map<String, double> downloadProgressMap = {}; // Track progress for each file
+  ResourceCategory? _selectedCategory;
+  ResourceSubcategory? _selectedSubcategory;
+
+  bool _isLoading = true;
+  Map<String, double> _downloadProgressMap = {};
 
   @override
   void initState() {
     super.initState();
-    fetchAllDocuments(); // Fetch all documents when the page is first loaded
+    _loadInitialData();
   }
 
-  Future<void> fetchAllDocuments() async {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('resources') // Assuming 'resources' is your collection name
-        .get();
-
-    // Convert Firestore documents to PDFDocument model
+  Future<void> _loadInitialData() async {
     setState(() {
-      documents = querySnapshot.docs
-          .map((doc) => PDFDocument.fromFirestore(doc))
-          .toList();
-      isLoading = false;
+      _isLoading = true;
     });
+
+    try {
+      final categories = await _resourceService.fetchCategories();
+      final resources = await _resourceService.fetchResources();
+      setState(() {
+        _categories = categories;
+        _resources = resources;
+        _isLoading = false;
+      });
+    } catch (e) {
+      // Handle error
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
-  void showFileInfoDialog(PDFDocument doc) {
-    // Try extracting the file type from the document name first
-    String fileType = '';
-
-    // Check if the file name has an extension
-    if (doc.name.contains('.')) {
-      fileType = doc.name.split('.').last.toUpperCase();
-    } else {
-      // Fallback to extracting file type from the URL if name does not have an extension
-      if (doc.url.contains('.')) {
-        fileType = doc.url.split('.').last.split('?').first.toUpperCase();
-        // We use split('?').first to remove any potential query parameters in the URL
-      }
+  Future<void> _fetchSubcategories(String categoryId) async {
+    try {
+      final subcategories = await _resourceService.fetchSubcategories(categoryId);
+      setState(() {
+        _subcategories = subcategories;
+      });
+    } catch (e) {
+      // Handle error
     }
+  }
 
-    // Default to 'Unknown' if no file type is found
-    if (fileType.isEmpty) {
-      fileType = 'UNKNOWN';
+  Future<void> _fetchResources() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final resources = await _resourceService.fetchResources(
+        categoryId: _selectedCategory?.id,
+        subcategoryId: _selectedSubcategory?.id,
+      );
+      setState(() {
+        _resources = resources;
+        _isLoading = false;
+      });
+    } catch (e) {
+      // Handle error
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
 
-    // Show dialog with file info
+  void _onCategorySelected(ResourceCategory? category) {
+    setState(() {
+      _selectedCategory = category;
+      _selectedSubcategory = null;
+      _subcategories = [];
+    });
+
+    if (category != null) {
+      _fetchSubcategories(category.id);
+    }
+    _fetchResources();
+  }
+
+  void _onSubcategorySelected(ResourceSubcategory? subcategory) {
+    setState(() {
+      _selectedSubcategory = subcategory;
+    });
+    _fetchResources();
+  }
+
+  void showFileInfoDialog(Resource doc) {
+    String fileType = doc.fileType?.toUpperCase() ?? 'UNKNOWN';
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -108,31 +142,10 @@ class _DocumentPageState extends State<DocumentPage> {
     );
   }
 
-  List<PDFDocument> _getFilteredDocuments() {
-    if (selectedCategory == 'All') {
-      // Return all documents if 'All' is selected
-      return documents;
-    } else if (selectedCategory == 'ready_to_work') {
-      // Return documents from 'ready_to_work' category, filtered by subcategory if one is selected
-      return documents
-          .where((doc) =>
-              doc.category == 'ready_to_work' &&
-              (selectedSubcategory == null ||
-                  doc.subcategory == selectedSubcategory))
-          .toList();
-    } else {
-      // Return documents from the selected category
-      return documents
-          .where((doc) => doc.category == selectedCategory)
-          .toList();
-    }
-  }
-
   void showCustomSnackBar(BuildContext context, String message) {
-    // Overlay entry to manually show and hide the custom snack bar
     OverlayEntry overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        bottom: 20, // Set the position of the snack bar
+        bottom: 20,
         left: 20,
         right: 20,
         child: TweenAnimationBuilder<double>(
@@ -159,103 +172,82 @@ class _DocumentPageState extends State<DocumentPage> {
       ),
     );
 
-    // Insert the overlay entry into the screen
     Overlay.of(context).insert(overlayEntry);
 
-    // Remove the snack bar after the duration ends
     Future.delayed(const Duration(seconds: 2), () {
       overlayEntry.remove();
     });
   }
 
-  Future<void> downloadFile(PDFDocument doc) async {
+  Future<void> downloadFile(Resource doc) async {
+    if (doc.url == null) return;
     FileDownloader fileDownloader = FileDownloader();
 
     setState(() {
-      downloadProgressMap[doc.url] =
-          0.0; // Start tracking progress for the file
+      _downloadProgressMap[doc.url!] = 0.0;
     });
 
-    // Pass the current context to the downloadFile function
     await fileDownloader.downloadFile(
-      context, // Pass the BuildContext from the widget tree
-      doc.url,
-      '${doc.name}.pdf',
+      context,
+      doc.url!,
+      '${doc.name}.${doc.fileType ?? 'pdf'}',
       (received, total) {
         if (total != -1) {
           setState(() {
-            downloadProgressMap[doc.url] = received / total;
+            _downloadProgressMap[doc.url!] = received / total;
           });
         }
       },
     );
 
     setState(() {
-      downloadProgressMap.remove(
-          doc.url); // Remove progress tracking once download is complete
+      _downloadProgressMap.remove(doc.url);
     });
 
-    ScaffoldMessenger.of(context)
-        .hideCurrentSnackBar(); // Hide any existing snackbars if present
-    showCustomSnackBar(context, 'Downloaded ${doc.name}.pdf');
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    showCustomSnackBar(context, 'Downloaded ${doc.name}');
   }
 
   @override
   Widget build(BuildContext context) {
     return PrimaryScaffold(
       isHomePage: true,
-      child: isLoading
+      child: _isLoading
           ? PrimaryPadding(child: _buildShimmerEffect())
           : Column(
               children: [
-                // Main category buttons
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.only(bottom: 0, left: 8, right: 8),
                   child: Row(
                     children: [
-                      _buildPillButton('All'),
-                      ...categories
-                          .map((category) => _buildPillButton(category)),
+                      _buildPillButton(null, 'All'),
+                      ..._categories.map((category) => _buildPillButton(category, category.name)),
                     ],
                   ),
                 ),
-
-                // Subcategory buttons if "ready_to_work" is selected
-                if (selectedCategory == 'ready_to_work')
+                if (_subcategories.isNotEmpty)
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.only(left: 8, right: 8),
                     child: Row(
-                      children: ready2workSubcategories
-                          .map((subcategory) => _buildPillButton(subcategory,
-                              isSubcategory: true))
+                      children: _subcategories
+                          .map((subcategory) => _buildPillButton(subcategory, subcategory.name, isSubcategory: true))
                           .toList(),
                     ),
                   ),
-                const SizedBox(
-                  height: 10,
-                ),
-                // const Divider(height: 1, color: Colors.grey),
-                const SizedBox(
-                  height: 20,
-                ),
-
-                // List of filtered documents
+                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 Expanded(
                   child: PrimaryPadding(
                     child: PrimaryContainer(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 0, horizontal: 25),
+                      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 25),
                       borderColor: bluishClr,
                       child: ListView.builder(
                         physics: const BouncingScrollPhysics(),
-                        itemCount: _getFilteredDocuments().length,
+                        itemCount: _resources.length,
                         itemBuilder: (context, index) {
-                          List<PDFDocument> filteredDocuments =
-                              _getFilteredDocuments();
-                          PDFDocument doc = filteredDocuments[index];
-
+                          Resource doc = _resources[index];
                           return _buildPDFContainer(doc);
                         },
                       ),
@@ -268,7 +260,6 @@ class _DocumentPageState extends State<DocumentPage> {
     );
   }
 
-  // Shimmer effect for a category button
   Widget _buildShimmerCategoryButton() {
     final themeManager = getIt<ThemeManager>();
 
@@ -278,19 +269,13 @@ class _DocumentPageState extends State<DocumentPage> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Shimmer.fromColors(
-              baseColor: theme == ThemeMode.dark
-                  ? Colors.grey[900]!
-                  : Colors.grey[300]!,
-              highlightColor: theme == ThemeMode.dark
-                  ? Colors.grey[800]!
-                  : Colors.grey[100]!,
+              baseColor: theme == ThemeMode.dark ? Colors.grey[900]! : Colors.grey[300]!,
+              highlightColor: theme == ThemeMode.dark ? Colors.grey[800]! : Colors.grey[100]!,
               child: Container(
                 width: 100,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: theme == ThemeMode.dark
-                      ? Colors.grey[900]!
-                      : Colors.grey[400],
+                  color: theme == ThemeMode.dark ? Colors.grey[900]! : Colors.grey[400],
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
@@ -306,36 +291,28 @@ class _DocumentPageState extends State<DocumentPage> {
         valueListenable: themeManager.themeMode,
         builder: (context, theme, snapshot) {
           return Shimmer.fromColors(
-            baseColor:
-                theme == ThemeMode.dark ? Colors.grey[900]! : Colors.grey[300]!,
-            highlightColor:
-                theme == ThemeMode.dark ? Colors.grey[800]! : Colors.grey[100]!,
+            baseColor: theme == ThemeMode.dark ? Colors.grey[900]! : Colors.grey[300]!,
+            highlightColor: theme == ThemeMode.dark ? Colors.grey[800]! : Colors.grey[100]!,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
               child: Row(
                 children: [
-                  // Simulate the PDF icon
                   Container(
                     width: 30,
                     height: 30,
                     decoration: BoxDecoration(
-                      color: theme == ThemeMode.dark
-                          ? Colors.grey[900]!
-                          : Colors.grey[400],
-                      borderRadius:
-                          BorderRadius.circular(5), // Icon-like rectangle
+                      color: theme == ThemeMode.dark ? Colors.grey[900]! : Colors.grey[400],
+                      borderRadius: BorderRadius.circular(5),
                     ),
                   ),
                   const SizedBox(width: 10),
-                  // Simulate the document title and subtitle
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Simulate the document title (first line)
                         Container(
                           height: 15,
-                          width: 150, // Adjust the width as needed
+                          width: 150,
                           decoration: BoxDecoration(
                             color: Colors.grey[400],
                             borderRadius: BorderRadius.circular(10),
@@ -345,14 +322,12 @@ class _DocumentPageState extends State<DocumentPage> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  // Simulate the "more" button (three dots)
                   Container(
                     width: 25,
                     height: 25,
                     decoration: BoxDecoration(
                       color: Colors.grey[400],
-                      borderRadius:
-                          BorderRadius.circular(12.5), // Circular shape
+                      borderRadius: BorderRadius.circular(12.5),
                     ),
                   ),
                 ],
@@ -362,29 +337,24 @@ class _DocumentPageState extends State<DocumentPage> {
         });
   }
 
-  // Function to create a shimmer effect while loading
   Widget _buildShimmerEffect() {
     return Column(
       children: [
-        // Shimmer for category buttons
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.only(bottom: 0, left: 8, right: 8),
           child: Row(
-            children:
-                List.generate(3, (index) => _buildShimmerCategoryButton()),
+            children: List.generate(3, (index) => _buildShimmerCategoryButton()),
           ),
         ),
         const Height10(),
         const Height10(),
-
-        // Shimmer for document list
         Expanded(
           child: ListView.builder(
             physics: const BouncingScrollPhysics(),
-            itemCount: 10, // Simulate 8 loading items
+            itemCount: 10,
             itemBuilder: (context, index) {
-              return _buildShimmerDocumentContainer(); // This now has shimmer effect
+              return _buildShimmerDocumentContainer();
             },
           ),
         ),
@@ -392,7 +362,7 @@ class _DocumentPageState extends State<DocumentPage> {
     );
   }
 
-  Widget _buildPDFContainer(PDFDocument doc) {
+  Widget _buildPDFContainer(Resource doc) {
     final themeManager = getIt<ThemeManager>();
 
     return ValueListenableBuilder<ThemeMode>(
@@ -406,8 +376,7 @@ class _DocumentPageState extends State<DocumentPage> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Icon(Icons.picture_as_pdf_rounded,
-                    color: Colors.red[600], size: 30),
+                Icon(Icons.picture_as_pdf_rounded, color: Colors.red[600], size: 30),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -418,17 +387,14 @@ class _DocumentPageState extends State<DocumentPage> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
-                          color: theme == ThemeMode.dark
-                              ? Colors.white
-                              : Colors.black,
+                          color: theme == ThemeMode.dark ? Colors.white : Colors.black,
                         ),
                       ),
-                      if (downloadProgressMap.containsKey(doc.url))
+                      if (doc.url != null && _downloadProgressMap.containsKey(doc.url!))
                         Padding(
                           padding: const EdgeInsets.only(top: 8.0),
                           child: LinearProgressIndicator(
-                            value: downloadProgressMap[
-                                doc.url], // Show progress for the specific file
+                            value: _downloadProgressMap[doc.url!],
                           ),
                         ),
                     ],
@@ -437,7 +403,6 @@ class _DocumentPageState extends State<DocumentPage> {
                 IconButton(
                   icon: const Icon(Icons.more_vert),
                   onPressed: () {
-                    // Show bottom sheet when clicking the 3 dots
                     showModalBottomSheet(
                       context: context,
                       builder: (context) {
@@ -447,28 +412,26 @@ class _DocumentPageState extends State<DocumentPage> {
                               leading: const Icon(Icons.download),
                               title: const Text('Download'),
                               onTap: () async {
-                                Navigator.pop(
-                                    context); // Close the bottom sheet
-                                await downloadFile(
-                                    doc); // Call the download function
+                                Navigator.pop(context);
+                                await downloadFile(doc);
                               },
                             ),
                             ListTile(
                               leading: const Icon(Icons.folder_open),
                               title: const Text('Open'),
                               onTap: () {
-                                Navigator.pop(
-                                    context); // Close the bottom sheet
-                                // Navigate to the PDF viewer page
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PDFViewerPage(
-                                      url: doc.url, // Pass the document URL
-                                      fileName: doc.name, // Pass the file name
+                                Navigator.pop(context);
+                                if (doc.url != null) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PDFViewerPage(
+                                        url: doc.url!,
+                                        fileName: doc.name,
+                                      ),
                                     ),
-                                  ),
-                                );
+                                  );
+                                }
                               },
                             ),
                             ListTile(
@@ -476,19 +439,19 @@ class _DocumentPageState extends State<DocumentPage> {
                               title: const Text('Share'),
                               onTap: () {
                                 Navigator.pop(context);
-                                SharePlus.instance.share(
-                                  ShareParams(text: doc.url),
-                                );
+                                if (doc.url != null) {
+                                  SharePlus.instance.share(
+                                    ShareParams(text: doc.url!),
+                                  );
+                                }
                               },
                             ),
                             ListTile(
                               leading: const Icon(Icons.info),
                               title: const Text('Info'),
                               onTap: () {
-                                Navigator.pop(
-                                    context); // Close the bottom sheet
-                                showFileInfoDialog(
-                                    doc); // Show file info dialog
+                                Navigator.pop(context);
+                                showFileInfoDialog(doc);
                               },
                             ),
                           ],
@@ -503,12 +466,15 @@ class _DocumentPageState extends State<DocumentPage> {
         });
   }
 
-  Widget _buildPillButton(String category, {bool isSubcategory = false}) {
+  Widget _buildPillButton(dynamic item, String label, {bool isSubcategory = false}) {
     final themeManager = getIt<ThemeManager>();
 
-    bool isSelected = isSubcategory
-        ? selectedSubcategory == category
-        : selectedCategory == category && selectedSubcategory == null;
+    bool isSelected;
+    if (isSubcategory) {
+      isSelected = _selectedSubcategory == item;
+    } else {
+      isSelected = _selectedCategory == item;
+    }
 
     return ValueListenableBuilder<Object>(
         valueListenable: themeManager.themeMode,
@@ -518,27 +484,18 @@ class _DocumentPageState extends State<DocumentPage> {
             child: ChoiceChip(
               showCheckmark: false,
               shape: const StadiumBorder(),
-              label: Text(category.replaceAll('_', ' ').capitalize()),
+              label: Text(label.replaceAll('_', ' ').capitalize()),
               selected: isSelected,
               onSelected: (bool selected) {
-                setState(() {
-                  if (isSubcategory) {
-                    selectedSubcategory = selected ? category : null;
-                  } else {
-                    selectedCategory = selected ? category : 'All';
-                    selectedSubcategory =
-                        null; // Reset subcategory if main category changes
-                  }
-                });
+                if (isSubcategory) {
+                  _onSubcategorySelected(selected ? item as ResourceSubcategory : null);
+                } else {
+                  _onCategorySelected(selected ? item as ResourceCategory : null);
+                }
               },
               selectedColor: kSSIorange,
-              backgroundColor: theme == ThemeMode.dark
-                  ? const Color(0xFF191919)
-                  : backgroundColorLight,
-              labelStyle: TextStyle(
-                  color: isSelected || theme == ThemeMode.dark
-                      ? Colors.white
-                      : Colors.black),
+              backgroundColor: theme == ThemeMode.dark ? const Color(0xFF191919) : backgroundColorLight,
+              labelStyle: TextStyle(color: isSelected || theme == ThemeMode.dark ? Colors.white : Colors.black),
             ),
           );
         });
@@ -547,6 +504,9 @@ class _DocumentPageState extends State<DocumentPage> {
 
 extension StringExtension on String {
   String capitalize() {
+    if (isEmpty) {
+      return this;
+    }
     return "${this[0].toUpperCase()}${substring(1)}";
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/global_widgets/custom_textfield.dart';
@@ -28,16 +29,17 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _getProfile() async {
-    setState(() {
-      _loading = true;
-    });
+    setState(() => _loading = true);
+    final auth = Provider.of<AuthService>(context, listen: false);
 
     try {
-      final userId = authService.value.currentUser?.id;
+      final userId = auth.currentUser?.id;
+      if (userId == null) throw Exception("User not logged in");
+
       final response = await Supabase.instance.client
           .from('profiles')
           .select()
-          .eq('id', userId!)
+          .eq('id', userId)
           .single();
 
       _fullNameController.text = response['full_name'] ?? '';
@@ -55,27 +57,26 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       }
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _updateProfile() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _loading = true;
-      });
+      setState(() => _loading = true);
+      final auth = Provider.of<AuthService>(context, listen: false);
 
       try {
-        final userId = authService.value.currentUser?.id;
+        final userId = auth.currentUser?.id;
+        if (userId == null) throw Exception("User not logged in");
+
         await Supabase.instance.client.from('profiles').update({
           'full_name': _fullNameController.text,
           'gender': _genderController.text,
           'date_of_birth': _dobController.text,
           'mobile_number': _mobileController.text,
           'username': _usernameController.text,
-        }).eq('id', userId!);
+        }).eq('id', userId);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -95,9 +96,7 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         }
       } finally {
-        setState(() {
-          _loading = false;
-        });
+        if (mounted) setState(() => _loading = false);
       }
     }
   }
@@ -105,9 +104,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-      ),
+      appBar: AppBar(title: const Text('Profile')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -118,62 +115,42 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     CustomTextField(
                       controller: _usernameController,
-                      labelText: 'Username',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your username';
-                        }
-                        return null;
-                      },
+                      hintText: 'Username',
+                      validator: (value) =>
+                          value == null || value.isEmpty ? 'Please enter your username' : null,
                     ),
                     const SizedBox(height: 16),
                     CustomTextField(
                       controller: _fullNameController,
-                      labelText: 'Full Name',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your full name';
-                        }
-                        return null;
-                      },
+                      hintText: 'Full Name',
+                      validator: (value) =>
+                          value == null || value.isEmpty ? 'Please enter your full name' : null,
                     ),
                     const SizedBox(height: 16),
                     CustomTextField(
                       controller: _genderController,
-                      labelText: 'Gender',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your gender';
-                        }
-                        return null;
-                      },
+                      hintText: 'Gender',
+                      validator: (value) =>
+                          value == null || value.isEmpty ? 'Please enter your gender' : null,
                     ),
                     const SizedBox(height: 16),
                     CustomTextField(
                       controller: _dobController,
-                      labelText: 'Date of Birth',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your date of birth';
-                        }
-                        return null;
-                      },
+                      hintText: 'Date of Birth',
+                      validator: (value) =>
+                          value == null || value.isEmpty ? 'Please enter your date of birth' : null,
                     ),
                     const SizedBox(height: 16),
                     CustomTextField(
                       controller: _mobileController,
-                      labelText: 'Mobile Number',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your mobile number';
-                        }
-                        return null;
-                      },
+                      hintText: 'Mobile Number',
+                      validator: (value) =>
+                          value == null || value.isEmpty ? 'Please enter your mobile number' : null,
                     ),
                     const SizedBox(height: 32),
                     PrimaryButton(
-                      text: 'Update Profile',
-                      onPressed: _updateProfile,
+                      label: 'Update Profile',
+                      onTap: _updateProfile,
                     ),
                   ],
                 ),

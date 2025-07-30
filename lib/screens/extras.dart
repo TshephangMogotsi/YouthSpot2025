@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/pointsProviders/motivational_points_provider.dart';
-import 'homepage/journal/journal.dart';
+import 'homepage/custom_journal/journal_list_view.dart';
 import 'homepage/lifestyleQuiz/quiz_intro.dart';
 import 'homepage_list_tile.dart';
 
@@ -63,7 +63,7 @@ class _ExtrasState extends State<Extras> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const Journal(),
+                builder: (context) => const JournalListView(),
               ),
             );
           },

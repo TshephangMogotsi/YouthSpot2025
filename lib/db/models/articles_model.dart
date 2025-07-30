@@ -19,10 +19,10 @@ class Article {
     return Article(
       id: map['id'].toString(),
       title: map['title'] ?? '',
-      category: map['category'] ?? '',
+      category: map['categories']?['name'] ?? '',
       description: map['description'] ?? '',
       imageUrl: map['imageurl'] ?? '',
-      author: map['author'] ?? '',
+      author: map['authors']?['name'] ?? '',
     );
   }
 }

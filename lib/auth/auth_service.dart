@@ -15,6 +15,22 @@ class AuthService extends ChangeNotifier {
       email: email,
       password: password,
     );
+
+    if (res.user != null) {
+      final profile = await Supabase.instance.client
+          .from('profiles')
+          .select()
+          .eq('id', res.user!.id)
+          .single();
+
+      if (profile['marked_for_deletion_at'] != null) {
+        await Supabase.instance.client
+            .from('profiles')
+            .update({'marked_for_deletion_at': null})
+            .eq('id', res.user!.id);
+      }
+    }
+
     notifyListeners();
     return res;
   }

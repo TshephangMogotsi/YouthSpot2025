@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:slide_to_act/slide_to_act.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/config/constants.dart';
+import 'package:youthspot/main.dart';
 
 import '../../../../config/font_constants.dart';
 
@@ -158,6 +161,11 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
             return SlideAction(
               key: _sliderKey,
               onSubmit: () async {
+                final userId = supabase.auth.currentUser?.id;
+                if (userId != null) {
+                  await supabase.functions.invoke('delete-user-soft', body: {'userId': userId});
+                }
+                await supabase.auth.signOut();
                 // Show loading inside slider
                 await Future.delayed(const Duration(seconds: 1));
                 _goToPage(2); // Go to success step

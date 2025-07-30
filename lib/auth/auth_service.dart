@@ -1,22 +1,24 @@
-import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/material.dart';
 
-class AuthService extends ChangeNotifier {
+ValueNotifier<AuthService> authService =
+    ValueNotifier<AuthService>(AuthService());
+
+class AuthService {
   final GoTrueClient supabaseAuth = Supabase.instance.client.auth;
 
   User? get currentUser => supabaseAuth.currentUser;
+
   Stream<AuthState> get authStateChanges => supabaseAuth.onAuthStateChange;
 
   Future<AuthResponse> signIn({
     required String email,
     required String password,
   }) async {
-    final res = await supabaseAuth.signInWithPassword(
+    return await supabaseAuth.signInWithPassword(
       email: email,
       password: password,
     );
-    notifyListeners();
-    return res;
   }
 
   Future<AuthResponse> createAccount({
@@ -28,7 +30,10 @@ class AuthService extends ChangeNotifier {
     required String dateOfBirth,
     required String mobileNumber,
   }) async {
-    final res = await supabaseAuth.signUp(email: email, password: password);
+    final AuthResponse res = await supabaseAuth.signUp(
+      email: email,
+      password: password,
+    );
 
     if (res.user != null) {
       await Supabase.instance.client.from('profiles').insert({
@@ -40,22 +45,23 @@ class AuthService extends ChangeNotifier {
         'mobile_number': mobileNumber,
       });
     }
-    notifyListeners();
+
     return res;
   }
 
   Future<void> signOut() async {
     await supabaseAuth.signOut();
-    notifyListeners();
   }
 
   Future<void> resetPassword({required String email}) async {
     await supabaseAuth.resetPasswordForEmail(email);
   }
 
-  Future<void> updateUsername({required String username}) async {
+  //update username
+  Future<void> updateUsername({
+    required String username,
+  }) async {
     await supabaseAuth.updateUser(UserAttributes(data: {'username': username}));
-    notifyListeners();
   }
 
   Future<void> deleteAccount({
@@ -64,22 +70,14 @@ class AuthService extends ChangeNotifier {
   }) async {
     await Supabase.instance.client.rpc('delete_user');
     await supabaseAuth.signOut();
-    notifyListeners();
   }
 
-  Future<void> reauthenticateUser({required String currentPassword}) async {
-    final email = supabaseAuth.currentUser?.email;
-    if (email == null || email.isEmpty) {
-      throw Exception("User email is missing. Please log in again.");
-    }
-    await supabaseAuth.signInWithPassword(
-      email: email,
-      password: currentPassword,
-    );
-  }
-
-  Future<void> updatePassword({required String newPassword}) async {
+  Future<void> resetPasswordFromCurrentPassword({
+    required String newPassword,
+    required String email,
+    required String currentPassword,
+  }) async {
+    await supabaseAuth.reauthenticate(currentPassword);
     await supabaseAuth.updateUser(UserAttributes(password: newPassword));
-    notifyListeners();
   }
 }

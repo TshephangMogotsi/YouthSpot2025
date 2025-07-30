@@ -34,7 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     try {
       final userId = auth.currentUser?.id;
-      if (userId == null) throw Exception("User not logged in");
+      if (userId == null) throw Exception("User not logged in!");
 
       final response = await Supabase.instance.client
           .from('profiles')

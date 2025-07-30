@@ -32,30 +32,31 @@ class EventProvider extends ChangeNotifier {
   }
 
   Future<void> addEvent(Event event) async {
-    // Add event to the local list
-    _events.add(event);
+    final newEvent = await SSIDatabase.instance.createEvent(event);
+    _events = [..._events, newEvent];
     notifyListeners();
-
-    // Save the event to the database
-    await SSIDatabase.instance.createEvent(event);
   }
 
   Future<void> deleteEvent(Event event) async {
-    // Remove the event from the local list
-    _events.remove(event);
-    notifyListeners();
-
     // Delete the event from the database
     await SSIDatabase.instance.deleteEvent(event.notificationId!);
+
+    _events = _events
+        .where((e) => e.notificationId != event.notificationId)
+        .toList();
+    notifyListeners();
   }
 
   Future<void> editEvent(Event newEvent, Event oldEvent) async {
-    final index = _events.indexOf(oldEvent);
-    _events[index] = newEvent;
-    notifyListeners();
-
     // Update the event in the database
     await SSIDatabase.instance.updateEvent(newEvent);
+
+    final index = _events.indexOf(oldEvent);
+    if (index != -1) {
+      _events = List.from(_events);
+      _events[index] = newEvent;
+      notifyListeners();
+    }
   }
 
    int getActiveEventCount() {

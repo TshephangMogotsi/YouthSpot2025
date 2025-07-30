@@ -240,7 +240,7 @@ class _DocumentPageState extends State<DocumentPage> {
                 Expanded(
                   child: PrimaryPadding(
                     child: PrimaryContainer(
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                      padding: const EdgeInsets.fromLTRB(25,10, 10,10),
                       child: ListView.builder(
                         physics: const BouncingScrollPhysics(),
                         itemCount: _filteredResources.length,

@@ -1,7 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:youthspot/screens/Account/account.dart';
 import 'package:youthspot/screens/homepage.dart';
 import 'package:youthspot/screens/resources/resources.dart';
-import 'package:flutter/material.dart';
+import 'package:youthspot/screens/services/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'article_page.dart';
@@ -24,7 +25,7 @@ class _AppEntryState extends State<AppEntry> with WidgetsBindingObserver {
     HomePage(),
     DocumentPage(), // Home
     ArticlePage(), // Resources
-    Placeholder(), // Services
+    ServicesScreen(), // Services
     Account(), // Leaderboard
     // DocumentPage(),
     // Services(),

@@ -60,6 +60,7 @@ dependencies:
   shimmer: ^3.0.0
   step_progress_indicator: ^1.0.2
   slide_to_act: ^2.0.2
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:

@@ -10,7 +10,7 @@ class FileDownloader {
   Future<void> downloadFile(BuildContext context, String url, String fileName, Function(int, int) onProgress) async {
     try {
       // Request storage permission first
-      var status = await Permission.storage.request();
+      var status = await Permission.manageExternalStorage.request();
       if (!status.isGranted) {
         print('Storage permission denied');
         await _showPermissionDeniedDialog(context);

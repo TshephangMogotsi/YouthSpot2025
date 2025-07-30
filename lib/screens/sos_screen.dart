@@ -13,19 +13,8 @@ class SOSScreen extends StatefulWidget {
 
 class _SOSScreenState extends State<SOSScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
+  final _messageController = TextEditingController();
   bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    final user = Provider.of<UserProvider>(context, listen: false).user;
-    if (user != null) {
-      _nameController.text = user.fullName;
-      _phoneController.text = user.phone;
-    }
-  }
 
   Future<void> _submitSOS() async {
     if (_formKey.currentState!.validate()) {
@@ -50,8 +39,9 @@ class _SOSScreenState extends State<SOSScreen> {
       try {
         await Supabase.instance.client.from('sos_requests').insert({
           'user_id': user.uid,
-          'full_name': _nameController.text,
-          'phone': _phoneController.text,
+          'full_name': user.fullName,
+          'phone': user.phone,
+          'distress_message': _messageController.text,
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -85,28 +75,21 @@ class _SOSScreenState extends State<SOSScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text(
-                'Your details will be sent to our support team.',
+                'Describe your situation below. Your name and contact number will be sent to our support team automatically.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 20),
               TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Full Name'),
+                controller: _messageController,
+                decoration: const InputDecoration(
+                  labelText: 'How are you in distress?',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 5,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Contact Number'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your contact number';
+                    return 'Please describe your situation';
                   }
                   return null;
                 },

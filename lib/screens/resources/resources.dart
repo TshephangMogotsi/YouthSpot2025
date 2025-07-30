@@ -25,7 +25,8 @@ class _DocumentPageState extends State<DocumentPage> {
 
   List<ResourceCategory> _categories = [];
   List<ResourceSubcategory> _subcategories = [];
-  List<Resource> _resources = [];
+  List<Resource> _allResources = [];
+  List<Resource> _filteredResources = [];
 
   ResourceCategory? _selectedCategory;
   ResourceSubcategory? _selectedSubcategory;
@@ -49,7 +50,8 @@ class _DocumentPageState extends State<DocumentPage> {
       final resources = await _resourceService.fetchResources();
       setState(() {
         _categories = categories;
-        _resources = resources;
+        _allResources = resources;
+        _filteredResources = resources;
         _isLoading = false;
       });
     } catch (e) {
@@ -71,25 +73,20 @@ class _DocumentPageState extends State<DocumentPage> {
     }
   }
 
-  Future<void> _fetchResources() async {
-    setState(() {
-      _isLoading = true;
-    });
-    try {
-      final resources = await _resourceService.fetchResources(
-        categoryId: _selectedCategory?.id,
-        subcategoryId: _selectedSubcategory?.id,
-      );
-      setState(() {
-        _resources = resources;
-        _isLoading = false;
-      });
-    } catch (e) {
-      // Handle error
-      setState(() {
-        _isLoading = false;
-      });
+  void _filterResources() {
+    List<Resource> resources = _allResources;
+
+    if (_selectedCategory != null) {
+      resources = resources.where((r) => r.categoryId == _selectedCategory!.id).toList();
     }
+
+    if (_selectedSubcategory != null) {
+      resources = resources.where((r) => r.subcategoryId == _selectedSubcategory!.id).toList();
+    }
+
+    setState(() {
+      _filteredResources = resources;
+    });
   }
 
   void _onCategorySelected(ResourceCategory? category) {
@@ -102,14 +99,14 @@ class _DocumentPageState extends State<DocumentPage> {
     if (category != null) {
       _fetchSubcategories(category.id);
     }
-    _fetchResources();
+    _filterResources();
   }
 
   void _onSubcategorySelected(ResourceSubcategory? subcategory) {
     setState(() {
       _selectedSubcategory = subcategory;
     });
-    _fetchResources();
+    _filterResources();
   }
 
   void showFileInfoDialog(Resource doc) {
@@ -245,9 +242,9 @@ class _DocumentPageState extends State<DocumentPage> {
                       borderColor: bluishClr,
                       child: ListView.builder(
                         physics: const BouncingScrollPhysics(),
-                        itemCount: _resources.length,
+                        itemCount: _filteredResources.length,
                         itemBuilder: (context, index) {
-                          Resource doc = _resources[index];
+                          Resource doc = _filteredResources[index];
                           return _buildPDFContainer(doc);
                         },
                       ),
@@ -488,9 +485,9 @@ class _DocumentPageState extends State<DocumentPage> {
               selected: isSelected,
               onSelected: (bool selected) {
                 if (isSubcategory) {
-                  _onSubcategorySelected(selected ? item as ResourceSubcategory : null);
+                  _onSubcategorySelected(selected ? item as ResourceSubcategory? : null);
                 } else {
-                  _onCategorySelected(selected ? item as ResourceCategory : null);
+                  _onCategorySelected(selected ? item as ResourceCategory? : null);
                 }
               },
               selectedColor: kSSIorange,

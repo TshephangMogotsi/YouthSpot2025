@@ -1,33 +1,42 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../db/models/articles_model.dart';
 
-
 class ArticlesProvider with ChangeNotifier {
   List<Article> _articles = [];
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  List<Article> _allArticles = [];
+  final SupabaseClient supabase = Supabase.instance.client;
 
   List<Article> get articles => _articles;
+  List<Article> get allArticles => _allArticles;
 
   ArticlesProvider() {
     loadInitialArticles();
   }
 
-  void _listenForArticles() {
-    firestore.collection('articles').snapshots().listen((snapshot) {
-      _articles = snapshot.docs.map((doc) => Article.fromSnapshot(doc)).toList();
-      notifyListeners();
-    });
-  }
-
-  void loadInitialArticles() async {
+  Future<void> loadInitialArticles() async {
     if (_articles.isEmpty) {
-      final snapshot = await firestore.collection('articles').limit(3).get();
-      _articles = snapshot.docs.map((doc) => Article.fromSnapshot(doc)).toList();
+      final response = await supabase
+          .from('articles')
+          .select('*, authors(name), categories(name)')
+          .limit(10);
+      _articles = (response as List)
+          .map((article) => Article.fromMap(article))
+          .toList();
       notifyListeners();
-      _listenForArticles();
     }
   }
 
+  Future<void> fetchAllArticles() async {
+    if (_allArticles.isEmpty) {
+      final response = await supabase
+          .from('articles')
+          .select('*, authors(name), categories(name)');
+      _allArticles = (response as List)
+          .map((article) => Article.fromMap(article))
+          .toList();
+      notifyListeners();
+    }
+  }
 }

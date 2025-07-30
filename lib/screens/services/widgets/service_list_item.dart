@@ -1,0 +1,48 @@
+import 'package:flutter/material.dart';
+import 'package:youthspot/db/models/service_model.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+class ServiceListItem extends StatelessWidget {
+  final Service service;
+
+  const ServiceListItem({super.key, required this.service});
+
+  Future<void> _launchMaps(double? lat, double? lon) async {
+    if (lat == null || lon == null) return;
+    final uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lon');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw 'Could not launch $uri';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ExpansionTile(
+        title: Text(service.name),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (service.location != null) Text('Location: ${service.location}'),
+                if (service.contacts != null && service.contacts!.isNotEmpty)
+                  Text('Contacts: ${service.contacts!.join(", ")}'),
+                if (service.type != null) Text('Type: ${service.type}'),
+                if (service.latitude != null && service.longitude != null)
+                  IconButton(
+                    icon: const Icon(Icons.location_on),
+                    onPressed: () => _launchMaps(service.latitude, service.longitude),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

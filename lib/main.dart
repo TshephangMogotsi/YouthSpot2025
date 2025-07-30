@@ -1,6 +1,7 @@
 import 'package:youthspot/auth/auth_layout.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/firebase_options.dart';
+import 'package:youthspot/services/notifications_helper.dart';
 import 'package:youthspot/services/services_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -27,10 +28,10 @@ void main() async {
   setupGetIt();
 
   WidgetsFlutterBinding.ensureInitialized();
+  NotificationService.initializeNotification();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
-  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await Supabase.initialize(
     url: "https://xcznelduagrrfzwkcrrs.supabase.co",

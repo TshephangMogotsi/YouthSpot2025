@@ -1,7 +1,9 @@
+import 'package:youthspot/config/font_constants.dart';
 import 'package:youthspot/global_widgets/primary_divider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:youthspot/global_widgets/primary_scaffold.dart';
 
 import '../../../../config/constants.dart';
 import '../../../../config/theme_manager.dart';
@@ -116,17 +118,14 @@ class _ArticleViewState extends State<ArticleView> {
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeManager.themeMode,
       builder: (context, theme, child) {
-        return Scaffold(
-           backgroundColor: themeManager.themeMode.value == ThemeMode.dark
-          ? darkmodeLight
-          : backgroundColorLight,
-          body: SingleChildScrollView(
+        return PrimaryScaffold(
+        child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  height: 200,
+                  height: 240,
                   width: double.infinity,
                   child: CachedNetworkImage(
                     imageUrl: widget.article.imageUrl,
@@ -163,28 +162,23 @@ class _ArticleViewState extends State<ArticleView> {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 11),
                             decoration: BoxDecoration(
                               color: kSSIorange,
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            child: const Text(
+                            child:  Text(
                               '2 days ago',
-                              style: TextStyle(
+                             style: AppTextStyles.secondarySemiBold.copyWith(
+                                fontSize: 12,
                                 color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                           const Width10(),
                           Text(
                             'By ${widget.article.author}',
-                            style: const TextStyle(
-                              color: Colors.blue,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTextStyles.primaryBold
                           ),
                         ],
                       ),

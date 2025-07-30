@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:youthspot/config/font_constants.dart';
 import 'package:youthspot/db/models/resource_model.dart';
 import 'package:youthspot/services/resource_service.dart';
 
@@ -223,6 +224,8 @@ class _DocumentPageState extends State<DocumentPage> {
                     ],
                   ),
                 ),
+                 if (_subcategories.isNotEmpty)
+                Height10(),
                 if (_subcategories.isNotEmpty)
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -233,13 +236,11 @@ class _DocumentPageState extends State<DocumentPage> {
                           .toList(),
                     ),
                   ),
-                const SizedBox(height: 10),
                 const SizedBox(height: 20),
                 Expanded(
                   child: PrimaryPadding(
                     child: PrimaryContainer(
-                      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 25),
-                      borderColor: bluishClr,
+                      padding: const EdgeInsets.fromLTRB(25,10, 10,10),
                       child: ListView.builder(
                         physics: const BouncingScrollPhysics(),
                         itemCount: _filteredResources.length,
@@ -480,7 +481,10 @@ class _DocumentPageState extends State<DocumentPage> {
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: ChoiceChip(
               showCheckmark: false,
-              shape: const StadiumBorder(),
+              
+              shape: const StadiumBorder(
+                side: BorderSide(color: Color.fromARGB(50, 158, 158, 158), width: 2),
+              ),
               label: Text(label.replaceAll('_', ' ').capitalize()),
               selected: isSelected,
               onSelected: (bool selected) {
@@ -491,8 +495,11 @@ class _DocumentPageState extends State<DocumentPage> {
                 }
               },
               selectedColor: kSSIorange,
-              backgroundColor: theme == ThemeMode.dark ? const Color(0xFF191919) : backgroundColorLight,
-              labelStyle: TextStyle(color: isSelected || theme == ThemeMode.dark ? Colors.white : Colors.black),
+              backgroundColor: theme == ThemeMode.dark ? const Color(0xFF191919) : const Color.fromARGB(255, 255, 255, 255),
+              labelStyle: AppTextStyles.secondarySemiBold.copyWith(
+                color: isSelected || theme == ThemeMode.dark ? Colors.white : Colors.black,
+              ),
+              // labelStyle: TextStyle(color: isSelected || theme == ThemeMode.dark ? Colors.white : Colors.black),
             ),
           );
         });

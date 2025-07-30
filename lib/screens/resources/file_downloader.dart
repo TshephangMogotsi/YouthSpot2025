@@ -3,25 +3,61 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class FileDownloader {
   final Dio _dio = Dio();
 
-  Future<void> downloadFile(BuildContext context, String url, String fileName, Function(int, int) onProgress) async {
+  Future<void> downloadFile(
+    BuildContext context,
+    String url,
+    String fileName,
+    Function(int, int) onProgress,
+  ) async {
     try {
-      // Request storage permission first
-      var status = await Permission.manageExternalStorage.request();
-      if (!status.isGranted) {
-        print('Storage permission denied');
-        await _showPermissionDeniedDialog(context);
-        return;
+      Directory? directory;
+      print('Starting download for $fileName');
+
+      if (Platform.isAndroid) {
+        print('Requesting storage permission on Android');
+        final androidInfo = await DeviceInfoPlugin().androidInfo;
+        final sdkInt = androidInfo.version.sdkInt;
+
+        bool hasPermission = false;
+
+        if (sdkInt >= 30) {
+          // Android 11+ (Scoped Storage)
+          var status = await Permission.manageExternalStorage.request();
+          hasPermission = status.isGranted;
+        } else {
+          // Android 10 and below
+          var status = await Permission.storage.request();
+          hasPermission = status.isGranted;
+        }
+
+        if (hasPermission) {
+          print('Storage permission granted');
+          directory = Directory('/storage/emulated/0/Download');
+        } else {
+          print('Storage permission denied');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content:
+                    Text("Storage permission is required to download files.")),
+          );
+          return;
+        }
+      } else if (Platform.isIOS) {
+        print('Getting documents directory on iOS');
+        directory = await getApplicationDocumentsDirectory();
       }
 
-      // Set path to public Downloads folder
-      Directory directory = Directory('/storage/emulated/0/Download');
-
-      if (!await directory.exists()) {
-        directory = await getExternalStorageDirectory() ?? directory; // fallback
+      if (directory == null) {
+        print('Failed to get download directory');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Could not access storage directory.")),
+        );
+        return;
       }
 
       print('Download directory: ${directory.path}');
@@ -43,6 +79,9 @@ class FileDownloader {
       );
     } catch (e) {
       print('Error downloading file: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Download failed: $e")),
+      );
     }
   }
 
@@ -63,47 +102,5 @@ class FileDownloader {
     }
 
     return filePath;
-  }
-
-  Future<bool> _showDownloadConfirmationDialog(BuildContext context, String fileName) async {
-    return await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Download file again?"),
-          content: Text("Do you want to download '$fileName' again?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false), // User cancels
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true), // User confirms
-              child: const Text("Download again"),
-            ),
-          ],
-        );
-      },
-    ) ?? false;
-  }
-
-  Future<void> _showPermissionDeniedDialog(BuildContext context) async {
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Permission Denied'),
-          content: const Text('Storage permission is required to download files. Please go to Settings > Apps > YouthSpot > Permissions and enable Storage.'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 }

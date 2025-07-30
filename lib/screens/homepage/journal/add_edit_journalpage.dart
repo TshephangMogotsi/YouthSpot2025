@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io'; // Importing dart:io to use Platform
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -17,10 +18,7 @@ import 'delete_dialog.dart';
 class AddEditJournalPage extends StatefulWidget {
   final JournalEntry? journalEntry;
 
-  const AddEditJournalPage({
-    super.key,
-    this.journalEntry,
-  });
+  const AddEditJournalPage({super.key, this.journalEntry});
 
   @override
   State<AddEditJournalPage> createState() => _AddEditJournalPageState();
@@ -32,6 +30,10 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
   late QuillController _contentController;
   late bool isImportant;
   late int number;
+
+  // Declare the focus node here
+  final FocusNode _editorFocusNode = FocusNode();
+  final ScrollController _editorScrollController = ScrollController();
 
   @override
   void initState() {
@@ -79,10 +81,7 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Journal',
-                          style: headingStyle,
-                        ),
+                        Text('Journal', style: headingStyle),
                         IconButton(
                           icon: Icon(
                             Icons.delete,
@@ -98,45 +97,69 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
                   const Height10(),
                   Expanded(
                     child: Container(
-                      color: theme == ThemeMode.dark ? darkmodeFore : Colors.white,
+                      color: theme == ThemeMode.dark
+                          ? darkmodeFore
+                          : Colors.white,
                       child: PrimaryPadding(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              TextField(
-                                controller: _titleController,
-                                decoration: const InputDecoration(
-                                  hintText: 'Title',
-                                  border: InputBorder.none,
-                                  hintStyle: TextStyle(
-                                      fontSize: 20, fontWeight: FontWeight.bold),
-                                ),
-                                style: const TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                              QuillToolbar.simple(
-                                configurations: QuillSimpleToolbarConfigurations(
-                                  controller: _contentController,
-                                  sharedConfigurations: const QuillSharedConfigurations(
-                                    locale: Locale('en'),
-                                  ),
-                                ),
-                              ),
-                              const Divider(),
-                              Expanded(
-                                child: QuillEditor.basic(
-                                  configurations: QuillEditorConfigurations(
-                                    controller: _contentController,
-                                    readOnly: false,
-                                    sharedConfigurations: const QuillSharedConfigurations(
-                                      locale: Locale('en'),
+                        child: Column(
+                          children: [
+                            // Move the Scrollable area inside a Column
+                            Flexible(
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Your TextField and Toolbar widgets go here
+                                    TextField(
+                                      controller: _titleController,
+                                      decoration: const InputDecoration(
+                                        hintText: 'Title',
+                                        border: InputBorder.none,
+                                        hintStyle: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
+                                    QuillSimpleToolbar(
+                                      controller: _contentController,
+                                      config: QuillSimpleToolbarConfig(
+                                        buttonOptions:
+                                            QuillSimpleToolbarButtonOptions(
+                                              base: QuillToolbarBaseButtonOptions(
+                                                afterButtonPressed: () {
+                                                  // Use Platform.is here to check for platform
+                                                  if (Platform.isWindows ||
+                                                      Platform.isLinux ||
+                                                      Platform.isMacOS) {
+                                                    _editorFocusNode
+                                                        .requestFocus();
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                      ),
+                                    ),
+                                    const Divider(),
+                                    QuillEditor(
+                                      controller: _contentController,
+                                      focusNode: _editorFocusNode,
+                                      scrollController: _editorScrollController,
+                                      config: QuillEditorConfig(
+                                        placeholder:
+                                            'Start writing your notes...',
+                                        padding: const EdgeInsets.all(16),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              )
-                            ],
-                          ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -191,8 +214,10 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
     await SSIDatabase.instance.createJounalEntry(journalEntry);
 
     // Award points for adding a new journal entry
-    Provider.of<JournalPointsProvider>(context, listen: false)
-        .addJournalEntryPoints();
+    Provider.of<JournalPointsProvider>(
+      context,
+      listen: false,
+    ).addJournalEntryPoints();
   }
 
   Future<void> deleteJournalEntry() async {
@@ -205,11 +230,16 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
       );
 
       if (shouldDelete ?? false) {
-        await SSIDatabase.instance.deleteJournalEntry(
-          widget.journalEntry!.id!,
-        );
+        await SSIDatabase.instance.deleteJournalEntry(widget.journalEntry!.id!);
         Navigator.of(context).pop();
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _editorFocusNode.dispose();
+    _editorScrollController.dispose();
+    super.dispose();
   }
 }

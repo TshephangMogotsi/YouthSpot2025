@@ -3,7 +3,6 @@ import 'package:youthspot/screens/Account/account.dart';
 import 'package:youthspot/screens/homepage.dart';
 import 'package:youthspot/screens/resources/resources.dart';
 import 'package:youthspot/screens/services/services.dart';
-import 'package:youthspot/screens/sos_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'article_page.dart';
@@ -57,51 +56,90 @@ class _AppEntryState extends State<AppEntry> with WidgetsBindingObserver {
       builder: (context, theme, child) {
         return Scaffold(
           body: _widgetOptions.elementAt(_selectedIndex),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SOSScreen()),
-              );
-            },
-            backgroundColor: Colors.red,
-            child: const Icon(Icons.sos),
-          ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-          bottomNavigationBar: BottomAppBar(
-            color: theme == ThemeMode.dark ? const Color(0xFF0A0A0A) : backgroundColorLight,
-            shape: const CircularNotchedRectangle(),
-            notchMargin: 8.0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                _buildNavItem(0, 'Home', 'assets/icon/Home.svg', 'assets/icon/home_outline.svg'),
-                _buildNavItem(1, 'Resources', 'assets/icon/folder.svg', 'assets/icon/folder_outline.svg'),
-                const SizedBox(width: 40), // The space for the FAB
-                _buildNavItem(2, 'Services', 'assets/icon/Services.svg', 'assets/icon/services_outline.svg'),
-                _buildNavItem(3, 'Leaderboard', 'assets/icon/trophy.svg', 'assets/icon/trophy_outline.svg'),
-                _buildNavItem(4, 'Account', 'assets/icon/profile.svg', 'assets/icon/profile_outline.svg'),
-              ],
-            ),
+          bottomNavigationBar: BottomNavigationBar(
+            backgroundColor: theme == ThemeMode.dark
+                ? const Color(0xFF0A0A0A)
+                : backgroundColorLight,
+            selectedItemColor: kSSIorange,
+            unselectedItemColor: Colors.grey,
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            type: BottomNavigationBarType.fixed,
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  _selectedIndex == 0
+                      ? 'assets/icon/Home.svg'
+                      : 'assets/icon/home_outline.svg',
+                  height: 20,
+                  width: 20,
+                  colorFilter: ColorFilter.mode(
+                    _selectedIndex == 0 ? kSSIorange : Colors.grey,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  _selectedIndex == 1
+                      ? 'assets/icon/folder.svg'
+                      : 'assets/icon/folder_outline.svg',
+                  height: 20,
+                  width: 20,
+                  colorFilter: ColorFilter.mode(
+                    _selectedIndex == 1 ? kSSIorange : Colors.grey,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                label: 'Resources',
+              ),
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  _selectedIndex == 2
+                      ? 'assets/icon/Services.svg'
+                      : 'assets/icon/services_outline.svg',
+                  height: 20,
+                  width: 20,
+                  colorFilter: ColorFilter.mode(
+                    _selectedIndex == 2 ? kSSIorange : Colors.grey,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                label: 'Services',
+              ),
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  _selectedIndex == 3
+                      ? 'assets/icon/trophy.svg'
+                      : 'assets/icon/trophy_outline.svg',
+                  height: 20,
+                  width: 20,
+                  colorFilter: ColorFilter.mode(
+                    _selectedIndex == 3 ? kSSIorange : Colors.grey,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                label: 'Leaderboard',
+              ),
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  _selectedIndex == 4
+                      ? 'assets/icon/profile.svg'
+                      : 'assets/icon/profile_outline.svg',
+                  height: 20,
+                  width: 20,
+                  colorFilter: ColorFilter.mode(
+                    _selectedIndex == 4 ? kSSIorange : Colors.grey,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                label: 'Account',
+              ),
+            ],
           ),
         );
       },
-    );
-  }
-
-  Widget _buildNavItem(int index, String label, String activeIcon, String inactiveIcon) {
-    return IconButton(
-      icon: SvgPicture.asset(
-        _selectedIndex == index ? activeIcon : inactiveIcon,
-        height: 20,
-        width: 20,
-        colorFilter: ColorFilter.mode(
-          _selectedIndex == index ? kSSIorange : Colors.grey,
-          BlendMode.srcIn,
-        ),
-      ),
-      onPressed: () => _onItemTapped(index),
-      tooltip: label,
     );
   }
 }

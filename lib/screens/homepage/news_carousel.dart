@@ -9,7 +9,6 @@ import 'all_articles_view.dart';
 import 'article_view.dart';
 import 'news_article.dart';
 
-
 class NewsCarousel extends StatelessWidget {
   const NewsCarousel({super.key});
 
@@ -29,12 +28,12 @@ class NewsCarousel extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ArticlesView(),
+                      builder: (context) => const AllArticlesView(),
                     ),
                   );
                 },
                 child: const Text(
-                  "See all",
+                  "Read All",
                   style: TextStyle(
                     color: kSSIorange,
                     fontSize: 12,
@@ -59,12 +58,15 @@ class NewsCarousel extends StatelessWidget {
                 imgURL: article.imageUrl,
                 title: article.title,
                 duration: '10 min read',
-                author: 'John David',
-                articleId: article.id,  // Pass the article ID here
+                author: article.author,
+                articleId: article.id, // Pass the article ID here
                 onTap: () {
                   // Access the PointsProvider to add points for reading the article
-                  final pointsProvider = Provider.of<ArticlePointsProvider>(context, listen: false);
-                  pointsProvider.addArticlePoints(article.id);  // Add article points
+                  final pointsProvider = Provider.of<ArticlePointsProvider>(
+                      context,
+                      listen: false);
+                  pointsProvider.addArticlePoints(
+                      article.id); // Add article points
 
                   // Navigate to the article view
                   Navigator.push(

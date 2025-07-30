@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../config/constants.dart';
@@ -24,11 +27,11 @@ class JournalDetailPage extends StatefulWidget {
 class _JournalDetailPageState extends State<JournalDetailPage> {
   late JournalEntry journalEntry;
   bool isLoading = false;
+  late QuillController _controller;
 
   @override
   void initState() {
     super.initState();
-
     refreshNote();
   }
 
@@ -37,6 +40,17 @@ class _JournalDetailPageState extends State<JournalDetailPage> {
 
     journalEntry =
         await SSIDatabase.instance.readJournalEntry(widget.journalID);
+
+    try {
+      final doc = Document.fromJson(jsonDecode(journalEntry.description));
+      _controller = QuillController(
+        document: doc,
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    } catch (e) {
+      _controller = QuillController.basic();
+      _controller.document.insert(0, journalEntry.description);
+    }
 
     setState(() => isLoading = false);
   }
@@ -130,13 +144,14 @@ class _JournalDetailPageState extends State<JournalDetailPage> {
                           style: const TextStyle(color: Colors.white38),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          journalEntry.description,
-                          style: TextStyle(
-                              color: theme == ThemeMode.dark
-                                  ? Colors.white
-                                  : const Color(0xFF1C1C24),
-                              fontSize: 18),
+                        QuillEditor.basic(
+                          configurations: QuillEditorConfigurations(
+                            controller: _controller,
+                            readOnly: true,
+                            sharedConfigurations: const QuillSharedConfigurations(
+                              locale: Locale('en'),
+                            ),
+                          ),
                         )
                       ],
                     ),

@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../config/constants.dart';
@@ -26,7 +29,7 @@ class AddEditJournalPage extends StatefulWidget {
 class _AddEditJournalPageState extends State<AddEditJournalPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
+  late QuillController _contentController;
   late bool isImportant;
   late int number;
 
@@ -36,7 +39,22 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
     isImportant = widget.journalEntry?.isImportant ?? false;
     number = widget.journalEntry?.number ?? 0;
     _titleController.text = widget.journalEntry?.title ?? '';
-    _contentController.text = widget.journalEntry?.description ?? '';
+
+    final description = widget.journalEntry?.description ?? '';
+    if (description.isNotEmpty) {
+      try {
+        final doc = Document.fromJson(jsonDecode(description));
+        _contentController = QuillController(
+          document: doc,
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+      } catch (e) {
+        _contentController = QuillController.basic();
+        _contentController.document.insert(0, description);
+      }
+    } else {
+      _contentController = QuillController.basic();
+    }
   }
 
   @override
@@ -46,7 +64,7 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         if (_titleController.text.isNotEmpty ||
-            _contentController.text.isNotEmpty) {
+            !_contentController.document.isEmpty()) {
           addOrUpdateNote();
         }
       },
@@ -97,15 +115,26 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
                                 style: const TextStyle(
                                     fontSize: 20, fontWeight: FontWeight.bold),
                               ),
-                              TextField(
-                                controller: _contentController,
-                                maxLines: null, // Allows for unlimited lines
-                                keyboardType: TextInputType.multiline,
-                                decoration: const InputDecoration(
-                                  hintText: 'What is on your mind...',
-                                  border: InputBorder.none,
+                              QuillToolbar.simple(
+                                configurations: QuillSimpleToolbarConfigurations(
+                                  controller: _contentController,
+                                  sharedConfigurations: const QuillSharedConfigurations(
+                                    locale: Locale('en'),
+                                  ),
                                 ),
                               ),
+                              const Divider(),
+                              Expanded(
+                                child: QuillEditor.basic(
+                                  configurations: QuillEditorConfigurations(
+                                    controller: _contentController,
+                                    readOnly: false,
+                                    sharedConfigurations: const QuillSharedConfigurations(
+                                      locale: Locale('en'),
+                                    ),
+                                  ),
+                                ),
+                              )
                             ],
                           ),
                         ),
@@ -138,22 +167,24 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
   }
 
   Future updateNote() async {
+    final json = jsonEncode(_contentController.document.toDelta().toJson());
     final note = widget.journalEntry!.copy(
       isImportant: isImportant,
       number: number,
       title: _titleController.text,
-      description: _contentController.text,
+      description: json,
     );
 
     await SSIDatabase.instance.updateJournalEntry(note);
   }
 
   Future addNote() async {
+    final json = jsonEncode(_contentController.document.toDelta().toJson());
     final journalEntry = JournalEntry(
       title: _titleController.text,
       isImportant: isImportant,
       number: number,
-      description: _contentController.text,
+      description: json,
       createdTime: DateTime.now(),
     );
 

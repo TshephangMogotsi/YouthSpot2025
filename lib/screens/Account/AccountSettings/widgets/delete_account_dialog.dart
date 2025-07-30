@@ -7,6 +7,7 @@ import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/main.dart';
 
 import '../../../../config/font_constants.dart';
+import 'goodbye_screen.dart';
 
 class DeleteAccountDialog extends StatefulWidget {
   const DeleteAccountDialog({super.key});
@@ -206,7 +207,10 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
   Widget _buildSuccessStep(BuildContext context, {Key? key}) {
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const GoodbyeScreen()),
+          (route) => false,
+        );
       }
     });
 

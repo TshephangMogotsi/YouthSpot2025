@@ -9,34 +9,38 @@ class FileDownloader {
 
   Future<void> downloadFile(BuildContext context, String url, String fileName, Function(int, int) onProgress) async {
     try {
-      Directory? directory;
-      print('Starting download for $fileName');
-
-      if (Platform.isAndroid) {
-        directory = await getExternalStorageDirectory();
-      } else if (Platform.isIOS) {
-        print('Getting documents directory on iOS');
-        directory = await getApplicationDocumentsDirectory();
+      // Request storage permission first
+      var status = await Permission.storage.request();
+      if (!status.isGranted) {
+        print('Storage permission denied');
+        await _showPermissionDeniedDialog(context);
+        return;
       }
 
-      if (directory != null) {
-        print('Download directory: ${directory.path}');
-        String savePath = await _getUniqueFilePath(directory.path, fileName);
-        print('Saving file to: $savePath');
+      // Set path to public Downloads folder
+      Directory directory = Directory('/storage/emulated/0/Download');
 
-        await _dio.download(
-          url,
-          savePath,
-          onReceiveProgress: (received, total) {
-            print('Download progress: $received/$total');
-            onProgress(received, total); // Report progress
-          },
-        );
-
-        print('File saved to: $savePath');
-      } else {
-        print('Failed to get directory');
+      if (!await directory.exists()) {
+        directory = await getExternalStorageDirectory() ?? directory; // fallback
       }
+
+      print('Download directory: ${directory.path}');
+      String savePath = await _getUniqueFilePath(directory.path, fileName);
+      print('Saving file to: $savePath');
+
+      await _dio.download(
+        url,
+        savePath,
+        onReceiveProgress: (received, total) {
+          print('Download progress: $received/$total');
+          onProgress(received, total);
+        },
+      );
+
+      print('File saved to: $savePath');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("File saved to Downloads: $fileName")),
+      );
     } catch (e) {
       print('Error downloading file: $e');
     }

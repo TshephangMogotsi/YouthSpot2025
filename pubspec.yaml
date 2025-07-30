@@ -62,6 +62,7 @@ dependencies:
   slide_to_act: ^2.0.2
   url_launcher: ^6.3.1
   device_info_plus: ^11.5.0
+  flutter_quill: ^11.4.2
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:io'; // Importing dart:io to use Platform
+
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../config/constants.dart';
@@ -14,10 +18,7 @@ import 'delete_dialog.dart';
 class AddEditJournalPage extends StatefulWidget {
   final JournalEntry? journalEntry;
 
-  const AddEditJournalPage({
-    super.key,
-    this.journalEntry,
-  });
+  const AddEditJournalPage({super.key, this.journalEntry});
 
   @override
   State<AddEditJournalPage> createState() => _AddEditJournalPageState();
@@ -26,9 +27,13 @@ class AddEditJournalPage extends StatefulWidget {
 class _AddEditJournalPageState extends State<AddEditJournalPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
+  late QuillController _contentController;
   late bool isImportant;
   late int number;
+
+  // Declare the focus node here
+  final FocusNode _editorFocusNode = FocusNode();
+  final ScrollController _editorScrollController = ScrollController();
 
   @override
   void initState() {
@@ -36,7 +41,22 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
     isImportant = widget.journalEntry?.isImportant ?? false;
     number = widget.journalEntry?.number ?? 0;
     _titleController.text = widget.journalEntry?.title ?? '';
-    _contentController.text = widget.journalEntry?.description ?? '';
+
+    final description = widget.journalEntry?.description ?? '';
+    if (description.isNotEmpty) {
+      try {
+        final doc = Document.fromJson(jsonDecode(description));
+        _contentController = QuillController(
+          document: doc,
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+      } catch (e) {
+        _contentController = QuillController.basic();
+        _contentController.document.insert(0, description);
+      }
+    } else {
+      _contentController = QuillController.basic();
+    }
   }
 
   @override
@@ -46,7 +66,7 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         if (_titleController.text.isNotEmpty ||
-            _contentController.text.isNotEmpty) {
+            !_contentController.document.isEmpty()) {
           addOrUpdateNote();
         }
       },
@@ -61,10 +81,7 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Journal',
-                          style: headingStyle,
-                        ),
+                        Text('Journal', style: headingStyle),
                         IconButton(
                           icon: Icon(
                             Icons.delete,
@@ -80,34 +97,69 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
                   const Height10(),
                   Expanded(
                     child: Container(
-                      color: theme == ThemeMode.dark ? darkmodeFore : Colors.white,
+                      color: theme == ThemeMode.dark
+                          ? darkmodeFore
+                          : Colors.white,
                       child: PrimaryPadding(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              TextField(
-                                controller: _titleController,
-                                decoration: const InputDecoration(
-                                  hintText: 'Title',
-                                  border: InputBorder.none,
-                                  hintStyle: TextStyle(
-                                      fontSize: 20, fontWeight: FontWeight.bold),
+                        child: Column(
+                          children: [
+                            // Move the Scrollable area inside a Column
+                            Flexible(
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Your TextField and Toolbar widgets go here
+                                    TextField(
+                                      controller: _titleController,
+                                      decoration: const InputDecoration(
+                                        hintText: 'Title',
+                                        border: InputBorder.none,
+                                        hintStyle: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    QuillSimpleToolbar(
+                                      controller: _contentController,
+                                      config: QuillSimpleToolbarConfig(
+                                        buttonOptions:
+                                            QuillSimpleToolbarButtonOptions(
+                                              base: QuillToolbarBaseButtonOptions(
+                                                afterButtonPressed: () {
+                                                  // Use Platform.is here to check for platform
+                                                  if (Platform.isWindows ||
+                                                      Platform.isLinux ||
+                                                      Platform.isMacOS) {
+                                                    _editorFocusNode
+                                                        .requestFocus();
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                      ),
+                                    ),
+                                    const Divider(),
+                                    QuillEditor(
+                                      controller: _contentController,
+                                      focusNode: _editorFocusNode,
+                                      scrollController: _editorScrollController,
+                                      config: QuillEditorConfig(
+                                        placeholder:
+                                            'Start writing your notes...',
+                                        padding: const EdgeInsets.all(16),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                style: const TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
                               ),
-                              TextField(
-                                controller: _contentController,
-                                maxLines: null, // Allows for unlimited lines
-                                keyboardType: TextInputType.multiline,
-                                decoration: const InputDecoration(
-                                  hintText: 'What is on your mind...',
-                                  border: InputBorder.none,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -138,30 +190,34 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
   }
 
   Future updateNote() async {
+    final json = jsonEncode(_contentController.document.toDelta().toJson());
     final note = widget.journalEntry!.copy(
       isImportant: isImportant,
       number: number,
       title: _titleController.text,
-      description: _contentController.text,
+      description: json,
     );
 
     await SSIDatabase.instance.updateJournalEntry(note);
   }
 
   Future addNote() async {
+    final json = jsonEncode(_contentController.document.toDelta().toJson());
     final journalEntry = JournalEntry(
       title: _titleController.text,
       isImportant: isImportant,
       number: number,
-      description: _contentController.text,
+      description: json,
       createdTime: DateTime.now(),
     );
 
     await SSIDatabase.instance.createJounalEntry(journalEntry);
 
     // Award points for adding a new journal entry
-    Provider.of<JournalPointsProvider>(context, listen: false)
-        .addJournalEntryPoints();
+    Provider.of<JournalPointsProvider>(
+      context,
+      listen: false,
+    ).addJournalEntryPoints();
   }
 
   Future<void> deleteJournalEntry() async {
@@ -174,11 +230,16 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
       );
 
       if (shouldDelete ?? false) {
-        await SSIDatabase.instance.deleteJournalEntry(
-          widget.journalEntry!.id!,
-        );
+        await SSIDatabase.instance.deleteJournalEntry(widget.journalEntry!.id!);
         Navigator.of(context).pop();
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _editorFocusNode.dispose();
+    _editorScrollController.dispose();
+    super.dispose();
   }
 }

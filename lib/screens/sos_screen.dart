@@ -12,74 +12,62 @@ class SOSScreen extends StatefulWidget {
 }
 
 class _SOSScreenState extends State<SOSScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
   bool _isLoading = false;
 
-  Future<void> _submitSOS() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final user = userProvider.user;
-
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Could not identify user. Please log in again.')),
-      );
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
-
-    try {
-      await Supabase.instance.client.from('sos_requests').insert({
-        'user_id': user.uid,
-        'full_name': user.fullName,
-        'phone': user.phone,
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('SOS submitted successfully!')),
-      );
-      Navigator.of(context).pop(); // Go back after submission
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error submitting SOS: $error')),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+  @override
+  void initState() {
+    super.initState();
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    if (user != null) {
+      _nameController.text = user.fullName;
+      _phoneController.text = user.phone;
     }
   }
 
-  void _showConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirm SOS'),
-          content: const Text('Are you sure you want to send an SOS?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Confirm'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _submitSOS();
-              },
-            ),
-          ],
+  Future<void> _submitSOS() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final user = userProvider.user;
+
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Could not identify user. Please log in again.')),
         );
-      },
-    );
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      try {
+        await Supabase.instance.client.from('sos_requests').insert({
+          'user_id': user.uid,
+          'full_name': _nameController.text,
+          'phone': _phoneController.text,
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('SOS submitted successfully!')),
+        );
+        Navigator.of(context).pop(); // Go back after submission
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error submitting SOS: $error')),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -89,30 +77,56 @@ class _SOSScreenState extends State<SOSScreen> {
         title: const Text('SOS'),
         backgroundColor: kSSIorange,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'Press the button below to send an SOS.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 40),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _showConfirmationDialog,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 50, vertical: 20),
-                      textStyle: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                'Your details will be sent to our support team.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Full Name'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _phoneController,
+                decoration: const InputDecoration(labelText: 'Contact Number'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your contact number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 40),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: _submitSOS,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 50, vertical: 20),
+                        textStyle: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      child: const Text('SEND SOS'),
                     ),
-                    child: const Text('SEND SOS'),
-                  ),
-          ],
+            ],
+          ),
         ),
       ),
     );

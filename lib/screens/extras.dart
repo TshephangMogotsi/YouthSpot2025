@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:youthspot/screens/sos_screen.dart';
 import '../providers/pointsProviders/motivational_points_provider.dart';
 import 'homepage/journal/journal.dart';
 import 'homepage/lifestyleQuiz/quiz_intro.dart';
@@ -26,12 +27,12 @@ class _ExtrasState extends State<Extras> {
           subtitle: 'In urgent distress? Send us an SOS message',
           svgURL: 'assets/Backgrounds/SOS.svg',
           onTap: () {
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => const SOS(),
-            //   ),
-            // );
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SOSScreen(),
+              ),
+            );
           },
         ),
         const SizedBox(

@@ -7,40 +7,36 @@ import 'package:permission_handler/permission_handler.dart';
 class FileDownloader {
   final Dio _dio = Dio();
 
-  Future<bool> _requestPermission(Permission permission) async {
-    if (await permission.isGranted) {
-      return true;
-    } else {
-      var result = await permission.request();
-      if (result == PermissionStatus.granted) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   Future<void> downloadFile(BuildContext context, String url, String fileName, Function(int, int) onProgress) async {
     try {
       Directory? directory;
+      print('Starting download for $fileName');
 
       if (Platform.isAndroid) {
-        if (await _requestPermission(Permission.storage)) {
+        print('Requesting storage permission on Android');
+        var status = await Permission.storage.request();
+        if (status.isGranted) {
+          print('Storage permission granted');
           directory = Directory('/storage/emulated/0/Download');
         } else {
-          // Handle permission denial
+          print('Storage permission denied');
           return;
         }
       } else if (Platform.isIOS) {
+        print('Getting documents directory on iOS');
         directory = await getApplicationDocumentsDirectory();
       }
 
       if (directory != null) {
+        print('Download directory: ${directory.path}');
         String savePath = await _getUniqueFilePath(directory.path, fileName);
+        print('Saving file to: $savePath');
 
         await _dio.download(
           url,
           savePath,
           onReceiveProgress: (received, total) {
+            print('Download progress: $received/$total');
             onProgress(received, total); // Report progress
           },
         );

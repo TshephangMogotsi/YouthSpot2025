@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Firebase import removed
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../user_provider.dart';
 
@@ -47,7 +48,7 @@ class LoginPointsProvider with ChangeNotifier {
   Future<void> initializeLoginPoints() async {
     if (userProvider.user != null) {
       try {
-        FirebaseFirestore.instance
+        // FirebaseFirestore.instance - REMOVED
             .collection('users')
             .doc(userProvider.user!.uid)
             .snapshots()
@@ -138,7 +139,7 @@ class LoginPointsProvider with ChangeNotifier {
   // Save updated login points and milestone info to Firebase
   Future<void> saveLoginPointsToFirebase() async {
     if (userProvider.user != null) {
-      await FirebaseFirestore.instance
+      await // FirebaseFirestore.instance - REMOVED
           .collection('users')
           .doc(userProvider.user!.uid)
           .update({

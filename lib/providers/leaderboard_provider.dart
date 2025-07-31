@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Firebase import removed
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 class LeaderboardProvider extends ChangeNotifier {
@@ -11,6 +12,9 @@ class LeaderboardProvider extends ChangeNotifier {
   // Fetch the user's position from Firestore before the leaderboard page loads
   Future<void> fetchUserPositionAndPoints(String uid, int rating) async {
     try {
+      // Firebase functionality removed - implement with Supabase or other backend
+      print('Firebase Firestore removed - fetchUserPositionAndPoints method needs reimplementation');
+      
       // Ensure that the user's rating is valid (it should not be null)
       if (rating == 0) {
         if (kDebugMode) {
@@ -21,33 +25,33 @@ class LeaderboardProvider extends ChangeNotifier {
         return;
       }
 
-      // Fetch all users ordered by rating (including those with same rating)
-      QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .orderBy('rating', descending: true)
-          .get();
-
-      // Convert the snapshot into a list of users
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> userDocs = snapshot.docs;
-
-      // Find the position of the current user
-      int position = 1; // Start from 1
-      for (var doc in userDocs) {
-        if (doc.id == uid) {
-          break; // Stop when we find the current user
-        }
-        position++;
-      }
-
-      // Log the fetched data for debugging
-      print('Calculated position for user $uid: $position');
-
-      // Set the current user's position and points
-      _currentUserPosition = position;
-      _currentUserPoints = rating;
-
-      // Notify listeners to update the UI
-      notifyListeners();
+      // // Fetch all users ordered by rating (including those with same rating)
+      // QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
+      //     .collection('users')
+      //     .orderBy('rating', descending: true)
+      //     .get();
+      //
+      // // Convert the snapshot into a list of users
+      // List<QueryDocumentSnapshot<Map<String, dynamic>>> userDocs = snapshot.docs;
+      //
+      // // Find the position of the current user
+      // int position = 1; // Start from 1
+      // for (var doc in userDocs) {
+      //   if (doc.id == uid) {
+      //     break; // Stop when we find the current user
+      //   }
+      //   position++;
+      // }
+      //
+      // // Log the fetched data for debugging
+      // print('Calculated position for user $uid: $position');
+      //
+      // // Set the current user's position and points
+      // _currentUserPosition = position;
+      // _currentUserPoints = rating;
+      //
+      // // Notify listeners to update the UI
+      // notifyListeners();
     } catch (e) {
       print('Error fetching user position: $e');
       _currentUserPosition = 0; // Set to 0 if there's an error

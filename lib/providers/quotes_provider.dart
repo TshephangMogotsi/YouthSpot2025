@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Firebase import removed
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import '../db/app_db.dart';
 import '../db/models/motivational_qoutes_model.dart';
 
@@ -20,14 +21,19 @@ class QuoteProvider with ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      final snapshot = await FirebaseFirestore.instance.collection('motivational_quotes').get();
-      _quotes = snapshot.docs.map((doc) => MotivationalQoute(
-            id: doc['id'],
-            quote: doc['quote'],
-            author: doc['author'],
-            backgroundImage: doc['backgroundImage'],
-            isFavorite: doc['isFavorite'],
-          )).toList();
+      // Firebase functionality removed - implement with Supabase or other backend
+      print('Firebase Firestore removed - fetchQuotes method needs reimplementation');
+      // final snapshot = await FirebaseFirestore.instance.collection('motivational_quotes').get();
+      // _quotes = snapshot.docs.map((doc) => MotivationalQoute(
+      //       id: doc['id'],
+      //       quote: doc['quote'],
+      //       author: doc['author'],
+      //       backgroundImage: doc['backgroundImage'],
+      //       isFavorite: doc['isFavorite'],
+      //     )).toList();
+      
+      // For now, initialize with empty list
+      _quotes = [];
       
     } finally {
       _isLoading = false;

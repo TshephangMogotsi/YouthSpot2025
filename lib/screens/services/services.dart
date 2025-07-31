@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:youthspot/db/models/service_model.dart';
 import 'package:youthspot/services/service_service.dart';
-import 'package:youthspot/global_widgets/primary_scaffold.dart';
-import 'package:youthspot/screens/services/widgets/service_list_item.dart';
+import '../../config/constants.dart';
+import '../../config/theme_manager.dart';
+import '../../services/services_locator.dart';
+import '../../global_widgets/custom_app_bar.dart';
+import '../../global_widgets/primary_padding.dart';
+import 'widgets/directory_tile.dart';
+import 'loading_shimmer.dart';
 
 class ServicesScreen extends StatefulWidget {
   const ServicesScreen({super.key});
@@ -38,22 +44,62 @@ class _ServicesScreenState extends State<ServicesScreen> {
       setState(() {
         _isLoading = false;
       });
+      // You could show an error snackbar here if needed
+      print('Error fetching services: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return PrimaryScaffold(
-      isHomePage: true,
-      child: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _services.length,
-              itemBuilder: (context, index) {
-                final service = _services[index];
-                return ServiceListItem(service: service);
-              },
+    final themeManager = getIt<ThemeManager>();
+
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, snapshot) {
+        return Scaffold(
+          backgroundColor: theme == ThemeMode.dark
+              ? darkmodeLight
+              : backgroundColorLight,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(60),
+            child: CustomAppBar(
+              context: context,
+              isHomePage: true,
             ),
+          ),
+          body: _isLoading
+              ? const LoadingShimmer()  // Show shimmer while loading
+              : ListView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: _services.length,
+                  itemBuilder: (context, index) {
+                    final service = _services[index];
+                    return PrimaryPadding(
+                      child: CustomDirectoryTile(
+                        title: service.name,
+                        trailing: Icons.expand_more,
+                        imageURL: service.imageUrl ?? '',  // Use imageUrl from Service model
+                        borderVisible: false,
+                        location: service.location ?? 'Location not available',
+                        latitude: service.latitude ?? 0.0,
+                        longitude: service.longitude ?? 0.0,
+                        contact: service.contacts?.isNotEmpty == true ? service.contacts!.first : 'No contact available',
+                        onCall: () {
+                          if (service.contacts?.isNotEmpty == true) {
+                            final contact = service.contacts!.first;
+                            // Basic phone number validation
+                            if (contact.isNotEmpty && contact != 'No contact available') {
+                              Uri dialNumber = Uri(scheme: 'tel', path: contact);
+                              launchUrl(dialNumber);
+                            }
+                          }
+                        },
+                      ),
+                    );
+                  },
+                ),
+        );
+      },
     );
   }
 }

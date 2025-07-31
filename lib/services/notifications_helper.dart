@@ -6,46 +6,50 @@ import '../main.dart';
 
 class NotificationService {
   static Future<void> initializeNotification() async {
-    await AwesomeNotifications().initialize(
-      null,
-      [
-        NotificationChannel(
-          channelGroupKey: 'high_importance_channel',
-          channelKey: 'high_importance_channel',
-          channelName: 'Basic notifications',
-          channelDescription: 'Notification channel for basic tests',
-          ledColor: Colors.white,
-          importance: NotificationImportance.Max,
-          channelShowBadge: true,
-          onlyAlertOnce: true,
-          playSound: true,
-          criticalAlerts: true,
-          icon: 'resource://drawable/notifications_icon_android',
-        )
-      ],
-      channelGroups: [
-        NotificationChannelGroup(
-          channelGroupKey: 'high_importance_channel_group',
-          channelGroupName: 'Group 1',
-        )
-      ],
-      debug: true,
-    );
+    try {
+      await AwesomeNotifications().initialize(
+        null,
+        [
+          NotificationChannel(
+            channelGroupKey: 'high_importance_channel_group',
+            channelKey: 'high_importance_channel',
+            channelName: 'Basic notifications',
+            channelDescription: 'Notification channel for basic tests',
+            ledColor: Colors.white,
+            importance: NotificationImportance.Max,
+            channelShowBadge: true,
+            onlyAlertOnce: true,
+            playSound: true,
+            criticalAlerts: true,
+            icon: 'resource://drawable/notifications_icon_android',
+          )
+        ],
+        channelGroups: [
+          NotificationChannelGroup(
+            channelGroupKey: 'high_importance_channel_group',
+            channelGroupName: 'Group 1',
+          )
+        ],
+        debug: true,
+      );
 
-    await AwesomeNotifications().isNotificationAllowed().then(
-      (isAllowed) async {
-        if (!isAllowed) {
-          await AwesomeNotifications().requestPermissionToSendNotifications();
-        }
-      },
-    );
+      await AwesomeNotifications().isNotificationAllowed().then(
+        (isAllowed) async {
+          if (!isAllowed) {
+            await AwesomeNotifications().requestPermissionToSendNotifications();
+          }
+        },
+      );
 
-    await AwesomeNotifications().setListeners(
-      onActionReceivedMethod: onActionReceivedMethod,
-      onNotificationCreatedMethod: onNotificationCreatedMethod,
-      onNotificationDisplayedMethod: onNotificationDisplayedMethod,
-      onDismissActionReceivedMethod: onDismissActionReceivedMethod,
-    );
+      await AwesomeNotifications().setListeners(
+        onActionReceivedMethod: onActionReceivedMethod,
+        onNotificationCreatedMethod: onNotificationCreatedMethod,
+        onNotificationDisplayedMethod: onNotificationDisplayedMethod,
+        onDismissActionReceivedMethod: onDismissActionReceivedMethod,
+      );
+    } catch (e) {
+      debugPrint('Error initializing notifications: $e');
+    }
   }
 
   static Future<void> onNotificationCreatedMethod(
@@ -144,17 +148,22 @@ class NotificationService {
     required final DateTime scheduledDate,
     required int notificationId,
   }) async {
-    await AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id: notificationId, // Ensure notificationId is used
-        channelKey: 'high_importance_channel',
-        title: title,
-        body: body,
-        notificationLayout: NotificationLayout.Default,
-        icon: 'resource://drawable/notifications_icon_android',
-      ),
-      schedule: NotificationCalendar.fromDate(date: scheduledDate),
-    );
+    try {
+      await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: notificationId, // Ensure notificationId is used
+          channelKey: 'high_importance_channel',
+          title: title,
+          body: body,
+          notificationLayout: NotificationLayout.Default,
+          icon: 'resource://drawable/notifications_icon_android',
+        ),
+        schedule: NotificationCalendar.fromDate(date: scheduledDate),
+      );
+    } catch (e) {
+      debugPrint('Error scheduling notification: $e');
+      rethrow;
+    }
   }
 
   // Cancel a specific notification by its ID

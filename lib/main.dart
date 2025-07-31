@@ -35,7 +35,7 @@ void main() async {
 final supabase = Supabase.instance.client;
 
 class MyApp extends StatelessWidget {
-  static var navigatorKey;
+  static final navigatorKey = GlobalKey<NavigatorState>();
 
   const MyApp({super.key});
 
@@ -84,6 +84,7 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        navigatorKey: navigatorKey,
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(

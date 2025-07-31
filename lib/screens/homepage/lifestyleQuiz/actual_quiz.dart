@@ -111,23 +111,6 @@ class _ActualQuizState extends State<ActualQuiz> {
             const Height20(),
             Row(
               children: [
-                Visibility(
-                  visible: quizLogic.isNotFirstQuestion(),
-                  child: Expanded(
-                    child: PrimaryButton(
-                      label: 'Back',
-                      customBackgroundColor: Colors.grey,
-                      onTap: () {
-                        setState(() {
-                          // quizLogic.previousQuestion();
-                        });
-                      },
-                    ),
-                  ),
-                ),
-                Visibility(
-                    visible: quizLogic.isNotFirstQuestion(),
-                    child: const Width20()),
                 Expanded(
                   child: PrimaryButton(
                     label: 'Next',

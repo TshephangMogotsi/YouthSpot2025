@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../config/constants.dart';
 import '../../../global_widgets/primary_button.dart';
 import '../../../global_widgets/primary_padding.dart';
 import 'actual_quiz.dart';
+import 'quiz_logic.dart';
 
 class LifestyleQuiz extends StatefulWidget {
   const LifestyleQuiz({super.key});
@@ -127,6 +129,8 @@ class _LifestyleQuizState extends State<LifestyleQuiz> {
                         customBackgroundColor: const Color(0xFF333E80),
                         label: 'Get Started',
                         onTap: () {
+                          // Reset quiz state before starting
+                          Provider.of<QuizLogic>(context, listen: false).resetQuiz();
                           Navigator.push(
                             context,
                             MaterialPageRoute(

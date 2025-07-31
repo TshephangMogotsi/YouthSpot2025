@@ -1,59 +1,65 @@
 import 'package:flutter/material.dart';
-import 'package:youthspot/db/models/service_model.dart';
-import 'package:youthspot/services/service_service.dart';
-import 'package:youthspot/global_widgets/primary_scaffold.dart';
-import 'package:youthspot/screens/services/widgets/service_list_item.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../providers/services_provider.dart';  // Import your ServiceProvider
+import '../../config/constants.dart';
+import '../../config/theme_manager.dart';
+import '../../services/services_locator.dart';
+import '../../global_widgets/custom_app_bar.dart';
+import '../../global_widgets/primary_padding.dart';
+import 'widgets/directory_tile.dart';
+import 'loading_shimmer.dart';  // Import your shimmer loading widget
 
-class ServicesScreen extends StatefulWidget {
-  const ServicesScreen({super.key});
-
-  @override
-  State<ServicesScreen> createState() => _ServicesScreenState();
-}
-
-class _ServicesScreenState extends State<ServicesScreen> {
-  final ServiceService _serviceService = ServiceService();
-  List<Service> _services = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchServices();
-  }
-
-  Future<void> _fetchServices() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final services = await _serviceService.fetchServices();
-      setState(() {
-        _services = services;
-        _isLoading = false;
-      });
-    } catch (e) {
-      // Handle error
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
+class Services extends StatelessWidget {
+  const Services({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return PrimaryScaffold(
-      isHomePage: true,
-      child: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _services.length,
-              itemBuilder: (context, index) {
-                final service = _services[index];
-                return ServiceListItem(service: service);
-              },
+    final themeManager = getIt<ThemeManager>();
+    final serviceProvider = Provider.of<ServiceProvider>(context);
+
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, snapshot) {
+        return Scaffold(
+          backgroundColor: theme == ThemeMode.dark
+              ? darkmodeLight
+              : backgroundColorLight,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(60),
+            child: CustomAppBar(
+              context: context,
+              isHomePage: true,
             ),
+          ),
+          body: serviceProvider.services.isEmpty
+              ? const LoadingShimmer()  // Show shimmer if no services are loaded yet
+              : ListView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: serviceProvider.services.length,
+                  itemBuilder: (context, index) {
+                    final service = serviceProvider.services[index].data() as Map<String, dynamic>;
+                    return PrimaryPadding(
+                      child: CustomDirectoryTile(
+                        title: service['name'],
+                        trailing: Icons.expand_more,
+                        imageURL: service['image'],  // Image URL from Firestore
+                        borderVisible: false,
+                        location: service['location'],
+                        latitude: double.parse(service['lat'].toString()),
+                        longitude: double.parse(service['lng'].toString()),
+                        contact: service['contacts'],
+                        onCall: () {
+                          Uri dialNumber =
+                              Uri(scheme: 'tel', path: service['contacts']);
+                          launchUrl(dialNumber);
+                        },
+                      ),
+                    );
+                  },
+                ),
+        );
+      },
     );
   }
 }

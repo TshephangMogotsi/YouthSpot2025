@@ -9,8 +9,6 @@ import '../../db/models/goal_model.dart';
 import '../global_widgets/primary_padding.dart';
 import '../providers/goal_provider.dart';
 import '../providers/medication_provider.dart';
-
-import '../providers/user_provider.dart';
 import '../services/services_locator.dart';
 import 'extras.dart';
 import 'homepage/my_spot.dart';
@@ -29,25 +27,14 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
     final goalProvider = Provider.of<GoalProvider>(context, listen: false);
     final medicationProvider =
         Provider.of<MedicationProvider>(context, listen: false);
 
-    userProvider.fetchUser().then((_) async {
-      if (!mounted) return; // <--- guard
-
-      if (userProvider.isUserFetched) {
-        // User fetched successfully
-        if (kDebugMode) {
-          print('User fetched successfully.');
-        }
-      } else {
-        if (kDebugMode) {
-          print('User not fetched.');
-        }
-      }
-    });
+    // User auth is now handled by AuthService - no need to fetch user here
+    if (kDebugMode) {
+      print('Auth handled by Supabase AuthService.');
+    }
 
     goalProvider.deleteInactiveGoals();
     medicationProvider.deleteInactiveMedications();

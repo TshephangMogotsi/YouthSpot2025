@@ -51,19 +51,8 @@ class _QuizResultsState extends State<QuizResults> {
                     'Quiz Results',
                     style: headingStyle,
                   ),
-                  PillButton(
-                    title: "Retake Quiz",
-                    backgroundColor: kSSIorange,
-                    onTap: () async {
-                      // await Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => const AddGoalPage(),
-                      //   ),
-                      // );
-                      // refreshMedicine();
-                    },
-                  ),
+                 
+                  
                 ],
               ),
               const Height20(),

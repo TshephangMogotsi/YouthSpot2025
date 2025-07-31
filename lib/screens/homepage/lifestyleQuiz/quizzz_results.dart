@@ -24,6 +24,7 @@ class QuizzzResults extends StatelessWidget {
     final quizLogic = Provider.of<QuizLogic>(context);
 
     return PrimaryScaffold(
+      isHomePage: true,
       child: Column(
         children: [
           PrimaryPadding(
@@ -34,20 +35,7 @@ class QuizzzResults extends StatelessWidget {
                   'Quiz Results',
                   style: headingStyle,
                 ),
-                PillButton(
-                  title: "Retake Quiz",
-                  backgroundColor: kSSIorange,
-                  onTap: () async {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => QuizResults(
-                          quizLogic: quizLogic,
-                        ),
-                      ),
-                    );
-                  },
-                ),
+               
               ],
             ),
           ),
@@ -205,6 +193,9 @@ class QuizzzResults extends StatelessWidget {
             ),
           ),
           const Height20(),
+          const Height20(),
+
+          
         ],
       ),
     );

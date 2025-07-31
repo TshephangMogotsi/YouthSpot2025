@@ -9,7 +9,6 @@ import 'models/journal_model.dart';
 import 'models/medicine_model.dart';
 import 'models/mood_model.dart';
 import 'models/doses_model.dart';
-import '../models/quotes_model.dart';
 
 class SSIDatabase {
   static final SSIDatabase instance = SSIDatabase._init();
@@ -30,7 +29,7 @@ class SSIDatabase {
     final path = join(dbPath, filePath);
 
     return await openDatabase(path,
-        version: 2, onCreate: _createDB, onUpgrade: _onUpgrade);
+        version: 3, onCreate: _createDB, onUpgrade: _onUpgrade);
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -45,30 +44,7 @@ class SSIDatabase {
         ALTER TABLE $tableMedicine ADD COLUMN ${MedicineFields.notificationIds} TEXT;
       ''');
     }
-    if (oldVersion < 2) {
-      // Create favorite_quotes table if upgrading from version 1
-      const idType2 = 'INTEGER PRIMARY KEY';
-      const textType = 'TEXT NOT NULL';
-      const integerType = 'INTEGER NOT NULL';
-      
-      await db.execute('''
-      CREATE TABLE IF NOT EXISTS $tableFavoriteQuotes (
-          ${QuotesModelFields.id} $idType2, 
-          ${QuotesModelFields.quote} $textType,
-          ${QuotesModelFields.author} $textType,
-          ${QuotesModelFields.isFavorite} $integerType,
-          ${QuotesModelFields.backgroundImageUrl} $textType
-           )
-      ''');
-    }
-    if (oldVersion < 10) {
-      await db.execute('''
-        ALTER TABLE $tableGoal ADD COLUMN ${GoalFields.notificationIds} TEXT;
-      ''');
-      await db.execute('''
-        ALTER TABLE $tableGoal ADD COLUMN ${GoalFields.totalReminders} INTEGER;
-      ''');
-    }
+    // Note: Removed duplicate column additions that were already in _createDB
   }
 
   Future _createDB(Database db, int version) async {
@@ -97,15 +73,6 @@ class SSIDatabase {
         ${DoseFields.medicineId} $integerType,
         ${DoseFields.time} $textType,
         FOREIGN KEY (${DoseFields.medicineId}) REFERENCES $tableMedicine(${MedicineFields.id})
-         )
-    ''');
-    await db.execute('''
-    CREATE TABLE $tableFavoriteQuotes (
-        ${QuotesModelFields.id} $idType2, 
-        ${QuotesModelFields.quote} $textType,
-        ${QuotesModelFields.author} $textType,
-        ${QuotesModelFields.isFavorite} $integerType,
-        ${QuotesModelFields.backgroundImageUrl} $textType
          )
     ''');
     await db.execute('''
@@ -299,40 +266,6 @@ class SSIDatabase {
     return count ?? 0;
   }
 
-  //----------------------------QOUTE FUNCTIONS---------------------------------
-
-  //insert favorite qoute
-  Future<void> insertFavoriteQoute(QuotesModel qoute) async {
-    final db = await instance.database;
-    await db.insert(tableFavoriteQuotes, qoute.toJson());
-  }
-
-  //read all favorite qoutes
-  Future<List<QuotesModel>> readAllFavoriteQoutes() async {
-    final db = await instance.database;
-    final result = await db.query(tableFavoriteQuotes);
-    return result.map((json) => QuotesModel.fromJson(json)).toList();
-  }
-
-  //check if id is in favorite qoutes
-  Future<bool> isFavoriteQoute(int id) async {
-    final db = await instance.database;
-    final result = await db.query(tableFavoriteQuotes,
-        where: '${QuotesModelFields.id} = ?', whereArgs: [id]);
-    return result.isNotEmpty;
-  }
-
-  // Delete a favorite quote from the database
-  Future<int> deleteFavoriteQoute(int id) async {
-    final db = await instance.database;
-
-    return await db.delete(
-      tableFavoriteQuotes,
-      where: '${QuotesModelFields.id} = ?',
-      whereArgs: [id],
-    );
-  }
-
   //----------------------------MOOD FUNCTIONS----------------------------------
 
   //add mood
@@ -507,7 +440,6 @@ class SSIDatabase {
     final batch = db.batch();
 
     batch.delete(tableMedicine);
-    batch.delete(tableFavoriteQuotes);
     batch.delete(tableMood);
     batch.delete(tableDose);
     batch.delete(tableGoal);

@@ -16,9 +16,9 @@ class Favorites extends StatefulWidget {
 }
 
 class _FavoritesState extends State<Favorites> {
-  List<int> removingIndexes = [];
+  List<String> removingIndexes = [];
 
-  void toggleFavorite(int id) async {
+  void toggleFavorite(String id) async {
     setState(() {
       removingIndexes.add(id); // Mark the item as being removed
     });

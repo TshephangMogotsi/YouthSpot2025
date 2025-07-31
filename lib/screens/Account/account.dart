@@ -9,7 +9,9 @@ import 'package:youthspot/screens/Account/AccountSettings/account_settings.dart'
 import 'package:flutter/material.dart';
 import 'package:youthspot/screens/Account/profile.dart';
 
+import '../../description.dart';
 import '../../global_widgets/primary_container.dart';
+import '../../terms_and_privacy.dart';
 
 class Account extends StatelessWidget {
   const Account({super.key});
@@ -51,14 +53,28 @@ class Account extends StatelessWidget {
               },
             ),
             const Height10(),
-            const SettingsListTile(
+             SettingsListTile(
               title: 'Terms and Conditions',
               assetImage: 'assets/icon/Settings/TermsAndConditionsIcon.png',
+              ontap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const TermsPrivacyScreen(),
+                  ),
+                );
+              },
             ),
             const Height10(),
-            const SettingsListTile(
+             SettingsListTile(
               title: 'Description',
               assetImage: 'assets/icon/Settings/DescriptionIcon.png',
+              ontap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const DescriptionPage(),
+                  ),
+                );
+              },
             ),
             const Height10(),
             const ThemeModeListTile(title: 'Day Mode', initialValue: false),

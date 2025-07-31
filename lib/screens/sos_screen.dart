@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/auth/auth_service.dart';
+import 'package:youthspot/global_widgets/primary_button.dart';
+import 'package:youthspot/global_widgets/primary_container.dart';
+import 'package:youthspot/global_widgets/primary_scaffold.dart';
 
 class SOSScreen extends StatefulWidget {
   const SOSScreen({super.key});
@@ -28,7 +31,8 @@ class _SOSScreenState extends State<SOSScreen> {
       if (user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Could not identify user. Please log in again.')),
+            content: Text('Could not identify user. Please log in again.'),
+          ),
         );
         setState(() {
           _isLoading = false;
@@ -56,9 +60,9 @@ class _SOSScreenState extends State<SOSScreen> {
         );
         Navigator.of(context).pop(); // Go back after submission
       } catch (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error submitting SOS: $error')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error submitting SOS: $error')));
       } finally {
         setState(() {
           _isLoading = false;
@@ -69,53 +73,49 @@ class _SOSScreenState extends State<SOSScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('SOS'),
-        backgroundColor: kSSIorange,
-      ),
-      body: Padding(
+    return PrimaryScaffold(
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Text(
-                'Describe your situation below. Your name and contact number will be sent to our support team automatically.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _messageController,
-                decoration: const InputDecoration(
-                  labelText: 'How are you in distress?',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 5,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please describe your situation';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 40),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: _submitSOS,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 50, vertical: 20),
-                        textStyle: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+          child: Center(
+            child: PrimaryContainer(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const Text(
+                    'Describe your situation below. Your name and contact number will be sent to our support team automatically.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _messageController,
+                    decoration:  InputDecoration(
+                      fillColor: Colors.grey[200],
+                      filled: true,
+                      hintText: 'How are you in distress?',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text('SEND SOS'),
+
                     ),
-            ],
+                    maxLines: 5,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please describe your situation';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 40),
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : PrimaryButton(label: 'Send SOS', onTap: _submitSOS),
+                ],
+              ),
+            ),
           ),
         ),
       ),

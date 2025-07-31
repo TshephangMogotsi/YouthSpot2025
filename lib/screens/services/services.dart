@@ -1,22 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../providers/services_provider.dart';  // Import your ServiceProvider
+import 'package:youthspot/db/models/service_model.dart';
+import 'package:youthspot/services/service_service.dart';
 import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
 import '../../services/services_locator.dart';
 import '../../global_widgets/custom_app_bar.dart';
 import '../../global_widgets/primary_padding.dart';
 import 'widgets/directory_tile.dart';
-import 'loading_shimmer.dart';  // Import your shimmer loading widget
+import 'loading_shimmer.dart';
 
-class Services extends StatelessWidget {
-  const Services({super.key});
+class ServicesScreen extends StatefulWidget {
+  const ServicesScreen({super.key});
+
+  @override
+  State<ServicesScreen> createState() => _ServicesScreenState();
+}
+
+class _ServicesScreenState extends State<ServicesScreen> {
+  final ServiceService _serviceService = ServiceService();
+  List<Service> _services = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchServices();
+  }
+
+  Future<void> _fetchServices() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final services = await _serviceService.fetchServices();
+      setState(() {
+        _services = services;
+        _isLoading = false;
+      });
+    } catch (e) {
+      // Handle error
+      setState(() {
+        _isLoading = false;
+      });
+      // You could show an error snackbar here if needed
+      print('Error fetching services: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final themeManager = getIt<ThemeManager>();
-    final serviceProvider = Provider.of<ServiceProvider>(context);
 
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeManager.themeMode,
@@ -32,27 +67,28 @@ class Services extends StatelessWidget {
               isHomePage: true,
             ),
           ),
-          body: serviceProvider.services.isEmpty
-              ? const LoadingShimmer()  // Show shimmer if no services are loaded yet
+          body: _isLoading
+              ? const LoadingShimmer()  // Show shimmer while loading
               : ListView.builder(
                   physics: const BouncingScrollPhysics(),
-                  itemCount: serviceProvider.services.length,
+                  itemCount: _services.length,
                   itemBuilder: (context, index) {
-                    final service = serviceProvider.services[index].data() as Map<String, dynamic>;
+                    final service = _services[index];
                     return PrimaryPadding(
                       child: CustomDirectoryTile(
-                        title: service['name'],
+                        title: service.name,
                         trailing: Icons.expand_more,
-                        imageURL: service['image'],  // Image URL from Firestore
+                        imageURL: service.imageUrl ?? '',  // Use imageUrl from Service model
                         borderVisible: false,
-                        location: service['location'],
-                        latitude: double.parse(service['lat'].toString()),
-                        longitude: double.parse(service['lng'].toString()),
-                        contact: service['contacts'],
+                        location: service.location ?? 'No location provided',
+                        latitude: service.latitude ?? 0.0,
+                        longitude: service.longitude ?? 0.0,
+                        contact: service.contacts?.isNotEmpty == true ? service.contacts!.first : 'No contact provided',
                         onCall: () {
-                          Uri dialNumber =
-                              Uri(scheme: 'tel', path: service['contacts']);
-                          launchUrl(dialNumber);
+                          if (service.contacts?.isNotEmpty == true) {
+                            Uri dialNumber = Uri(scheme: 'tel', path: service.contacts!.first);
+                            launchUrl(dialNumber);
+                          }
                         },
                       ),
                     );

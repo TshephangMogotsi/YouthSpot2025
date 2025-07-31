@@ -158,38 +158,8 @@ class MySpot extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: Consumer<QuoteProvider>(
-                  builder: (context, quoteProvider, child) {
-                    final quotesCount = quoteProvider.quotes.length;
-                    return MySpotCard(
-                      notifications: quotesCount > 0 ? quotesCount : null,
-                      notificationsBgColor: const Color(0xFF6B46C1),
-                      title: "Motivation",
-                      iconURL: "assets/icons/motivational_quotes.svg",
-                      iconPadding: 8,
-                      iconBgColor: const Color(0xFF6B46C1),
-                      imageURL: 'assets/Backgrounds/Goals_bg.png',
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const MotivationalQuotes(),
-                          ),
-                        );
-                      },
-                      color: const Color(0xFFE0E7FF),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 10),
-              // Empty space to balance the layout
-              Expanded(child: Container()),
-            ],
-          ),
+          
+          
           const SizedBox(height: 20,),
         ],
       ),

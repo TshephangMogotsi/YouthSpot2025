@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Firebase import removed
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 import '../user_provider.dart';
@@ -35,27 +36,37 @@ class ArticlePointsProvider with ChangeNotifier {
   Future<void> initializeArticlePoints() async {
     if (userProvider.user != null) {
       try {
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(userProvider.user!.uid)
-            .snapshots()
-            .listen((DocumentSnapshot<Map<String, dynamic>> snapshot) {
-          if (snapshot.exists) {
-            Map<String, dynamic>? userData = snapshot.data();
-
-            _articlePoints = userData?['articlePoints'] ?? 0;
-            _milestonePoints = userData?['milestonePoints'] ?? 0;
-            _readArticleIds.addAll(List<String>.from(
-                userData?['readArticleIds'] ?? []));
-
-            _isInitialized = true; // Set flag after initialization
-            notifyListeners();
-          } else {
-            if (kDebugMode) {
-              print('Snapshot does not exist!');
-            }
-          }
-        });
+        // Firebase functionality removed - implement with Supabase or other backend
+        print('Firebase Firestore removed - initializeArticlePoints method needs reimplementation');
+        // FirebaseFirestore.instance
+        //     .collection('users')
+        //     .doc(userProvider.user!.uid)
+        //     .snapshots()
+        //     .listen((DocumentSnapshot<Map<String, dynamic>> snapshot) {
+        //   if (snapshot.exists) {
+        //     Map<String, dynamic>? userData = snapshot.data();
+        //
+        //     _articlePoints = userData?['articlePoints'] ?? 0;
+        //     _milestonePoints = userData?['milestonePoints'] ?? 0;
+        //     _readArticleIds.addAll(List<String>.from(
+        //         userData?['readArticleIds'] ?? []));
+        //
+        //     _isInitialized = true; // Set flag after initialization
+        //     notifyListeners();
+        //   } else {
+        //     if (kDebugMode) {
+        //       print('Snapshot does not exist!');
+        //     }
+        //   }
+        // });
+        
+        // Initialize with default values for now
+        _articlePoints = 0;
+        _milestonePoints = 0;
+        _readArticleIds.clear();
+        
+        _isInitialized = true;
+        notifyListeners();
       } catch (e) {
         if (kDebugMode) {
           print('Error initializing article points: $e');
@@ -118,15 +129,17 @@ class ArticlePointsProvider with ChangeNotifier {
 
   // Save updated article points and read article IDs to Firebase
   Future<void> saveArticlePointsToFirebase() async {
-    if (userProvider.user != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userProvider.user!.uid)
-          .update({
-        'articlePoints': _articlePoints,
-        'milestonePoints': _milestonePoints,
-        'readArticleIds': _readArticleIds, // Store the list of read article IDs
-      });
-    }
+    // Firebase functionality removed - implement with Supabase or other backend
+    print('Firebase Firestore removed - saveArticlePointsToFirebase method needs reimplementation');
+    // if (userProvider.user != null) {
+    //   await FirebaseFirestore.instance
+    //       .collection('users')
+    //       .doc(userProvider.user!.uid)
+    //       .update({
+    //     'articlePoints': _articlePoints,
+    //     'milestonePoints': _milestonePoints,
+    //     'readArticleIds': _readArticleIds, // Store the list of read article IDs
+    //   });
+    // }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Firebase import removed
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'user_provider.dart';
 
@@ -43,30 +44,44 @@ class PointsProvider with ChangeNotifier {
   Future<void> initializePoints() async {
     if (userProvider.user != null) {
       try {
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(userProvider.user!.uid)
-            .snapshots()
-            .listen((DocumentSnapshot<Map<String, dynamic>> snapshot) {
-          if (snapshot.exists) {
-            Map<String, dynamic>? userData = snapshot.data();
-
-            _totalPoints = userData?['points'] ?? 0;
-            _moodPoints = userData?['moodPoints'] ?? 0;
-            _chatroomPoints = userData?['chatroomPoints'] ?? 0;
-            _startedChatroomPoints = userData?['startedChatroomPoints'] ?? 0;
-            _journalPoints = userData?['journalPoints'] ?? 0;
-            _medicationPoints = userData?['medicationPoints'] ?? 0;
-            _loginPoints = userData?['loginPoints'] ?? 0;
-
-            hasInitialized = true; // Set initialization flag
-            notifyListeners(); // Notify UI that points have been updated
-          } else {
-            if (kDebugMode) {
-              print('Snapshot does not exist!');
-            }
-          }
-        });
+        // Firebase functionality removed - implement with Supabase or other backend
+        print('Firebase Firestore removed - initializePoints method needs reimplementation');
+        // FirebaseFirestore.instance
+        //     .collection('users')
+        //     .doc(userProvider.user!.uid)
+        //     .snapshots()
+        //     .listen((DocumentSnapshot<Map<String, dynamic>> snapshot) {
+        //   if (snapshot.exists) {
+        //     Map<String, dynamic>? userData = snapshot.data();
+        //
+        //     _totalPoints = userData?['points'] ?? 0;
+        //     _moodPoints = userData?['moodPoints'] ?? 0;
+        //     _chatroomPoints = userData?['chatroomPoints'] ?? 0;
+        //     _startedChatroomPoints = userData?['startedChatroomPoints'] ?? 0;
+        //     _journalPoints = userData?['journalPoints'] ?? 0;
+        //     _medicationPoints = userData?['medicationPoints'] ?? 0;
+        //     _loginPoints = userData?['loginPoints'] ?? 0;
+        //
+        //     hasInitialized = true; // Set initialization flag
+        //     notifyListeners(); // Notify UI that points have been updated
+        //   } else {
+        //     if (kDebugMode) {
+        //       print('Snapshot does not exist!');
+        //     }
+        //   }
+        // });
+        
+        // Initialize with default values for now
+        _totalPoints = 0;
+        _moodPoints = 0;
+        _chatroomPoints = 0;
+        _startedChatroomPoints = 0;
+        _journalPoints = 0;
+        _medicationPoints = 0;
+        _loginPoints = 0;
+        
+        hasInitialized = true;
+        notifyListeners();
       } catch (e) {
         if (kDebugMode) {
           print('Error initializing points: $e');
@@ -134,19 +149,21 @@ class PointsProvider with ChangeNotifier {
 
   // Save updated points to Firebase
   Future<void> savePointsToFirebase() async {
-    if (userProvider.user != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userProvider.user!.uid)
-          .update({
-        'points': _totalPoints,
-        'moodPoints': _moodPoints,
-        'chatroomPoints': _chatroomPoints,
-        'startedChatroomPoints': _startedChatroomPoints,
-        'journalPoints': _journalPoints,
-        'medicationPoints': _medicationPoints,
-        'loginPoints': _loginPoints,
-      });
-    }
+    // Firebase functionality removed - implement with Supabase or other backend
+    print('Firebase Firestore removed - savePointsToFirebase method needs reimplementation');
+    // if (userProvider.user != null) {
+    //   await FirebaseFirestore.instance
+    //       .collection('users')
+    //       .doc(userProvider.user!.uid)
+    //       .update({
+    //     'points': _totalPoints,
+    //     'moodPoints': _moodPoints,
+    //     'chatroomPoints': _chatroomPoints,
+    //     'startedChatroomPoints': _startedChatroomPoints,
+    //     'journalPoints': _journalPoints,
+    //     'medicationPoints': _medicationPoints,
+    //     'loginPoints': _loginPoints,
+    //   });
+    // }
   }
 }

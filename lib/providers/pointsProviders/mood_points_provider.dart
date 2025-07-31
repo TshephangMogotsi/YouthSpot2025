@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Firebase import removed
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 import '../user_provider.dart';
@@ -44,7 +45,7 @@ class MoodPointsProvider with ChangeNotifier {
   Future<void> initializeMoodPoints({bool useFirebase = true}) async {
     if (userProvider.user != null && useFirebase) {
       try {
-        FirebaseFirestore.instance
+        // FirebaseFirestore.instance - REMOVED
             .collection('users')
             .doc(userProvider.user!.uid)
             .snapshots()
@@ -133,7 +134,7 @@ class MoodPointsProvider with ChangeNotifier {
   // Save updated mood points, milestone points, last recorded date, and streak to Firebase
   Future<void> _saveMoodPointsToFirebase() async {
     if (userProvider.user != null) {
-      await FirebaseFirestore.instance
+      await // FirebaseFirestore.instance - REMOVED
           .collection('users')
           .doc(userProvider.user!.uid)
           .update({

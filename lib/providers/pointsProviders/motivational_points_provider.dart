@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Firebase import removed
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../user_provider.dart';
 
@@ -41,7 +42,7 @@ class MotivationalQuotesProvider with ChangeNotifier {
   Future<void> initializeQuotePoints() async {
     if (userProvider.user != null) {
       try {
-        FirebaseFirestore.instance
+        // FirebaseFirestore.instance - REMOVED
             .collection('users')
             .doc(userProvider.user!.uid)
             .snapshots()
@@ -159,7 +160,7 @@ class MotivationalQuotesProvider with ChangeNotifier {
   // Save updated quote points and milestone info to Firebase
   Future<void> saveQuotePointsToFirebase() async {
     if (userProvider.user != null) {
-      await FirebaseFirestore.instance
+      await // FirebaseFirestore.instance - REMOVED
           .collection('users')
           .doc(userProvider.user!.uid)
           .update({

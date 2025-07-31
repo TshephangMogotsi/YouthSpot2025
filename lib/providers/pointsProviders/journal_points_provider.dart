@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Firebase import removed
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../user_provider.dart';
 
@@ -23,7 +24,7 @@ class JournalPointsProvider with ChangeNotifier {
   Future<void> initializeJournalPoints() async {
     if (userProvider.user != null) {
       try {
-        FirebaseFirestore.instance
+        // FirebaseFirestore.instance - REMOVED
             .collection('users')
             .doc(userProvider.user!.uid)
             .snapshots()
@@ -92,7 +93,7 @@ class JournalPointsProvider with ChangeNotifier {
   // Save journal points and milestone points to Firebase
   Future<void> saveJournalPointsToFirebase() async {
     if (userProvider.user != null) {
-      await FirebaseFirestore.instance
+      await // FirebaseFirestore.instance - REMOVED
           .collection('users')
           .doc(userProvider.user!.uid)
           .update({

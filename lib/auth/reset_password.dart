@@ -1,6 +1,5 @@
 import 'package:provider/provider.dart';
 import 'package:youthspot/auth/auth_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../config/constants.dart';
@@ -33,9 +32,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       isSubmitted = true;
       error = null;
     });
-  } on FirebaseAuthException catch (e) {
+  } catch (e) {
     setState(() {
-      error = e.message ?? 'An unknown error occurred';
+      error = e.toString();
       if (kDebugMode) print(error);
     });
   }

@@ -1,5 +1,6 @@
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Firebase import removed - using generic Map instead of DocumentSnapshot
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   final String uid;
@@ -24,9 +25,8 @@ class UserModel {
     this.rating, // Include in constructor
   });
 
-  // Factory method to create a UserModel from a Firestore document snapshot
-  factory UserModel.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
-    final data = snapshot.data()!;
+  // Factory method to create a UserModel from a data Map (was Firestore document snapshot)
+  factory UserModel.fromSnapshot(Map<String, dynamic> data) {
     return UserModel(
       uid: snapshot.id,
       fullName: data['fullName'] ?? data['fullname'] ?? 'No Name',

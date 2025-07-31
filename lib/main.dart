@@ -1,9 +1,7 @@
 import 'package:youthspot/auth/auth_layout.dart';
 import 'package:youthspot/auth/auth_service.dart';
-import 'package:youthspot/firebase_options.dart';
 import 'package:youthspot/services/notifications_helper.dart';
 import 'package:youthspot/services/services_locator.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +30,6 @@ void main() async {
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await Supabase.initialize(
     url: "https://xcznelduagrrfzwkcrrs.supabase.co",
     anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhjem5lbGR1YWdycmZ6d2tjcnJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3ODkxMjAsImV4cCI6MjA2NTM2NTEyMH0.Rmp0pnQEc7RRW80oU-MI_OwnEzwJl0v0niyZHIcu8Qw",

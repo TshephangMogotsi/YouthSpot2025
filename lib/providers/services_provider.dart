@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Firebase import removed
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ServiceProvider with ChangeNotifier {
-  List<DocumentSnapshot> _services = [];
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  List<dynamic> _services = []; // Changed from DocumentSnapshot to dynamic
+  // final FirebaseFirestore firestore = FirebaseFirestore.instance; // Firebase removed
 
-  List<DocumentSnapshot> get services => _services;
+  List<dynamic> get services => _services;
 
   ServiceProvider() {
     _fetchServices();
   }
 
   void _fetchServices() {
-    firestore.collection('clinicalServices').snapshots().listen((snapshot) {
-      _services = snapshot.docs;
-      notifyListeners();
-    });
+    // Firebase functionality removed - implement with Supabase or other backend
+    print('Firebase Firestore removed - _fetchServices method needs reimplementation');
+    // firestore.collection('clinicalServices').snapshots().listen((snapshot) {
+    //   _services = snapshot.docs;
+    //   notifyListeners();
+    // });
   }
 
   Future<bool> loadImages() async {

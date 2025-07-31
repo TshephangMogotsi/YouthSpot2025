@@ -31,7 +31,6 @@ class AuthService extends ChangeNotifier {
       }
     }
 
-    notifyListeners();
     return res;
   }
 
@@ -56,13 +55,11 @@ class AuthService extends ChangeNotifier {
         'mobile_number': mobileNumber,
       });
     }
-    notifyListeners();
     return res;
   }
 
   Future<void> signOut() async {
     await supabaseAuth.signOut();
-    notifyListeners();
   }
 
   Future<void> resetPassword({required String email}) async {
@@ -71,7 +68,6 @@ class AuthService extends ChangeNotifier {
 
   Future<void> updateUsername({required String username}) async {
     await supabaseAuth.updateUser(UserAttributes(data: {'username': username}));
-    notifyListeners();
   }
 
   Future<void> deleteAccount({
@@ -80,7 +76,6 @@ class AuthService extends ChangeNotifier {
   }) async {
     await Supabase.instance.client.rpc('delete_user');
     await supabaseAuth.signOut();
-    notifyListeners();
   }
 
   Future<void> reauthenticateUser({required String currentPassword}) async {
@@ -96,6 +91,5 @@ class AuthService extends ChangeNotifier {
 
   Future<void> updatePassword({required String newPassword}) async {
     await supabaseAuth.updateUser(UserAttributes(password: newPassword));
-    notifyListeners();
   }
 }

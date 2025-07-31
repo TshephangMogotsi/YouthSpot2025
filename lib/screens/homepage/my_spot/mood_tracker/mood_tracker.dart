@@ -249,20 +249,43 @@ class _MoodTrackerState extends State<MoodTracker> {
     required String description,
     required String date,
   }) async {
-    final moodObject = Mood(
-      mood: mood,
-      description: description,
-      date: date,
-    );
+    try {
+      final moodObject = Mood(
+        mood: mood,
+        description: description,
+        date: date,
+      );
 
-    // Add the mood entry to the database
-    await SSIDatabase.instance.addMood(moodObject);
+      // Add the mood entry to the database
+      await SSIDatabase.instance.addMood(moodObject);
 
-    // Trigger a notification after mood is added
-    await NotificationService.sendImmediateNotification(
-      notificationId: DateTime.now().millisecondsSinceEpoch.remainder(100000),
-      title: 'Mood Recorded!',
-      body: 'Your mood for today ($mood) has been recorded.',
-    );
+      // Trigger a notification after mood is added (non-blocking)
+      try {
+        await NotificationService.sendImmediateNotification(
+          notificationId: DateTime.now().millisecondsSinceEpoch.remainder(100000),
+          title: 'Mood Recorded!',
+          body: 'Your mood for today ($mood) has been recorded.',
+        );
+      } catch (e) {
+        // Log notification error but don't prevent mood recording success
+        if (kDebugMode) {
+          print('Notification failed: $e');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error adding mood: $e');
+      }
+      // Show error to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to record mood: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      rethrow;
+    }
   }
 }

@@ -111,7 +111,7 @@ class NotificationService {
         category: category,
         payload: payload,
         bigPicture: bigPicture,
-        icon: 'resource://drawable/notifications_icon_android',
+        icon: 'resource://drawable/icon_notifications',
       ),
       actionButtons: actionButtons,
       schedule: scheduled
@@ -137,7 +137,7 @@ class NotificationService {
         title: title,
         body: body,
         notificationLayout: NotificationLayout.Default,
-        icon: 'resource://drawable/notifications_icon_android',
+        icon: 'resource://drawable/icon_notifications',
       ),
     );
   }
@@ -156,7 +156,7 @@ class NotificationService {
           title: title,
           body: body,
           notificationLayout: NotificationLayout.Default,
-          icon: 'resource://drawable/notifications_icon_android',
+          icon: 'resource://drawable/icon_notifications',
         ),
         schedule: NotificationCalendar.fromDate(date: scheduledDate),
       );

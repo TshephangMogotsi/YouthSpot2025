@@ -9,7 +9,7 @@ class SupabaseQuotesService {
       final response = await _supabase
           .from('motivational_quotes')
           .select('*')
-          .order('created', ascending: true);
+          .order('created_at', ascending: true);
 
       return (response as List)
           .map((quote) => MotivationalQuote.fromSupabase(quote))
@@ -19,16 +19,18 @@ class SupabaseQuotesService {
     }
   }
 
-  Future<List<MotivationalQuote>> fetchFavoriteQuotes(Set<String> favoriteIds) async {
+  Future<List<MotivationalQuote>> fetchFavoriteQuotes(
+    Set<String> favoriteIds,
+  ) async {
     if (favoriteIds.isEmpty) return [];
-    
+
     try {
       // Convert set to list for Supabase IN filter
       final idsList = favoriteIds.toList();
       final response = await _supabase
           .from('motivational_quotes')
           .select('*')
-          .in_('id', idsList);
+          .filter('id', 'in', idsList);
 
       return (response as List)
           .map((quote) => MotivationalQuote.fromSupabase(quote))

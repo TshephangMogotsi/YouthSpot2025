@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:youthspot/config/constants.dart';
+
+import '../../config/constants.dart';
 
 class InfoTile extends StatelessWidget {
   const InfoTile({
@@ -24,6 +25,7 @@ class InfoTile extends StatelessWidget {
             radius: 30,
             backgroundColor: Colors.white,
             child: CachedNetworkImage(
+              
               height: 30,
               width: 30,
               imageUrl: imageURL,

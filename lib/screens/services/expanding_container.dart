@@ -110,7 +110,7 @@ class ExpandingContainer extends StatelessWidget {
                                         latitude, longitude);
                                   }
                                 },
-                              GestureDetector(
+                              child: GestureDetector(
                                 onTap: () {
                                   if (latitude != 0.0 && longitude != 0.0) {
                                     MapsLauncher.launchCoordinates(
@@ -135,6 +135,7 @@ class ExpandingContainer extends StatelessWidget {
                                     style: const TextStyle(color: Colors.white)
                                   ),
                                 ),
+                              ),
                               ),
                             ],
                           ),

@@ -21,7 +21,7 @@ class NotificationService {
             onlyAlertOnce: true,
             playSound: true,
             criticalAlerts: true,
-            icon: 'resource://drawable/notifications_icon_android',
+            icon: 'resource://drawable/icon_notifications',
           )
         ],
         channelGroups: [

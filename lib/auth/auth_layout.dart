@@ -1,4 +1,5 @@
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 
@@ -31,7 +32,7 @@ class AuthLayout extends StatelessWidget {
               } else {
                 page = const AppLoadingPage();
               }
-            } else if (snapshot.hasData && snapshot.data?.user != null) {
+            } else if (snapshot.hasData && snapshot.data?.session?.user != null) {
               // User is authenticated via stream data
               page = const AppNavigationLayout();
             } else if (auth.currentUser != null) {

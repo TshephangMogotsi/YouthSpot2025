@@ -63,6 +63,15 @@ dependencies:
   auto_size_text: ^3.0.0
 
 dev_dependencies:
+  flutter_launcher_icons: "^0.14.4"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  adaptive_icon_foreground: "assets/icon/youthspot_foreground.png"
+  adaptive_icon_background: "#ffffff"
+
   flutter_test:
     sdk: flutter
 

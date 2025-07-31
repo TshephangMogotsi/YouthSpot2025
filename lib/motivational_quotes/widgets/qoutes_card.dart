@@ -18,7 +18,7 @@ class QoutesCard extends StatelessWidget {
     this.onTap,
   });
 
-  final int id;
+  final String id;
   final String quote;
   final String author;
   final String backgroundImage; // URL of the image

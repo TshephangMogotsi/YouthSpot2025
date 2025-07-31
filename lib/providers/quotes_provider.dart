@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import '../db/app_db.dart';
-import '../models/quotes_model.dart';
+import '../models/motivational_quote.dart';
 import '../services/supabase_quotes_service.dart';
+import '../services/favorites_service.dart';
 
 class QuoteProvider with ChangeNotifier {
-  List<QuotesModel> _quotes = [];
+  List<MotivationalQuote> _quotes = [];
   bool _isLoading = true;
   final SupabaseQuotesService _quotesService = SupabaseQuotesService();
-  Set<int> _favoriteIds = {};
+  Set<String> _favoriteIds = {};
 
-  List<QuotesModel> get quotes => _quotes;
+  List<MotivationalQuote> get quotes => _quotes;
   bool get isLoading => _isLoading;
 
   // Getter to filter favorite quotes
-  List<QuotesModel> get favoriteQuotes =>
+  List<MotivationalQuote> get favoriteQuotes =>
       _quotes.where((quote) => quote.isFavorite).toList();
 
   Future<void> fetchQuotes() async {
@@ -21,8 +21,8 @@ class QuoteProvider with ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // Load favorite IDs from local database first
-      await _loadFavoriteIds();
+      // Load favorite IDs from SharedPreferences
+      _favoriteIds = await FavoritesService.getFavoriteIds();
 
       // Fetch quotes from Supabase
       final quotesFromSupabase = await _quotesService.fetchMotivationalQuotes();
@@ -41,33 +41,24 @@ class QuoteProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _loadFavoriteIds() async {
-    try {
-      final favoriteQuotes = await SSIDatabase.instance.readAllFavoriteQoutes();
-      _favoriteIds = favoriteQuotes.map((q) => q.id).toSet();
-    } catch (e) {
-      print('Error loading favorite IDs: $e');
-      _favoriteIds = {};
-    }
-  }
-
-  void toggleFavorite(int quoteId) {
+  Future<void> toggleFavorite(String quoteId) async {
     final quoteIndex = _quotes.indexWhere((quote) => quote.id == quoteId);
     if (quoteIndex != -1) {
       // Toggle favorite status
+      final isCurrentlyFavorite = _quotes[quoteIndex].isFavorite;
       _quotes[quoteIndex] = _quotes[quoteIndex].copyWith(
-        isFavorite: !_quotes[quoteIndex].isFavorite,
+        isFavorite: !isCurrentlyFavorite,
       );
 
       // Update local storage
-      if (_quotes[quoteIndex].isFavorite) {
-        // Add to database and favorite IDs set
+      if (!isCurrentlyFavorite) {
+        // Add to favorites
         _favoriteIds.add(quoteId);
-        SSIDatabase.instance.insertFavoriteQoute(_quotes[quoteIndex]);
+        await FavoritesService.addFavorite(quoteId);
       } else {
-        // Remove from database and favorite IDs set
+        // Remove from favorites
         _favoriteIds.remove(quoteId);
-        SSIDatabase.instance.deleteFavoriteQoute(quoteId);
+        await FavoritesService.removeFavorite(quoteId);
       }
 
       notifyListeners(); // Notify to rebuild UI

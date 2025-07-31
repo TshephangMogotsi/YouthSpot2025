@@ -32,7 +32,8 @@ class Account extends StatelessWidget {
             const SizedBox(height: 20),
             ProfileListTile(
               title: 'My Profile',
-              assetImage: 'assets/icon/Settings/ProfilePicture.png',
+              //profile image inside or circle avatar
+              assetImage: 'assets/icon/Settings/ProfileIcon.png',
               ontap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const ProfilePage()),

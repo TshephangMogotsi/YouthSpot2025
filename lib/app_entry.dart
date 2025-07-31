@@ -25,7 +25,7 @@ class _AppEntryState extends State<AppEntry> with WidgetsBindingObserver {
     HomePage(),
     DocumentPage(), // Resources
     ServicesScreen(), // Services
-    Placeholder(), // Leaderboard
+    // Placeholder(), // Leaderboard
     Account(), // Account
   ];
 
@@ -108,20 +108,20 @@ class _AppEntryState extends State<AppEntry> with WidgetsBindingObserver {
                 ),
                 label: 'Services',
               ),
-              BottomNavigationBarItem(
-                icon: SvgPicture.asset(
-                  _selectedIndex == 3
-                      ? 'assets/icon/trophy.svg'
-                      : 'assets/icon/trophy_outline.svg',
-                  height: 20,
-                  width: 20,
-                  colorFilter: ColorFilter.mode(
-                    _selectedIndex == 3 ? kSSIorange : Colors.grey,
-                    BlendMode.srcIn,
-                  ),
-                ),
-                label: 'Leaderboard',
-              ),
+              // BottomNavigationBarItem(
+              //   icon: SvgPicture.asset(
+              //     _selectedIndex == 3
+              //         ? 'assets/icon/trophy.svg'
+              //         : 'assets/icon/trophy_outline.svg',
+              //     height: 20,
+              //     width: 20,
+              //     colorFilter: ColorFilter.mode(
+              //       _selectedIndex == 3 ? kSSIorange : Colors.grey,
+              //       BlendMode.srcIn,
+              //     ),
+              //   ),
+              //   label: 'Leaderboard',
+              // ),
               BottomNavigationBarItem(
                 icon: SvgPicture.asset(
                   _selectedIndex == 4

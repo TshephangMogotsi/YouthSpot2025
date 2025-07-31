@@ -29,7 +29,7 @@ class SSIDatabase {
     final path = join(dbPath, filePath);
 
     return await openDatabase(path,
-        version: 2, onCreate: _createDB, onUpgrade: _onUpgrade);
+        version: 3, onCreate: _createDB, onUpgrade: _onUpgrade);
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -44,14 +44,7 @@ class SSIDatabase {
         ALTER TABLE $tableMedicine ADD COLUMN ${MedicineFields.notificationIds} TEXT;
       ''');
     }
-    if (oldVersion < 10) {
-      await db.execute('''
-        ALTER TABLE $tableGoal ADD COLUMN ${GoalFields.notificationIds} TEXT;
-      ''');
-      await db.execute('''
-        ALTER TABLE $tableGoal ADD COLUMN ${GoalFields.totalReminders} INTEGER;
-      ''');
-    }
+    // Note: Removed duplicate column additions that were already in _createDB
   }
 
   Future _createDB(Database db, int version) async {

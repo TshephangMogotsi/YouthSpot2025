@@ -16,7 +16,7 @@ class AuthLayout extends StatelessWidget {
 
    @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthService>(context, listen: true);
+    final auth = Provider.of<AuthService>(context, listen: false);
 
     return StreamBuilder(
       stream: auth.authStateChanges,

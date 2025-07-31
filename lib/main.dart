@@ -1,4 +1,4 @@
-import 'package:youthspot/auth/auth_layout.dart';
+import 'package:youthspot/app_wrapper.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/services/notifications_helper.dart';
 import 'package:youthspot/services/services_locator.dart';
@@ -92,7 +92,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const AuthLayout()
+        home: const AppWrapper()
       ),
     );
   }

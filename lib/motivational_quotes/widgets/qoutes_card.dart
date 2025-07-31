@@ -34,30 +34,52 @@ class QoutesCard extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // CachedNetworkImage with loading and error handling
-          CachedNetworkImage(
-            imageUrl: backgroundImage,
-            imageBuilder: (context, imageProvider) => Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(mainBorderRadius),
-                image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.4),
-                    BlendMode.darken,
+          // Check if backgroundImage is null or empty
+          if (backgroundImage.isNotEmpty)
+            // CachedNetworkImage with loading and error handling
+            CachedNetworkImage(
+              imageUrl: backgroundImage,
+              imageBuilder: (context, imageProvider) => Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(mainBorderRadius),
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(0.4),
+                      BlendMode.darken,
+                    ),
                   ),
                 ),
+                child:
+                    _buildQuoteContent(), // Display the text when image is loaded
               ),
-              child:
-                  _buildQuoteContent(), // Display the text when image is loaded
-            ),
-            placeholder: (context, url) =>
-                _buildShimmerEffect(), // Shimmer while loading
-            errorWidget: (context, url, error) => const Icon(Icons.error),
-          ),
+              placeholder: (context, url) =>
+                  _buildShimmerEffect(), // Shimmer while loading
+              errorWidget: (context, url, error) => _buildDefaultBackground(),
+            )
+          else
+            // Use default background when no image URL is provided
+            _buildDefaultBackground(),
         ],
       ),
+    );
+  }
+
+  Widget _buildDefaultBackground() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(mainBorderRadius),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            kSSIorange.withOpacity(0.8),
+            kSSIorange.withOpacity(0.6),
+          ],
+        ),
+      ),
+      child: _buildQuoteContent(),
     );
   }
 

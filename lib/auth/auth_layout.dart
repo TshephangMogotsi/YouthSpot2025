@@ -14,22 +14,24 @@ class AuthLayout extends StatelessWidget {
 
   final Widget? pageifNotConnected;
 
-   @override
+  @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthService>(context, listen: false);
-
-    return StreamBuilder(
-      stream: auth.authStateChanges,
-      builder: (context, snapshot) {
-        Widget page;
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          page = const AppLoadingPage();
-        } else if (snapshot.hasData) {
-          page = const AppNavigationLayout();
-        } else {
-          page = pageifNotConnected ?? const AuthSwitcher();
-        }
-        return page;
+    return Consumer<AuthService>(
+      builder: (context, auth, child) {
+        return StreamBuilder(
+          stream: auth.authStateChanges,
+          builder: (context, snapshot) {
+            Widget page;
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              page = const AppLoadingPage();
+            } else if (snapshot.hasData && snapshot.data?.user != null) {
+              page = const AppNavigationLayout();
+            } else {
+              page = pageifNotConnected ?? const AuthSwitcher();
+            }
+            return page;
+          },
+        );
       },
     );
   }

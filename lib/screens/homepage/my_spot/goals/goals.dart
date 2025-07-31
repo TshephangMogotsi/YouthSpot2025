@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:showcaseview/showcaseview.dart';
 
 import '../../../../../config/constants.dart';
 import '../../../../../config/theme_manager.dart';
@@ -33,21 +32,10 @@ class _GoalsState extends State<Goals> {
   ValueNotifier<DateTime> selectedDateNotifier =
       ValueNotifier<DateTime>(DateTime.now());
 
-  final GlobalKey _addButtonKey = GlobalKey();
-
   @override
   void initState() {
     super.initState();
     refreshGoals();
-
-    // Run the showcase as soon as the page opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        ShowCaseWidget.of(context).startShowCase([
-          _addButtonKey,
-        ]);
-      });
-    });
   }
 
   @override
@@ -59,19 +47,6 @@ class _GoalsState extends State<Goals> {
     setState(() => isLoading = true);
     goals = await SSIDatabase.instance.readAllGoals();
     setState(() => isLoading = false);
-  }
-
-  void _scrollToKey(GlobalKey key) {
-    final context = key.currentContext;
-    if (context != null) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        Scrollable.ensureVisible(
-          context,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-      });
-    }
   }
 
   @override
@@ -96,28 +71,20 @@ class _GoalsState extends State<Goals> {
                         'Goals',
                         style: headingStyle,
                       ),
-                      Showcase(
-                        key: _addButtonKey,
-                        description: 'Add a new goal.',
-                        disposeOnTap: true,
-                        onTargetClick: () {
-                          _scrollToKey(_addButtonKey);
-                        },
-                        child: PillButton2(
-                          title: 'Add',
-                          icon: const Icon(
-                            Icons.add,
-                            color: Colors.white,
-                          ),
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const AddGoalPage2()),
-                            );
-                            refreshGoals();
-                          },
+                      PillButton2(
+                        title: 'Add',
+                        icon: const Icon(
+                          Icons.add,
+                          color: Colors.white,
                         ),
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const AddGoalPage2()),
+                          );
+                          refreshGoals();
+                        },
                       ),
                     ],
                   ),

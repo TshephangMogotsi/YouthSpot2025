@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:showcaseview/showcaseview.dart';
 import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
 import '../../db/models/goal_model.dart';
@@ -45,63 +44,52 @@ class _HomePageState extends State<HomePage> {
     final themeManager = getIt<ThemeManager>();
     final goalProvider = Provider.of<GoalProvider>(context);
 
-    return ShowCaseWidget(
-      builder: (BuildContext context) {
-        return Scaffold(
-          backgroundColor: themeManager.themeMode.value == ThemeMode.dark
-              ? darkmodeLight
-              : backgroundColorLight,
-          body: ListView(
-            controller: _scrollController,
-            physics: const BouncingScrollPhysics(),
-            children: [
-              const Height10(),
-              Center(
-                child: SvgPicture.asset(
-                  'assets/icon/appicon_homepage.svg',
-                  height: 35,
-                  width: 35,
-                  colorFilter: ColorFilter.mode(
-                    themeManager.themeMode.value == ThemeMode.dark
-                        ? Colors.white
-                        : kSSIorange,
-                    BlendMode.srcIn,
-                  ),
-                ),
+    return Scaffold(
+      backgroundColor: themeManager.themeMode.value == ThemeMode.dark
+          ? darkmodeLight
+          : backgroundColorLight,
+      body: ListView(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(),
+        children: [
+          const Height10(),
+          Center(
+            child: SvgPicture.asset(
+              'assets/icon/appicon_homepage.svg',
+              height: 35,
+              width: 35,
+              colorFilter: ColorFilter.mode(
+                themeManager.themeMode.value == ThemeMode.dark
+                    ? Colors.white
+                    : kSSIorange,
+                BlendMode.srcIn,
               ),
-              const Height20(),
-
-              // Showcase for Articles Section
-              const NewsCarousel(),
-              const Height10(),
-
-              // Showcase for MySpot Section
-              const MySpot(),
-              const Height10(),
-
-              // Show progress tracker if there are goals
-              if (goalProvider.goals.isNotEmpty) ...[
-                PrimaryPadding(
-                  child: buildProgressTracker(goalProvider.goals),
-                ),
-                const Height20(),
-              ],
-
-              // Showcase for Extras Section
-              const Extras(),
-              const Height20(),
-              const Height20(),
-            ],
+            ),
           ),
-          // floatingActionButton: FloatingActionButton(
-          //   onPressed: () {
-          //     ShowCaseWidget.of(context)
-          //         .startShowCase([_articlesKey, _mySpotKey, _extrasKey]);
-          //   },
-          //   child: const Icon(Icons.play_arrow),
-          // ),
-        );
-      },
+          const Height20(),
+
+          // Articles Section
+          const NewsCarousel(),
+          const Height10(),
+
+          // MySpot Section
+          const MySpot(),
+          const Height10(),
+
+          // Show progress tracker if there are goals
+          if (goalProvider.goals.isNotEmpty) ...[
+            PrimaryPadding(
+              child: buildProgressTracker(goalProvider.goals),
+            ),
+            const Height20(),
+          ],
+
+          // Extras Section
+          const Extras(),
+          const Height20(),
+          const Height20(),
+        ],
+      ),
     );
   }
 

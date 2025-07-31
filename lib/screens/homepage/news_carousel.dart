@@ -4,7 +4,7 @@ import '../../../config/constants.dart';
 import '../../global_widgets/primary_padding.dart';
 import '../../global_widgets/section_header.dart';
 import '../../providers/articles_provider.dart';
-import '../../providers/pointsProviders/article_points_provider.dart';
+
 import 'all_articles_view.dart';
 import 'article_view.dart';
 import 'news_article.dart';
@@ -61,13 +61,6 @@ class NewsCarousel extends StatelessWidget {
                 author: article.author,
                 articleId: article.id, // Pass the article ID here
                 onTap: () {
-                  // Access the PointsProvider to add points for reading the article
-                  final pointsProvider = Provider.of<ArticlePointsProvider>(
-                      context,
-                      listen: false);
-                  pointsProvider.addArticlePoints(
-                      article.id); // Add article points
-
                   // Navigate to the article view
                   Navigator.push(
                     context,

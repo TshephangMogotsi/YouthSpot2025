@@ -9,7 +9,7 @@ import '../config/constants.dart';
 import '../global_widgets/primary_divider.dart';
 import '../global_widgets/primary_padding.dart';
 import '../global_widgets/primary_scaffold.dart';
-import '../providers/pointsProviders/motivational_points_provider.dart';
+
 import '../providers/quotes_provider.dart';
 import '../services/services_locator.dart';
 import 'favourites.dart';
@@ -31,21 +31,11 @@ class _MotivationalQuotesState extends State<MotivationalQuotes> {
     super.initState();
     Future.microtask(() async {
       await Provider.of<QuoteProvider>(context, listen: false).fetchQuotes();
-      final quotesProvider = Provider.of<QuoteProvider>(context, listen: false);
-      final quotesPointsProvider =
-          Provider.of<MotivationalQuotesProvider>(context, listen: false);
-      if (quotesProvider.quotes.isNotEmpty) {
-        quotesPointsProvider.addQuotePoints(
-            quotesProvider.quotes[0].id.toString()); // Award points for the first quote
-      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final quotesPointsProvider =
-        Provider.of<MotivationalQuotesProvider>(context);
-
     return PrimaryScaffold(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,8 +76,6 @@ class _MotivationalQuotesState extends State<MotivationalQuotes> {
                     setState(() {
                       motivationalQoutesIndex = index;
                     });
-                    quotesPointsProvider.addQuotePoints(
-                        quoteProvider.quotes[index].id.toString()); // Award points for viewing the quote
                   },
                   itemBuilder: (context, index) {
                     final quote = quoteProvider.quotes[index];

@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   awesome_notifications
   gtk
+  maps_launcher
   url_launcher_linux
 )
 

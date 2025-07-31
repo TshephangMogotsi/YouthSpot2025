@@ -30,7 +30,7 @@ class SSIDatabase {
     final path = join(dbPath, filePath);
 
     return await openDatabase(path,
-        version: 1, onCreate: _createDB, onUpgrade: _onUpgrade);
+        version: 2, onCreate: _createDB, onUpgrade: _onUpgrade);
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -43,6 +43,22 @@ class SSIDatabase {
       ''');
       await db.execute('''
         ALTER TABLE $tableMedicine ADD COLUMN ${MedicineFields.notificationIds} TEXT;
+      ''');
+    }
+    if (oldVersion < 2) {
+      // Create favorite_quotes table if upgrading from version 1
+      const idType2 = 'INTEGER PRIMARY KEY';
+      const textType = 'TEXT NOT NULL';
+      const integerType = 'INTEGER NOT NULL';
+      
+      await db.execute('''
+      CREATE TABLE IF NOT EXISTS $tableFavoriteQuotes (
+          ${QuotesModelFields.id} $idType2, 
+          ${QuotesModelFields.quote} $textType,
+          ${QuotesModelFields.author} $textType,
+          ${QuotesModelFields.isFavorite} $integerType,
+          ${QuotesModelFields.backgroundImageUrl} $textType
+           )
       ''');
     }
     if (oldVersion < 10) {

@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import '../db/app_db.dart';
-import '../db/models/motivational_qoutes_model.dart';
+import '../models/quotes_model.dart';
 import '../services/supabase_quotes_service.dart';
 
 class QuoteProvider with ChangeNotifier {
-  List<MotivationalQoute> _quotes = [];
+  List<QuotesModel> _quotes = [];
   bool _isLoading = true;
   final SupabaseQuotesService _quotesService = SupabaseQuotesService();
   Set<int> _favoriteIds = {};
 
-  List<MotivationalQoute> get quotes => _quotes;
+  List<QuotesModel> get quotes => _quotes;
   bool get isLoading => _isLoading;
 
   // Getter to filter favorite quotes
-  List<MotivationalQoute> get favoriteQuotes =>
+  List<QuotesModel> get favoriteQuotes =>
       _quotes.where((quote) => quote.isFavorite).toList();
 
   Future<void> fetchQuotes() async {

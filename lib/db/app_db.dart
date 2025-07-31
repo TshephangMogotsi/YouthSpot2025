@@ -9,7 +9,7 @@ import 'models/journal_model.dart';
 import 'models/medicine_model.dart';
 import 'models/mood_model.dart';
 import 'models/doses_model.dart';
-import 'models/motivational_qoutes_model.dart';
+import '../models/quotes_model.dart';
 
 class SSIDatabase {
   static final SSIDatabase instance = SSIDatabase._init();
@@ -84,11 +84,12 @@ class SSIDatabase {
          )
     ''');
     await db.execute('''
-    CREATE TABLE $tableFavoriteQoutes (
-        ${MotivationalQouteFields.id} $idType2, 
-        ${MotivationalQouteFields.quote} $textType,
-        ${MotivationalQouteFields.author} $textType,
-        ${MotivationalQouteFields.isFavorite} $integerType
+    CREATE TABLE $tableFavoriteQuotes (
+        ${QuotesModelFields.id} $idType2, 
+        ${QuotesModelFields.quote} $textType,
+        ${QuotesModelFields.author} $textType,
+        ${QuotesModelFields.isFavorite} $integerType,
+        ${QuotesModelFields.backgroundImageUrl} $textType
          )
     ''');
     await db.execute('''
@@ -285,23 +286,23 @@ class SSIDatabase {
   //----------------------------QOUTE FUNCTIONS---------------------------------
 
   //insert favorite qoute
-  Future<void> insertFavoriteQoute(MotivationalQoute qoute) async {
+  Future<void> insertFavoriteQoute(QuotesModel qoute) async {
     final db = await instance.database;
-    await db.insert(tableFavoriteQoutes, qoute.toJson());
+    await db.insert(tableFavoriteQuotes, qoute.toJson());
   }
 
   //read all favorite qoutes
-  Future<List<MotivationalQoute>> readAllFavoriteQoutes() async {
+  Future<List<QuotesModel>> readAllFavoriteQoutes() async {
     final db = await instance.database;
-    final result = await db.query(tableFavoriteQoutes);
-    return result.map((json) => MotivationalQoute.fromJson(json)).toList();
+    final result = await db.query(tableFavoriteQuotes);
+    return result.map((json) => QuotesModel.fromJson(json)).toList();
   }
 
   //check if id is in favorite qoutes
   Future<bool> isFavoriteQoute(int id) async {
     final db = await instance.database;
-    final result = await db.query(tableFavoriteQoutes,
-        where: '${MotivationalQouteFields.id} = ?', whereArgs: [id]);
+    final result = await db.query(tableFavoriteQuotes,
+        where: '${QuotesModelFields.id} = ?', whereArgs: [id]);
     return result.isNotEmpty;
   }
 
@@ -310,8 +311,8 @@ class SSIDatabase {
     final db = await instance.database;
 
     return await db.delete(
-      tableFavoriteQoutes,
-      where: '${MotivationalQouteFields.id} = ?',
+      tableFavoriteQuotes,
+      where: '${QuotesModelFields.id} = ?',
       whereArgs: [id],
     );
   }
@@ -490,7 +491,7 @@ class SSIDatabase {
     final batch = db.batch();
 
     batch.delete(tableMedicine);
-    batch.delete(tableFavoriteQoutes);
+    batch.delete(tableFavoriteQuotes);
     batch.delete(tableMood);
     batch.delete(tableDose);
     batch.delete(tableGoal);

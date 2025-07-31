@@ -27,7 +27,7 @@ class Goals extends StatefulWidget {
 }
 
 class _GoalsState extends State<Goals> {
-  late List<Goal> goals;
+  List<Goal> goals = [];
   bool isLoading = false;
   ValueNotifier<DateTime> selectedDateNotifier =
       ValueNotifier<DateTime>(DateTime.now());
@@ -59,9 +59,10 @@ class _GoalsState extends State<Goals> {
           return Scaffold(
             backgroundColor:
                 theme == ThemeMode.dark ? darkmodeLight : backgroundColorLight,
-            body: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            body: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 const Height20(),
                 PrimaryPadding(
                   child: Row(
@@ -160,7 +161,8 @@ class _GoalsState extends State<Goals> {
                 const Height20(),
               ],
             ),
-          );
+          ),
+        );
         });
   }
 

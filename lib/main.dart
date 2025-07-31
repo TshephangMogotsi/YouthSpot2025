@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
               create: (context) => MedicationProvider()..fetchMedications(),
             ),
             ChangeNotifierProvider(
-              create: (context) => UserProvider()..fetchUser(),
+              create: (context) => UserProvider(), // Kept for backward compatibility
             ),
             ChangeNotifierProvider(
               create: (_) => ArticlesProvider(),

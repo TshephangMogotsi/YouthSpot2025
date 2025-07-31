@@ -1,96 +1,26 @@
-// Firebase imports removed
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-import '../db/models/user.dart';  // Ensure this file path is correct
 import 'package:flutter/foundation.dart';
 
 class UserProvider extends ChangeNotifier {
-  UserModel? _user;
+  // UserModel removed - app now uses Supabase directly without user model
 
-  UserModel? get user => _user;
-
-  // Method to check if the user is authenticated and fetch user details
+  // Fetch user method removed - auth handled directly by Supabase AuthService
   Future<void> fetchUser() async {
-    try {
-      // Firebase functionality removed - implement with Supabase or other backend
-      print('Firebase auth removed - fetchUser method needs reimplementation');
-      // User? firebaseUser = FirebaseAuth.instance.currentUser;
-      //
-      // if (firebaseUser != null) {
-      //   // Fetch user document from Firestore
-      //   DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore.instance
-      //       .collection('users')
-      //       .doc(firebaseUser.uid)
-      //       .get();
-      //
-      //   if (userDoc.exists && userDoc.data() != null) {
-      //     _user = UserModel.fromSnapshot(userDoc);
-      //     notifyListeners(); // Notify listeners that user is fetched
-      //   } else {
-      //     print('User document does not exist');
-      //   }
-      // } else {
-      //   print('No user is currently signed in');
-      // }
-    } catch (e) {
-      print('Error fetching user: $e');
-    }
+    // This method is kept for backward compatibility but does nothing
+    // Auth is now handled by AuthService using Supabase
   }
 
-  bool get isUserFetched => _user != null;
+  bool get isUserFetched => true; // Always return true since auth is handled by Supabase
 
-  Future<void> updateUser(UserModel user, {String? profilePictureUrl}) async {
-    try {
-      // Firebase functionality removed - implement with Supabase or other backend
-      print('Firebase Firestore removed - updateUser method needs reimplementation');
-      // Map<String, dynamic> userData = user.toMap();
-      // if (profilePictureUrl != null) {
-      //   userData['imageUrl'] = profilePictureUrl;
-      // }
-      //
-      // await FirebaseFirestore.instance
-      //     .collection('users')
-      //     .doc(user.uid)
-      //     .update(userData);
-      // _user = user.copyWith(imageUrl: profilePictureUrl);
-      // notifyListeners();
-    } catch (e) {
-      print('Error updating user: $e');
-    }
+  // Update user method removed - user updates handled directly via Supabase
+  Future<void> updateUser(Map<String, dynamic> userData) async {
+    // This method is kept for backward compatibility but does nothing
+    // User updates are now handled directly via Supabase client calls
   }
 
+  // User position method removed - leaderboard functionality handled elsewhere
   Future<int?> fetchUserPosition() async {
-    try {
-      // Firebase functionality removed - implement with Supabase or other backend
-      print('Firebase auth/firestore removed - fetchUserPosition method needs reimplementation');
-      // User? firebaseUser = FirebaseAuth.instance.currentUser;
-      //
-      // if (firebaseUser != null) {
-      //   DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore.instance
-      //       .collection('users')
-      //       .doc(firebaseUser.uid)
-      //       .get();
-      //
-      //   if (userDoc.exists && userDoc.data() != null) {
-      //     UserModel user = UserModel.fromSnapshot(userDoc);
-      //
-      //     // Count how many users have a higher rating
-      //     QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
-      //         .collection('users')
-      //         .where('rating', isGreaterThan: user.rating)
-      //         .get();
-      //
-      //     int position = snapshot.docs.length + 1;
-      //     return position; // Return the user's position
-      //   } else {
-      //     print('User document does not exist');
-      //   }
-      // } else {
-      //   print('No user is currently signed in');
-      // }
-    } catch (e) {
-      print('Error fetching user position: $e');
-    }
-    return null; // Return null if user is not found or an error occurs
+    // This method is kept for backward compatibility but returns null
+    // Leaderboard functionality should be handled via LeaderboardProvider
+    return null;
   }
 }

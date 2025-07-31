@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/config/constants.dart';
-import 'package:youthspot/providers/user_provider.dart';
+import 'package:youthspot/auth/auth_service.dart';
 
 class SOSScreen extends StatefulWidget {
   const SOSScreen({super.key});
@@ -22,8 +22,8 @@ class _SOSScreenState extends State<SOSScreen> {
         _isLoading = true;
       });
 
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final user = userProvider.user;
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final user = authService.currentUser;
 
       if (user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -37,10 +37,17 @@ class _SOSScreenState extends State<SOSScreen> {
       }
 
       try {
+        // Get user profile data from Supabase
+        final profileResponse = await Supabase.instance.client
+            .from('profiles')
+            .select('full_name, mobile_number')
+            .eq('id', user.id)
+            .single();
+
         await Supabase.instance.client.from('sos_requests').insert({
-          'user_id': user.uid,
-          'full_name': user.fullName,
-          'phone': user.phone,
+          'user_id': user.id,
+          'full_name': profileResponse['full_name'] ?? 'Unknown',
+          'phone': profileResponse['mobile_number'] ?? 'Unknown',
           'distress_message': _messageController.text,
         });
 

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-// Firebase import removed
-// import 'package:cloud_firestore/cloud_firestore.dart';
 import '../db/app_db.dart';
 import '../db/models/motivational_qoutes_model.dart';
+import '../services/supabase_quotes_service.dart';
 
 class QuoteProvider with ChangeNotifier {
   List<MotivationalQoute> _quotes = [];
   bool _isLoading = true;
-  final List<int> _viewedQuoteIds = []; // Track viewed quote IDs
+  final SupabaseQuotesService _quotesService = SupabaseQuotesService();
+  Set<int> _favoriteIds = {};
 
   List<MotivationalQoute> get quotes => _quotes;
   bool get isLoading => _isLoading;
@@ -21,23 +21,33 @@ class QuoteProvider with ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // Firebase functionality removed - implement with Supabase or other backend
-      print('Firebase Firestore removed - fetchQuotes method needs reimplementation');
-      // final snapshot = await FirebaseFirestore.instance.collection('motivational_quotes').get();
-      // _quotes = snapshot.docs.map((doc) => MotivationalQoute(
-      //       id: doc['id'],
-      //       quote: doc['quote'],
-      //       author: doc['author'],
-      //       backgroundImage: doc['backgroundImage'],
-      //       isFavorite: doc['isFavorite'],
-      //     )).toList();
+      // Load favorite IDs from local database first
+      await _loadFavoriteIds();
+
+      // Fetch quotes from Supabase
+      final quotesFromSupabase = await _quotesService.fetchMotivationalQuotes();
       
-      // For now, initialize with empty list
+      // Update favorite status based on local storage
+      _quotes = quotesFromSupabase.map((quote) {
+        return quote.copyWith(isFavorite: _favoriteIds.contains(quote.id));
+      }).toList();
+      
+    } catch (e) {
+      print('Error fetching quotes: $e');
       _quotes = [];
-      
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> _loadFavoriteIds() async {
+    try {
+      final favoriteQuotes = await SSIDatabase.instance.readAllFavoriteQoutes();
+      _favoriteIds = favoriteQuotes.map((q) => q.id).toSet();
+    } catch (e) {
+      print('Error loading favorite IDs: $e');
+      _favoriteIds = {};
     }
   }
 
@@ -49,23 +59,18 @@ class QuoteProvider with ChangeNotifier {
         isFavorite: !_quotes[quoteIndex].isFavorite,
       );
 
-      // If using local storage, update the database accordingly
+      // Update local storage
       if (_quotes[quoteIndex].isFavorite) {
-        // Add to database
+        // Add to database and favorite IDs set
+        _favoriteIds.add(quoteId);
         SSIDatabase.instance.insertFavoriteQoute(_quotes[quoteIndex]);
       } else {
-        // Remove from database
+        // Remove from database and favorite IDs set
+        _favoriteIds.remove(quoteId);
         SSIDatabase.instance.deleteFavoriteQoute(quoteId);
       }
 
       notifyListeners(); // Notify to rebuild UI
-    }
-  }
-
-  void viewQuote(int quoteId) {
-    if (!_viewedQuoteIds.contains(quoteId)) {
-      _viewedQuoteIds.add(quoteId);
-      notifyListeners();
     }
   }
 }

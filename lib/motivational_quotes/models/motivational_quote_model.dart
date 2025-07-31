@@ -53,6 +53,16 @@ class MotivationalQoute {
         backgroundImage: json[MotivationalQouteFields.backgroundImage] as String,
       );
 
+  // Add fromSupabase method to handle Supabase data format
+  static MotivationalQoute fromSupabase(Map<String, dynamic> json) =>
+      MotivationalQoute(
+        id: json['id'] as int,
+        author: json['author'] as String,
+        quote: json['quote'] as String,
+        isFavorite: false, // Will be determined locally
+        backgroundImage: json['background_image_url'] as String? ?? '',
+      );
+
   Map<String, Object?> toJson() => {
         MotivationalQouteFields.id: id,
         MotivationalQouteFields.quote: quote,

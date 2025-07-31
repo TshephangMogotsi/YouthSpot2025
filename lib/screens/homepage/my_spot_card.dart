@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class MySpotCard extends StatelessWidget {
   const MySpotCard({
@@ -76,11 +77,21 @@ class MySpotCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(15.0),
                             color: iconBgColor,
                           ),
-                          child: Image.asset(
-                            iconURL,
-                            width: 10,
-                            height: 10,
-                          ),
+                          child: iconURL.endsWith('.svg') 
+                            ? SvgPicture.asset(
+                                iconURL,
+                                width: 10,
+                                height: 10,
+                                colorFilter: ColorFilter.mode(
+                                  Colors.white,
+                                  BlendMode.srcIn,
+                                ),
+                              )
+                            : Image.asset(
+                                iconURL,
+                                width: 10,
+                                height: 10,
+                              ),
                         ),
                         const SizedBox(width: 10),
                         Text(

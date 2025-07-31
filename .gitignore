@@ -43,3 +43,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# App signing configuration (contains sensitive information)
+android/key.properties
+*.jks
+*.keystore
+
+# iOS signing certificates and profiles
+ios/Runner.xcarchive/
+ios/exportOptions.plist

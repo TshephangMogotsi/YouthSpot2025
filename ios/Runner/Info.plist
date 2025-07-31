@@ -52,5 +52,9 @@
 		<string>comgooglemaps</string>
 		<string>tel</string>
 	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>This app uses Face ID for secure authentication to access your journal and protect your privacy.</string>
+	<key>NSLocalAuthenticationFallbackTitle</key>
+	<string>Use Passcode</string>
 </dict>
 </plist>

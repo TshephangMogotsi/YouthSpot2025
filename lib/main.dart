@@ -12,6 +12,7 @@ import 'providers/event_provider.dart';
 import 'providers/goal_provider.dart';
 import 'providers/leaderboard_provider.dart';
 import 'providers/medication_provider.dart';
+import 'providers/upcoming_events_provider.dart';
 
 import 'providers/quotes_provider.dart';
 import 'providers/services_provider.dart';
@@ -47,6 +48,9 @@ class MyApp extends StatelessWidget {
       providers: [
          ChangeNotifierProvider(
               create: (_) => EventProvider()..loadEventsFromDB(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => UpcomingEventsProvider(),
             ),
             ChangeNotifierProvider(
               create: (context) => QuizLogic(),

@@ -1,11 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:async';
 
 class AuthService extends ChangeNotifier {
   final GoTrueClient supabaseAuth = Supabase.instance.client.auth;
+  late StreamSubscription<AuthState> _authSubscription;
+
+  AuthService() {
+    // Listen to auth state changes and notify our listeners
+    _authSubscription = supabaseAuth.onAuthStateChange.listen((data) {
+      notifyListeners();
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription.cancel();
+    super.dispose();
+  }
 
   User? get currentUser => supabaseAuth.currentUser;
   Stream<AuthState> get authStateChanges => supabaseAuth.onAuthStateChange;
+  
+  bool get isAuthenticated => currentUser != null;
 
   Future<AuthResponse> signIn({
     required String email,
@@ -29,6 +46,9 @@ class AuthService extends ChangeNotifier {
             .update({'marked_for_deletion_at': null})
             .eq('id', res.user!.id);
       }
+      
+      // Notify listeners that authentication state has changed
+      notifyListeners();
     }
 
     return res;
@@ -54,12 +74,17 @@ class AuthService extends ChangeNotifier {
         'date_of_birth': dateOfBirth,
         'mobile_number': mobileNumber,
       });
+      
+      // Notify listeners that authentication state has changed
+      notifyListeners();
     }
     return res;
   }
 
   Future<void> signOut() async {
     await supabaseAuth.signOut();
+    // Notify listeners that authentication state has changed
+    notifyListeners();
   }
 
   Future<void> resetPassword({required String email}) async {

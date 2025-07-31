@@ -42,11 +42,13 @@ class _TimePickerWidgetState extends State<TimePickerWidget> {
           });
           widget.onTimeSelected(_selectedTime);
         },
-        is24HrFormat: true,
+        is24HrFormat: true, // Use 24-hour format for clarity in medical/goal contexts
         accentColor: kSSIorange, // Use app's primary color
-        unselectedColor: Colors.grey,
+        unselectedColor: Colors.grey[400]!,
         cancelText: "Cancel",
         okText: "Confirm",
+        borderRadius: 16.0,
+        elevation: 12.0,
       ),
     );
   }

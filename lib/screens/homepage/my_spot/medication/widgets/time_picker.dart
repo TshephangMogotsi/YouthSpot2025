@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:day_night_time_picker/day_night_time_picker.dart';
 
 import '../../../../../config/constants.dart';
 import '../../../../../config/theme_manager.dart';
@@ -30,28 +31,26 @@ class _TimePickerWidgetState extends State<TimePickerWidget> {
   }
 
   void _showTimePicker(Color backgroundColor) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: _selectedTime,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: backgroundColor,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
+    Navigator.of(context).push(
+      showPicker(
+        context: context,
+        value: Time(hour: _selectedTime.hour, minute: _selectedTime.minute),
+        onChange: (Time newTime) {
+          final newTimeOfDay = TimeOfDay(hour: newTime.hour, minute: newTime.minute);
+          setState(() {
+            _selectedTime = newTimeOfDay;
+          });
+          widget.onTimeSelected(_selectedTime);
+        },
+        is24HrFormat: true, // Use 24-hour format for clarity in medical/goal contexts
+        accentColor: kSSIorange, // Use app's primary color
+        unselectedColor: Colors.grey[400]!,
+        cancelText: "Cancel",
+        okText: "Confirm",
+        borderRadius: 16.0,
+        elevation: 12.0,
+      ),
     );
-
-    if (picked != null && picked != _selectedTime) {
-      setState(() {
-        _selectedTime = picked;
-      });
-      widget.onTimeSelected(_selectedTime);
-    }
   }
 
   @override

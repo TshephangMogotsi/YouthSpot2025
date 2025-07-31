@@ -3,6 +3,7 @@ import 'package:youthspot/screens/Account/account.dart';
 import 'package:youthspot/screens/homepage.dart';
 import 'package:youthspot/screens/resources/resources.dart';
 import 'package:youthspot/screens/services/services.dart';
+import 'package:youthspot/screens/events/events_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'article_page.dart';
@@ -25,7 +26,7 @@ class _AppEntryState extends State<AppEntry> with WidgetsBindingObserver {
     HomePage(),
     DocumentPage(), // Resources
     ServicesScreen(), // Services
-    // Placeholder(), // Leaderboard
+    EventsScreen(), // Events
     Account(), // Account
   ];
 
@@ -122,6 +123,18 @@ class _AppEntryState extends State<AppEntry> with WidgetsBindingObserver {
               //   ),
               //   label: 'Leaderboard',
               // ),
+              BottomNavigationBarItem(
+                icon: SvgPicture.asset(
+                  'assets/icon/calendar-alt.svg',
+                  height: 20,
+                  width: 20,
+                  colorFilter: ColorFilter.mode(
+                    _selectedIndex == 3 ? kSSIorange : Colors.grey,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                label: 'Events',
+              ),
               BottomNavigationBarItem(
                 icon: SvgPicture.asset(
                   _selectedIndex == 4

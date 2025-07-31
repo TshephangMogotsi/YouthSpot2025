@@ -330,5 +330,39 @@ void nextQuestion(int? choiceNumber) {
     : "Consider discussing with a healthcare professional about best hygiene practices.";
 
   bool getReproductiveHealthRequiresAction() => !isCircumcised;
+
+  // Reset quiz to initial state for retaking
+  void resetQuiz() {
+    _questionNumber = 0;
+    question4Answers.clear();
+    question4ExtraAnswers.clear();
+    
+    _alcoholAndDrugsPoints = 0;
+    _sexualStatusAndRelationshipsPoints = 0;
+    _gbvRelated = 0;
+    
+    // Reset all boolean flags to their initial states
+    hasTestedInForHIVLastYear = false;
+    hivStatus = HIVStatus.unknown;
+    isOnTreatment = false;
+    isTakingMedicationRegularly = false;
+    hasEverBeenSexuallyActive = false;
+    hasHadSexInLast3Months = false;
+    hasHadMoreThanOnePartnerAtTheSameTime = false;
+    hasParticipatedInSexParty = false;
+    hasAnyPartnerBeenBlesserBaes = false;
+    hasHadSexWithoutCondom = false;
+    condomUseWithPartner = FrequencyOfUseOfCondomWithPartner.never;
+    isUsingContraceptives = false;
+    knowsStatusOfPartners = false;
+    hasBeenForcedIntoSex = false;
+    isPartnerControlling = false;
+    hasEverBeenAbusedByPartner = false;
+    hasGottenHelpAfterAbuse = false;
+    isCircumcised = false;
+    finish = false;
+    
+    notifyListeners();
+  }
 }
 

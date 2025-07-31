@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/global_widgets/custom_textfield.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
+import 'package:youthspot/global_widgets/primary_scaffold.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -103,9 +104,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: _loading
+    return PrimaryScaffold(
+    
+      child: _loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),

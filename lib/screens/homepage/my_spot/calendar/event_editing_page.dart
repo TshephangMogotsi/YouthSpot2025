@@ -166,16 +166,25 @@ class _EventEditingPageState extends State<EventEditingPage> {
     final notificationDescription =
         NotificationUtils.formatEventTime(fromDate, toDate);
 
-    // Schedule notification
-    await NotificationService.scheduleNotification(
-      notificationId: notificationId,
-      title: event.title,
-      body: notificationDescription,
-      scheduledDate: event.from,
-    );
+    // Schedule notification with error handling
+    try {
+      await NotificationService.scheduleNotification(
+        notificationId: notificationId,
+        title: event.title,
+        body: notificationDescription,
+        scheduledDate: event.from,
+      );
+    } catch (e) {
+      // Log the error but don't prevent event creation
+      debugPrint('Failed to schedule notification: $e');
+    }
 
     if (isEditing) {
-      await AwesomeNotifications().cancel(widget.event!.notificationId!);
+      try {
+        await AwesomeNotifications().cancel(widget.event!.notificationId!);
+      } catch (e) {
+        debugPrint('Failed to cancel previous notification: $e');
+      }
       await provider.editEvent(event, widget.event!);
     } else {
       await provider.addEvent(event);

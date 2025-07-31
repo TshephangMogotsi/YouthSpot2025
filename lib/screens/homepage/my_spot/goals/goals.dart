@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:youthspot/global_widgets/primary_scaffold.dart';
 
 import '../../../../../config/constants.dart';
 import '../../../../../config/theme_manager.dart';
@@ -56,10 +57,8 @@ class _GoalsState extends State<Goals> {
     return ValueListenableBuilder<ThemeMode>(
         valueListenable: themeManager.themeMode,
         builder: (context, theme, child) {
-          return Scaffold(
-            backgroundColor:
-                theme == ThemeMode.dark ? darkmodeLight : backgroundColorLight,
-            body: SafeArea(
+          return PrimaryScaffold(
+          child: SafeArea(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

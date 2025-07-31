@@ -1,0 +1,12 @@
+# Android App Signing Configuration Template
+# 
+# IMPORTANT: This file contains sensitive information and should NOT be committed to version control.
+# Add this filename to .gitignore
+#
+# To generate a keystore, run:
+# keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+
+storePassword=YOUR_STORE_PASSWORD_HERE
+keyPassword=YOUR_KEY_PASSWORD_HERE
+keyAlias=upload
+storeFile=../upload-keystore.jks

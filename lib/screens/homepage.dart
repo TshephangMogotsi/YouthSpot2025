@@ -9,10 +9,7 @@ import '../../db/models/goal_model.dart';
 import '../global_widgets/primary_padding.dart';
 import '../providers/goal_provider.dart';
 import '../providers/medication_provider.dart';
-import '../providers/pointsProviders/article_points_provider.dart';
-import '../providers/pointsProviders/journal_points_provider.dart';
-import '../providers/pointsProviders/login_points_providers.dart';
-import '../providers/pointsProviders/mood_points_provider.dart';
+
 import '../providers/user_provider.dart';
 import '../services/services_locator.dart';
 import 'extras.dart';
@@ -41,25 +38,13 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return; // <--- guard
 
       if (userProvider.isUserFetched) {
-        // All these are sync methods, so safe
-        Provider.of<ArticlePointsProvider>(context, listen: false)
-            .initializeArticlePoints();
-        Provider.of<MoodPointsProvider>(context, listen: false)
-            .initializeMoodPoints();
-        Provider.of<JournalPointsProvider>(context, listen: false)
-            .initializeJournalPoints();
-
-        // This is async, so guard again after await
-        await Provider.of<LoginPointsProvider>(context, listen: false)
-            .initializeLoginPoints();
-
-        if (!mounted) return; // <--- guard again
-
-        Provider.of<LoginPointsProvider>(context, listen: false)
-            .addDailyLoginPoints();
+        // User fetched successfully
+        if (kDebugMode) {
+          print('User fetched successfully.');
+        }
       } else {
         if (kDebugMode) {
-          print('User not fetched, cannot initialize points.');
+          print('User not fetched.');
         }
       }
     });

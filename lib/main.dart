@@ -12,12 +12,7 @@ import 'providers/event_provider.dart';
 import 'providers/goal_provider.dart';
 import 'providers/leaderboard_provider.dart';
 import 'providers/medication_provider.dart';
-import 'providers/pointsProviders/article_points_provider.dart';
-import 'providers/pointsProviders/journal_points_provider.dart';
-import 'providers/pointsProviders/login_points_providers.dart';
-import 'providers/pointsProviders/mood_points_provider.dart';
-import 'providers/pointsProviders/motivational_points_provider.dart';
-import 'providers/points_provider.dart';
+
 import 'providers/quotes_provider.dart';
 import 'providers/services_provider.dart';
 import 'providers/user_provider.dart';
@@ -67,21 +62,7 @@ class MyApp extends StatelessWidget {
             ChangeNotifierProvider(
               create: (_) => ArticlesProvider(),
             ),
-            ChangeNotifierProvider(
-              create: (context) => ArticlePointsProvider(
-                Provider.of<UserProvider>(context, listen: false),
-              )..initializeArticlePoints(),
-            ),
-            ChangeNotifierProvider(
-              create: (context) => MoodPointsProvider(
-                Provider.of<UserProvider>(context, listen: false),
-              )..initializeMoodPoints(),
-            ),
-            ChangeNotifierProvider(
-              create: (context) => JournalPointsProvider(
-                Provider.of<UserProvider>(context, listen: false),
-              )..initializeJournalPoints(), // Register JournalPointsProvider
-            ),
+
             ChangeNotifierProvider(
               create: (_) => ServiceProvider(),
             ),
@@ -97,21 +78,7 @@ class MyApp extends StatelessWidget {
             // ChangeNotifierProvider(
             //   create: (_) => DocumentProvider(),
             // ),
-            ChangeNotifierProvider(
-              create: (context) => PointsProvider(
-                Provider.of<UserProvider>(context, listen: false),
-              ),
-            ),
-            ChangeNotifierProvider(
-              create: (context) => LoginPointsProvider(
-                Provider.of<UserProvider>(context, listen: false),
-              )..initializeLoginPoints(),
-            ),
-            ChangeNotifierProvider(
-              create: (context) => MotivationalQuotesProvider(
-                Provider.of<UserProvider>(context, listen: false),
-              )..initializeQuotePoints(), // Register MotivationalQuotesProvider
-            ),
+
              ChangeNotifierProvider(
           create: (_) => AuthService(), // Add your AuthService here
         ),

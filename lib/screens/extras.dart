@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:youthspot/screens/sos_screen.dart';
-import '../providers/pointsProviders/motivational_points_provider.dart';
+
 import 'homepage/journal/journal.dart';
 import 'homepage/lifestyleQuiz/quiz_intro.dart';
 import 'homepage_list_tile.dart';
@@ -77,12 +77,6 @@ class _ExtrasState extends State<Extras> {
           subtitle: 'Your daily dose of motivation & affirmations',
           svgURL: 'assets/icons/motivational_quotes.svg',
           onTap: () async {
-            final motivationalQuotesProvider =
-                Provider.of<MotivationalQuotesProvider>(context, listen: false);
-
-            // Award points for opening quotes once per day
-            await motivationalQuotesProvider.addDailyQuotePoints();
-
             // Navigator.push(
             //   context,
             //   MaterialPageRoute(

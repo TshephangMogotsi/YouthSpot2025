@@ -15,7 +15,7 @@ import '../../../../global_widgets/primary_button.dart';
 import '../../../../global_widgets/primary_container.dart';
 import '../../../../global_widgets/primary_divider.dart';
 import '../../../../global_widgets/primary_padding.dart';
-import '../../../../providers/pointsProviders/mood_points_provider.dart';
+
 import '../../../../services/notifications_helper.dart';
 import '../../../../services/services_locator.dart';
 import 'widgets/mood_calendar.dart';
@@ -257,11 +257,6 @@ class _MoodTrackerState extends State<MoodTracker> {
 
     // Add the mood entry to the database
     await SSIDatabase.instance.addMood(moodObject);
-
-    // Access MoodPointsProvider to add mood points
-    final moodPointsProvider =
-        Provider.of<MoodPointsProvider>(context, listen: false);
-    moodPointsProvider.addMoodPoints();
 
     // Trigger a notification after mood is added
     await NotificationService.sendImmediateNotification(

@@ -8,7 +8,7 @@ import '../../../db/app_db.dart';
 import '../../../db/models/journal_model.dart';
 import '../../../global_widgets/primary_padding.dart';
 import '../../../global_widgets/primary_scaffold.dart';
-import '../../../providers/pointsProviders/journal_points_provider.dart';
+
 import 'delete_dialog.dart';
 
 class AddEditJournalPage extends StatefulWidget {
@@ -158,10 +158,6 @@ class _AddEditJournalPageState extends State<AddEditJournalPage> {
     );
 
     await SSIDatabase.instance.createJounalEntry(journalEntry);
-
-    // Award points for adding a new journal entry
-    Provider.of<JournalPointsProvider>(context, listen: false)
-        .addJournalEntryPoints();
   }
 
   Future<void> deleteJournalEntry() async {

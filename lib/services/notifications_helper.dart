@@ -111,7 +111,7 @@ class NotificationService {
         category: category,
         payload: payload,
         bigPicture: bigPicture,
-        icon: 'resource://drawable/notifications_icon_android',
+        icon: 'resource://drawable/icon_notifications',
       ),
       actionButtons: actionButtons,
       schedule: scheduled
@@ -130,16 +130,21 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
-    await AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id: notificationId,
-        channelKey: 'high_importance_channel',
-        title: title,
-        body: body,
-        notificationLayout: NotificationLayout.Default,
-        icon: 'resource://drawable/notifications_icon_android',
-      ),
-    );
+    try {
+      await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: notificationId,
+          channelKey: 'high_importance_channel',
+          title: title,
+          body: body,
+          notificationLayout: NotificationLayout.Default,
+          icon: 'resource://drawable/icon_notifications',
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error sending immediate notification: $e');
+      // Don't rethrow to prevent app crash if notification fails
+    }
   }
 
   static Future<void> scheduleNotification({
@@ -156,7 +161,7 @@ class NotificationService {
           title: title,
           body: body,
           notificationLayout: NotificationLayout.Default,
-          icon: 'resource://drawable/notifications_icon_android',
+          icon: 'resource://drawable/icon_notifications',
         ),
         schedule: NotificationCalendar.fromDate(date: scheduledDate),
       );

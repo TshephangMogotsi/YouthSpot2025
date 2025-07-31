@@ -43,6 +43,15 @@ class _ProfilePageState extends State<ProfilePage> {
     _getProfile();
   }
 
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _dobController.dispose();
+    _mobileController.dispose();
+    _usernameController.dispose();
+    super.dispose();
+  }
+
   Future<void> _getProfile() async {
     setState(() => _loading = true);
     final auth = Provider.of<AuthService>(context, listen: false);
@@ -169,8 +178,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     Text('Gender', style: inputTitle),
                     const Height10(),
                     FullWidthDropdownButton(
-                      hintText: selectedGender ?? 'Select gender',
+                      hintText: 'Select gender',
                       showError: isGenderSelected != null,
+                      initialValue: selectedGender,
                       options: genderList,
                       onOptionSelect: (option) {
                         if (kDebugMode) {

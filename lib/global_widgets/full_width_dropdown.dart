@@ -10,10 +10,12 @@ class FullWidthDropdownButton extends StatefulWidget {
       required this.options,
       required this.showError,
       this.onOptionSelect,
-      required this.hintText});
+      required this.hintText,
+      this.initialValue});
   final List<String> options;
   final bool showError;
   final String hintText;
+  final String? initialValue;
   final void Function(String)? onOptionSelect;
 
   @override
@@ -23,6 +25,12 @@ class FullWidthDropdownButton extends StatefulWidget {
 
 class _FullWidthDropdownButtonState extends State<FullWidthDropdownButton> {
   String? dropdownValue;
+
+  @override
+  void initState() {
+    super.initState();
+    dropdownValue = widget.initialValue;
+  }
 
   @override
   Widget build(BuildContext context) {

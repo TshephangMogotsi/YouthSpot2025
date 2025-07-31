@@ -26,6 +26,9 @@ class QuotesModel {
     this.isFavorite = false,
   });
 
+  // Backward compatibility getter
+  String get backgroundImage => backgroundImageUrl;
+
   // Add the copyWith method
   QuotesModel copyWith({
     int? id,

@@ -23,10 +23,12 @@ class SupabaseQuotesService {
     if (favoriteIds.isEmpty) return [];
     
     try {
+      // Convert list to comma-separated string for Supabase IN filter
+      final idsString = favoriteIds.join(',');
       final response = await _supabase
           .from('motivational_quotes')
           .select('*')
-          .inFilter('id', favoriteIds);
+          .filter('id', 'in', '($idsString)');
 
       return (response as List)
           .map((quote) => QuotesModel.fromSupabase(quote))

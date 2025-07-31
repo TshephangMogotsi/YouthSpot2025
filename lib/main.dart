@@ -16,6 +16,7 @@ import 'providers/medication_provider.dart';
 import 'providers/quotes_provider.dart';
 import 'providers/services_provider.dart';
 import 'providers/user_provider.dart';
+import 'screens/homepage/lifestyleQuiz/quiz_logic.dart';
 
 void main() async {
   setupGetIt();
@@ -47,9 +48,9 @@ class MyApp extends StatelessWidget {
          ChangeNotifierProvider(
               create: (_) => EventProvider()..loadEventsFromDB(),
             ),
-            // ChangeNotifierProvider(
-            //   create: (context) => QuizLogic(),
-            // ),
+            ChangeNotifierProvider(
+              create: (context) => QuizLogic(),
+            ),
             ChangeNotifierProvider(
               create: (_) => GoalProvider()..fetchGoals(),
             ),

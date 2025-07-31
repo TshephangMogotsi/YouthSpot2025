@@ -55,13 +55,15 @@ class ExpandingContainer extends StatelessWidget {
                     shrinkWrap: true,
                     children: [
                       InkWell(
-                        onTap: onCall,
+                        onTap: contact.toLowerCase().contains('no contact') ? null : onCall,
                         child: Row(children: [
                           Container(
                             width: 30,
                             height: 30,
-                            decoration: const BoxDecoration(
-                              color: kSSIorange,
+                            decoration: BoxDecoration(
+                              color: contact.toLowerCase().contains('no contact') 
+                                  ? Colors.grey[400] 
+                                  : kSSIorange,
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.phone,
@@ -103,20 +105,35 @@ class ExpandingContainer extends StatelessWidget {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  MapsLauncher.launchCoordinates(
-                                      latitude, longitude);
+                                  if (latitude != 0.0 && longitude != 0.0) {
+                                    MapsLauncher.launchCoordinates(
+                                        latitude, longitude);
+                                  }
+                                },
+                              GestureDetector(
+                                onTap: () {
+                                  if (latitude != 0.0 && longitude != 0.0) {
+                                    MapsLauncher.launchCoordinates(
+                                        latitude, longitude);
+                                  }
                                 },
                                 child: Container(
                                   //add light blue rounded shape decoration
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 15),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue[400],
+                                    color: (latitude != 0.0 && longitude != 0.0) 
+                                        ? Colors.blue[400] 
+                                        : Colors.grey[400],
                                     borderRadius: BorderRadius.circular(10),
                                   ),
 
-                                  child: const Text('Open Maps',
-                                      style: TextStyle(color: Colors.white)),
+                                  child: Text(
+                                    (latitude != 0.0 && longitude != 0.0) 
+                                        ? 'Open Maps' 
+                                        : 'No Location',
+                                    style: const TextStyle(color: Colors.white)
+                                  ),
                                 ),
                               ),
                             ],

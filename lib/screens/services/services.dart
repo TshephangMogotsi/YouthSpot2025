@@ -80,14 +80,18 @@ class _ServicesScreenState extends State<ServicesScreen> {
                         trailing: Icons.expand_more,
                         imageURL: service.imageUrl ?? '',  // Use imageUrl from Service model
                         borderVisible: false,
-                        location: service.location ?? 'No location provided',
+                        location: service.location ?? 'Location not available',
                         latitude: service.latitude ?? 0.0,
                         longitude: service.longitude ?? 0.0,
-                        contact: service.contacts?.isNotEmpty == true ? service.contacts!.first : 'No contact provided',
+                        contact: service.contacts?.isNotEmpty == true ? service.contacts!.first : 'No contact available',
                         onCall: () {
                           if (service.contacts?.isNotEmpty == true) {
-                            Uri dialNumber = Uri(scheme: 'tel', path: service.contacts!.first);
-                            launchUrl(dialNumber);
+                            final contact = service.contacts!.first;
+                            // Basic phone number validation
+                            if (contact.isNotEmpty && contact != 'No contact available') {
+                              Uri dialNumber = Uri(scheme: 'tel', path: contact);
+                              launchUrl(dialNumber);
+                            }
                           }
                         },
                       ),

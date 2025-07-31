@@ -59,7 +59,7 @@ class QuotesModel {
   // Factory method to handle Supabase data format
   static QuotesModel fromSupabase(Map<String, dynamic> json) =>
       QuotesModel(
-        id: json['id'] as int,
+        id: json['id'] is String ? int.parse(json['id']) : json['id'] as int,
         author: json['author'] as String,
         quote: json['quote'] as String,
         isFavorite: false, // Will be determined locally

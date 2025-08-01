@@ -38,6 +38,11 @@ TextStyle get subTitleStyle {
 const double mainBorderRadius = 34;
 const double innerBorderRadius = 25;
 
+// Audio player constants
+const Color articlePlayerBackgroundColor = Color(0xFFF5F5F5);
+const Color iconColor = Color(0xFFFF9600);
+const Color progressBarColor = Color(0xFFE0E0E0);
+
 class Height10 extends StatelessWidget {
   const Height10({super.key});
 

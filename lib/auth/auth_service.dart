@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
+import '../services/connectivity_helper.dart';
 
 class AuthService extends ChangeNotifier {
   final GoTrueClient supabaseAuth = Supabase.instance.client.auth;
@@ -196,7 +197,39 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> resetPassword({required String email}) async {
-    await supabaseAuth.resetPasswordForEmail(email);
+    // Check if Supabase is properly initialized
+    if (!_isSupabaseInitialized) {
+      throw AuthException('Authentication service is not available. Please restart the app.');
+    }
+
+    try {
+      await supabaseAuth.resetPasswordForEmail(email).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw AuthException('Request timed out. Please check your internet connection and try again.');
+        },
+      );
+    } on AuthException catch (e) {
+      // Handle specific Supabase auth errors
+      String errorMessage;
+      switch (e.message) {
+        case 'Email address not found':
+          errorMessage = 'No account found with this email address.';
+          break;
+        case 'Invalid email':
+          errorMessage = 'Please enter a valid email address.';
+          break;
+        default:
+          errorMessage = e.message ?? 'Password reset failed. Please try again.';
+      }
+      throw AuthException(errorMessage);
+    } catch (e) {
+      // Handle network and other errors
+      if (e.toString().contains('timeout') || e.toString().contains('SocketException')) {
+        throw AuthException('Network timeout. Please check your internet connection and try again.');
+      }
+      throw AuthException('Network error. Please check your internet connection and try again.');
+    }
   }
 
   Future<void> updateUsername({required String username}) async {

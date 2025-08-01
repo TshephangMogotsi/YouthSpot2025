@@ -1,4 +1,5 @@
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,22 +24,29 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   String? error;
 
   Future<void> resetPassword() async {
-  final auth = Provider.of<AuthService>(context, listen: false);
-  try {
-    await auth.resetPassword(
-      email: emailController.text.trim(),
-    );
-    setState(() {
-      isSubmitted = true;
-      error = null;
-    });
-  } catch (e) {
-    setState(() {
-      error = e.toString();
-      if (kDebugMode) print(error);
-    });
+    if (!_formKey.currentState!.validate()) return;
+    
+    final auth = Provider.of<AuthService>(context, listen: false);
+    try {
+      await auth.resetPassword(
+        email: emailController.text.trim(),
+      );
+      setState(() {
+        isSubmitted = true;
+        error = null;
+      });
+    } on AuthException catch (e) {
+      setState(() {
+        error = e.message;
+        if (kDebugMode) print('Reset password error: $error');
+      });
+    } catch (e) {
+      setState(() {
+        error = 'Network error. Please check your internet connection and try again.';
+        if (kDebugMode) print('Reset password error: $e');
+      });
+    }
   }
-}
 
 
   @override

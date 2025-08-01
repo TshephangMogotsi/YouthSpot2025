@@ -30,7 +30,7 @@ class _AppEntryState extends State<AppEntry> with WidgetsBindingObserver {
     HomePage(),
     DocumentPage(), // Resources
     ServicesScreen(), // Services
-    EventsScreen(), // Events
+    // EventsScreen(), // Events
     Account(), // Account
   ];
 
@@ -150,14 +150,14 @@ class _AppEntryState extends State<AppEntry> with WidgetsBindingObserver {
               //   ),
               //   label: 'Leaderboard',
               // ),
-              BottomNavigationBarItem(
-                icon: Icon(
-                  _selectedIndex == 3 ? Icons.event : Icons.event_outlined,
-                  size: 20,
-                  color: _selectedIndex == 3 ? kSSIorange : Colors.grey,
-                ),
-                label: 'Events',
-              ),
+              // BottomNavigationBarItem(
+              //   icon: Icon(
+              //     _selectedIndex == 3 ? Icons.event : Icons.event_outlined,
+              //     size: 20,
+              //     color: _selectedIndex == 3 ? kSSIorange : Colors.grey,
+              //   ),
+              //   label: 'Events',
+              // ),
               BottomNavigationBarItem(
                 icon: SvgPicture.asset(
                   _selectedIndex == 4

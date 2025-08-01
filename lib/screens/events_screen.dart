@@ -213,188 +213,194 @@ class EventCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(mainBorderRadius),
       ),
-      child: PrimaryPadding(
-        verticalPadding: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Event image placeholder
-            Container(
-              width: double.infinity,
-              height: 180,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-                // TODO: Uncomment and handle image loading logic
-                // image: event.imageUrl != null
-                //     ? DecorationImage(
-                //         image: NetworkImage(event.imageUrl!),
-                //         fit: BoxFit.cover,
-                //       )
-                //     : null,
+      child: Column(
+        children: [
+           Container(
+                width: double.infinity,
+                height: 180,
+                margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.grey,
+                  // TODO: Uncomment and handle image loading logic
+                  // image: event.imageUrl != null
+                  //     ? DecorationImage(
+                  //         image: NetworkImage(event.imageUrl!),
+                  //         fit: BoxFit.cover,
+                  //       )
+                  //     : null,
+                ),
               ),
-            ),
-            Height10(),
-            // Event Title
-            Text(
-              event.title,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: theme == ThemeMode.dark ? Colors.white : Colors.black,
-              ),
-            ),
-            // Description and Join/Cancel Button
-            Row(
+          PrimaryPadding(
+            verticalPadding: true,
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Description
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 8),
-                      Text(
-                        event.description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: theme == ThemeMode.dark ? Colors.white70 : Colors.black54,
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                // Event image placeholder
+               
+                // Event Title
+                Text(
+                  event.title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: theme == ThemeMode.dark ? Colors.white : Colors.black,
                   ),
                 ),
-                // Join/Cancel Button
-                Consumer2<CommunityEventsProvider, EventProvider>(
-                  builder: (context, communityProvider, eventProvider, child) {
-                    return ElevatedButton(
-                      onPressed: event.isFull && !event.isUserAttending
-                          ? null
-                          : () async {
-                              if (event.isUserAttending) {
-                                await communityProvider.leaveEvent(event.id, eventProvider);
-                              } else {
-                                await communityProvider.joinEvent(event.id, eventProvider);
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: event.isUserAttending
-                            ? Colors.red.shade600
-                            : event.isFull
-                                ? Colors.grey
-                                : kSSIorange,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        event.isUserAttending
-                            ? 'Cancel'
-                            : event.isFull
-                                ? 'Full'
-                                : 'Join',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // Date/Time & Organized By
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+                // Description and Join/Cancel Button
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.access_time, size: 16, color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${dateFormat.format(event.eventDate)} • ${timeFormat.format(event.eventDate)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
+                    // Description
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
+                          Text(
+                            event.description,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: theme == ThemeMode.dark ? Colors.white70 : Colors.black54,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
+                    ),
+                    // Join/Cancel Button
+                    Consumer2<CommunityEventsProvider, EventProvider>(
+                      builder: (context, communityProvider, eventProvider, child) {
+                        return ElevatedButton(
+                          onPressed: event.isFull && !event.isUserAttending
+                              ? null
+                              : () async {
+                                  if (event.isUserAttending) {
+                                    await communityProvider.leaveEvent(event.id, eventProvider);
+                                  } else {
+                                    await communityProvider.joinEvent(event.id, eventProvider);
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: event.isUserAttending
+                                ? Colors.red.shade600
+                                : event.isFull
+                                    ? Colors.grey
+                                    : kSSIorange,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            event.isUserAttending
+                                ? 'Cancel'
+                                : event.isFull
+                                    ? 'Full'
+                                    : 'Join',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
-                Width10(),
-                // "Organized by" section, with wrapping
-                if (event.organizer != null)
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 12),
+                // Date/Time & Organized By
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Icon(Icons.person, size: 16, color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54),
+                        Icon(Icons.access_time, size: 16, color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54),
                         const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            'Organized by ${event.organizer}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
-                            ),
-                            softWrap: true,
-                            overflow: TextOverflow.visible,
+                        Text(
+                          '${dateFormat.format(event.eventDate)} • ${timeFormat.format(event.eventDate)}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
                           ),
                         ),
                       ],
                     ),
+                    Width10(),
+                    // "Organized by" section, with wrapping
+                    if (event.organizer != null)
+                      Expanded(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.person, size: 16, color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                'Organized by ${event.organizer}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
+                                ),
+                                softWrap: true,
+                                overflow: TextOverflow.visible,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+                // Location
+                if (event.location != null) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, size: 16, color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          event.location!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
+                ],
+                // Attendees
+                if (event.maxAttendees != null) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.group, size: 16, color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${event.currentAttendees} / ${event.maxAttendees} attendees',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: LinearProgressIndicator(
+                          value: event.currentAttendees / event.maxAttendees!,
+                          backgroundColor: Colors.grey[300],
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            event.isFull ? Colors.red : kSSIorange,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
-            // Location
-            if (event.location != null) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(Icons.location_on, size: 16, color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      event.location!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            // Attendees
-            if (event.maxAttendees != null) ...[
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.group, size: 16, color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${event.currentAttendees} / ${event.maxAttendees} attendees',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: LinearProgressIndicator(
-                      value: event.currentAttendees / event.maxAttendees!,
-                      backgroundColor: Colors.grey[300],
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        event.isFull ? Colors.red : kSSIorange,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

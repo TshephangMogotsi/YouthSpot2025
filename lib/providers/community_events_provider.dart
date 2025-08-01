@@ -279,4 +279,117 @@ class CommunityEventsProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  /// Synchronizes user's attended events to personal calendar
+  /// This should be called on app initialization to ensure calendar is up-to-date
+  Future<void> syncAttendedEventsToCalendar(EventProvider eventProvider) async {
+    try {
+      final currentUserId = supabase.auth.currentUser?.id;
+      if (currentUserId == null) {
+        if (kDebugMode) {
+          print('User not authenticated, skipping event sync');
+        }
+        return;
+      }
+
+      if (kDebugMode) {
+        print('Starting sync of attended events to personal calendar...');
+      }
+
+      // Get user's event attendances
+      final attendanceResponse = await supabase
+          .from('event_attendees')
+          .select('event_id')
+          .eq('user_id', currentUserId);
+
+      if (attendanceResponse is! List || attendanceResponse.isEmpty) {
+        if (kDebugMode) {
+          print('No event attendances found for user');
+        }
+        return;
+      }
+
+      final userEventIds = attendanceResponse
+          .map((attendance) => attendance['event_id'] as String?)
+          .where((id) => id != null)
+          .cast<String>()
+          .toList();
+
+      if (userEventIds.isEmpty) {
+        if (kDebugMode) {
+          print('No valid event IDs found in user attendances');
+        }
+        return;
+      }
+
+      // Get community events that user is attending
+      final attendedEventsResponse = await supabase
+          .from('community_events')
+          .select('*')
+          .inFilter('id', userEventIds)
+          .eq('is_active', true);
+
+      if (attendedEventsResponse is! List) {
+        throw Exception('Unexpected response format for attended events');
+      }
+
+      final attendedEventsList = attendedEventsResponse as List;
+      if (attendedEventsList.isEmpty) {
+        if (kDebugMode) {
+          print('No active attended events found');
+        }
+        return;
+      }
+
+      // Get existing personal calendar events to avoid duplicates
+      final existingEvents = eventProvider.events;
+      
+      int syncedCount = 0;
+      for (final eventData in attendedEventsList) {
+        try {
+          final communityEvent = CommunityEvent.fromJson(eventData);
+          
+          // Check if this event already exists in personal calendar
+          final existsInCalendar = existingEvents.any((personalEvent) =>
+              personalEvent.title == communityEvent.title &&
+              personalEvent.from == communityEvent.eventDate);
+
+          if (!existsInCalendar) {
+            // Create personal calendar event for this attended community event
+            final personalEvent = Event(
+              title: communityEvent.title,
+              description: '${communityEvent.description}\n\nLocation: ${communityEvent.location ?? 'TBD'}\nOrganizer: ${communityEvent.organizer ?? 'Unknown'}',
+              from: communityEvent.eventDate,
+              to: communityEvent.endDate ?? communityEvent.eventDate.add(const Duration(hours: 2)),
+              backgroundColor: const Color(0xFF4CAF50), // Green for community events
+              isAllDay: false,
+            );
+
+            await eventProvider.addEvent(personalEvent);
+            syncedCount++;
+            
+            if (kDebugMode) {
+              print('Synced event to calendar: ${communityEvent.title}');
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error syncing individual event: $e');
+          }
+          // Continue with other events
+        }
+      }
+
+      if (kDebugMode) {
+        print('Event sync completed. Synced $syncedCount new events to calendar.');
+      }
+
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error syncing attended events to calendar: $e');
+      }
+      // Don't set _error here as this is a background sync operation
+      // and shouldn't interfere with normal UI functionality
+    }
+  }
 }

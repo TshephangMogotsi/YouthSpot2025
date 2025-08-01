@@ -62,6 +62,13 @@ class CommunityEventsProvider extends ChangeNotifier {
         }
       }
 
+      // Validate response format
+      if (eventsResponse is! List) {
+        throw Exception('Unexpected response format: ${eventsResponse.runtimeType}');
+      }
+
+      final eventsList = eventsResponse as List;
+
       // Then, get user's attendances if user is logged in
       List<String> userEventIds = [];
       if (currentUserId != null) {
@@ -70,15 +77,25 @@ class CommunityEventsProvider extends ChangeNotifier {
             .select('event_id')
             .eq('user_id', currentUserId);
         
-        userEventIds = (attendanceResponse as List)
-            .map((attendance) => attendance['event_id'] as String)
-            .toList();
+        if (attendanceResponse is List) {
+          userEventIds = attendanceResponse
+              .map((attendance) => attendance['event_id'] as String?)
+              .where((id) => id != null)
+              .cast<String>()
+              .toList();
+        }
       }
 
-      _events = (eventsResponse as List).map<CommunityEvent>((eventData) {
+      _events = eventsList.map<CommunityEvent>((eventData) {
         try {
+          // Validate eventData is a Map
+          if (eventData is! Map<String, dynamic>) {
+            throw ArgumentError('Event data is not a valid Map: ${eventData.runtimeType}');
+          }
+
           // Check if current user is attending this event
-          final isUserAttending = userEventIds.contains(eventData['id']);
+          final eventId = eventData['id'] as String?;
+          final isUserAttending = eventId != null && userEventIds.contains(eventId);
 
           // Add the user attending flag
           final eventMap = Map<String, dynamic>.from(eventData);

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS public.community_events (
     end_date TIMESTAMP WITH TIME ZONE,
     location VARCHAR(255),
     organizer VARCHAR(255),
-    image_url TEXT,
+    image_url VARCHAR(512),
     max_attendees INTEGER,
     current_attendees INTEGER DEFAULT 0,
     is_active BOOLEAN DEFAULT true,
@@ -57,9 +57,9 @@ CREATE INDEX idx_event_attendees_event_id ON public.event_attendees(event_id);
 CREATE INDEX idx_event_attendees_user_id ON public.event_attendees(user_id);
 
 -- Insert some sample data
-INSERT INTO public.community_events (title, description, event_date, end_date, location, organizer, max_attendees) VALUES
-('Youth Wellness Workshop', 'Interactive workshop focusing on mental health and wellness strategies for young adults.', '2025-02-15 10:00:00+00', '2025-02-15 16:00:00+00', 'Community Center Hall A', 'YouthSpot Team', 50),
-('Career Development Seminar', 'Learn about career opportunities, resume building, and interview skills.', '2025-02-20 14:00:00+00', '2025-02-20 18:00:00+00', 'Business Center Conference Room', 'Career Guidance Counselors', 30),
-('Mental Health Support Group', 'Safe space for youth to share experiences and learn coping strategies.', '2025-02-25 18:00:00+00', '2025-02-25 20:00:00+00', 'Wellness Center Room B', 'Licensed Therapists', 20),
-('Technology Skills Bootcamp', 'Hands-on training in digital literacy and basic programming concepts.', '2025-03-01 09:00:00+00', '2025-03-01 17:00:00+00', 'Tech Hub Training Lab', 'IT Professionals', 25),
-('Peer Support Network Meeting', 'Monthly gathering for peer support and community building among youth.', '2025-03-05 16:00:00+00', '2025-03-05 18:00:00+00', 'Youth Center Main Hall', 'Peer Coordinators', 40);
+INSERT INTO public.community_events (title, description, event_date, end_date, location, organizer, image_url, max_attendees) VALUES
+('Youth Wellness Workshop', 'Interactive workshop focusing on mental health and wellness strategies for young adults.', '2025-02-15 10:00:00+00', '2025-02-15 16:00:00+00', 'Community Center Hall A', 'YouthSpot Team', 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', 50),
+('Career Development Seminar', 'Learn about career opportunities, resume building, and interview skills.', '2025-02-20 14:00:00+00', '2025-02-20 18:00:00+00', 'Business Center Conference Room', 'Career Guidance Counselors', 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', 30),
+('Mental Health Support Group', 'Safe space for youth to share experiences and learn coping strategies.', '2025-02-25 18:00:00+00', '2025-02-25 20:00:00+00', 'Wellness Center Room B', 'Licensed Therapists', 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', 20),
+('Technology Skills Bootcamp', 'Hands-on training in digital literacy and basic programming concepts.', '2025-03-01 09:00:00+00', '2025-03-01 17:00:00+00', 'Tech Hub Training Lab', 'IT Professionals', 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', 25),
+('Peer Support Network Meeting', 'Monthly gathering for peer support and community building among youth.', '2025-03-05 16:00:00+00', '2025-03-05 18:00:00+00', 'Youth Center Main Hall', 'Peer Coordinators', 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', 40);

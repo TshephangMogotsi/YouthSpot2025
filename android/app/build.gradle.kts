@@ -16,7 +16,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.example.youthspot"
-    compileSdk = 34 // Replace with actual version if needed
+    compileSdk = 35 // Replace with actual version if needed
     ndkVersion = "27.0.12077973"
 
     compileOptions {

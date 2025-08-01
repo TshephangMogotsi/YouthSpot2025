@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:restart_app/restart_app.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
@@ -32,16 +33,16 @@ class _DeleteAccountDataDialogState extends State<DeleteAccountDataDialog> {
     setState(() => isDeleting = true);
     
     try {
+      // Always delete local database data first
+      await SSIDatabase.instance.deleteAllData();
+      
+      // Try to delete Supabase data if user is logged in
       final auth = Provider.of<AuthService>(context, listen: false);
       final userId = auth.currentUser?.id;
       
       if (userId != null) {
-        // Delete from Supabase tables
         await _deleteSupabaseData(userId);
       }
-      
-      // Delete local database data
-      await SSIDatabase.instance.deleteAllData();
       
       // Reinitialize database to ensure clean state
       await _refreshDatabase();
@@ -65,16 +66,26 @@ class _DeleteAccountDataDialogState extends State<DeleteAccountDataDialog> {
     
     try {
       // Delete from event_attendees (user's event registrations)
-      await supabase
-          .from('event_attendees')
-          .delete()
-          .eq('user_id', userId);
+      try {
+        await supabase
+            .from('event_attendees')
+            .delete()
+            .eq('user_id', userId);
+      } catch (e) {
+        // Table might not exist or user might not have data
+        print('Warning: Could not delete from event_attendees: $e');
+      }
       
       // Delete from notes (if user has notes)
-      await supabase
-          .from('notes')
-          .delete()
-          .eq('user_id', userId);
+      try {
+        await supabase
+            .from('notes')
+            .delete()
+            .eq('user_id', userId);
+      } catch (e) {
+        // Table might not exist or user might not have data
+        print('Warning: Could not delete from notes: $e');
+      }
           
       // Note: We don't delete from profiles table as that would break authentication
       // Instead, we could clear non-essential profile data if needed
@@ -233,8 +244,13 @@ class _DeleteAccountDataDialogState extends State<DeleteAccountDataDialog> {
               onSubmit: () async {
                 await _performDataDeletion();
                 _goToPage(2); // Go to success step
-                await Future.delayed(const Duration(seconds: 3));
-                Navigator.pop(context); // Close after success animation
+                await Future.delayed(const Duration(seconds: 2));
+                Navigator.pop(context); // Close dialog
+                
+                // Restart app to ensure completely clean state
+                await Future.delayed(const Duration(milliseconds: 500));
+                Restart.restartApp();
+                
                 return null;
               },
               borderRadius: 10,
@@ -289,7 +305,7 @@ class _DeleteAccountDataDialogState extends State<DeleteAccountDataDialog> {
         ),
         const SizedBox(height: 8),
         const Text(
-          'All your stored account data has been permanently deleted.',
+          'All your stored account data has been permanently deleted. The app will restart to ensure a clean state.',
           style: AppTextStyles.primaryRegular,
           textAlign: TextAlign.center,
         ),

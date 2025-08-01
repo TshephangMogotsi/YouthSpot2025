@@ -89,13 +89,10 @@ class MyApp extends StatelessWidget {
             ChangeNotifierProvider(
               create: (_) => AuthService(), // Add your AuthService here
             ),
-            // Add ThemeManager as a provider
-            ChangeNotifierProvider(
-              create: (_) => getIt<ThemeManager>(),
-            ),
       ],
-      child: Consumer<ThemeManager>(
-        builder: (context, themeManager, child) {
+      child: Builder(
+        builder: (context) {
+          final themeManager = getIt<ThemeManager>();
           return ValueListenableBuilder<ThemeMode>(
             valueListenable: themeManager.themeMode,
             builder: (context, themeMode, child) {

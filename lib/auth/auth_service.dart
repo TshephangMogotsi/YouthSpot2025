@@ -17,7 +17,7 @@ class AuthService extends ChangeNotifier {
   // Helper method to check if Supabase is properly initialized
   bool get _isSupabaseInitialized {
     try {
-      return Supabase.instance.client.supabaseUrl.isNotEmpty;
+      return Supabase.instance.client.auth != null;
     } catch (e) {
       return false;
     }

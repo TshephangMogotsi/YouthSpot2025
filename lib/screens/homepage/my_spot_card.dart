@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../config/font_constants.dart';
+
 class MySpotCard extends StatelessWidget {
   const MySpotCard({
     super.key,
@@ -77,39 +79,36 @@ class MySpotCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(15.0),
                             color: iconBgColor,
                           ),
-                          child: iconURL.endsWith('.svg') 
-                            ? SvgPicture.asset(
-                                iconURL,
-                                width: 10,
-                                height: 10,
-                                colorFilter: ColorFilter.mode(
-                                  Colors.white,
-                                  BlendMode.srcIn,
-                                ),
-                              )
-                            : Image.asset(
-                                iconURL,
-                                width: 10,
-                                height: 10,
-                              ),
+                          child: iconURL.endsWith('.svg')
+                              ? SvgPicture.asset(
+                                  iconURL,
+                                  width: 10,
+                                  height: 10,
+                                  colorFilter: ColorFilter.mode(
+                                    Colors.white,
+                                    BlendMode.srcIn,
+                                  ),
+                                )
+                              : Image.asset(iconURL, width: 10, height: 10),
                         ),
                         const SizedBox(width: 10),
                         Text(
                           title,
-                          style: const TextStyle(
+                          style: AppTextStyles.primaryBigBold.copyWith(
                             color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
                           ),
+                          // style: const TextStyle(
+                          //   color: Colors.white,
+                          //   fontSize: 16,
+                          //   fontWeight: FontWeight.bold,
+                          // ),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(
-                height: 5,
-              ),
+              const SizedBox(height: 5),
             ],
           ),
         ),

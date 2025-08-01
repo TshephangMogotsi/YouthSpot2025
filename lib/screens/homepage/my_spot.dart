@@ -5,6 +5,7 @@ import '../../../config/theme_manager.dart';
 
 import '../../../services/services_locator.dart';
 
+import '../../config/font_constants.dart';
 import '../../global_widgets/primary_padding.dart';
 import '../../providers/event_provider.dart';
 import '../../providers/goal_provider.dart';
@@ -35,12 +36,13 @@ class MySpot extends StatelessWidget {
                 builder: (context, theme, snapshot) {
                   return Text(
                     "My spot",
-                    style: TextStyle(
-                      color:
-                          theme == ThemeMode.dark ? Colors.white : Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                       style: AppTextStyles.title
+                    // style: TextStyle(
+                    //   color:
+                    //       theme == ThemeMode.dark ? Colors.white : Colors.black,
+                    //   fontSize: 20,
+                    //   fontWeight: FontWeight.bold,
+                    // ),
                   );
                 },
               ),

@@ -27,8 +27,10 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     final goalProvider = Provider.of<GoalProvider>(context, listen: false);
-    final medicationProvider =
-        Provider.of<MedicationProvider>(context, listen: false);
+    final medicationProvider = Provider.of<MedicationProvider>(
+      context,
+      listen: false,
+    );
 
     // User auth is now handled by AuthService - no need to fetch user here
     if (kDebugMode) {
@@ -78,9 +80,7 @@ class _HomePageState extends State<HomePage> {
 
           // Show progress tracker if there are goals
           if (goalProvider.goals.isNotEmpty) ...[
-            PrimaryPadding(
-              child: buildProgressTracker(goalProvider.goals),
-            ),
+            PrimaryPadding(child: buildProgressTracker(goalProvider.goals)),
             const Height20(),
           ],
 
@@ -102,8 +102,9 @@ class _HomePageState extends State<HomePage> {
       expiredReminders += calculateExpiredReminders(goal);
     }
 
-    double progress =
-        totalReminders == 0 ? 0.0 : expiredReminders / totalReminders;
+    double progress = totalReminders == 0
+        ? 0.0
+        : expiredReminders / totalReminders;
     int progressPercentage = (progress * 100).toInt();
 
     return GestureDetector(
@@ -135,25 +136,30 @@ class _HomePageState extends State<HomePage> {
                 const Text(
                   'Total Goal\nProgression',
                   style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      height: 1.2),
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 1.2,
+                  ),
                 ),
                 Container(
                   decoration: BoxDecoration(
-                      color: const Color(0xFF2A5451),
-                      borderRadius: BorderRadius.circular(15)),
+                    color: const Color(0xFF2A5451),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                   padding: const EdgeInsetsDirectional.symmetric(
-                      horizontal: 10, vertical: 6),
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   child: Text(
                     '$progressPercentage%',
                     style: const TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                )
+                ),
               ],
             ),
             const Height10(),

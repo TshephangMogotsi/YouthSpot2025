@@ -22,7 +22,7 @@ class NewsCarousel extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const SectionHeader(title: 'Articles'),
+               SectionHeader(title: 'Articles',),
               InkWell(
                 onTap: () {
                   Navigator.push(

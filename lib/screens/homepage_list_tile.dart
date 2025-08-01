@@ -4,8 +4,8 @@ import 'package:flutter_svg_provider/flutter_svg_provider.dart';
 import '../../config/theme_manager.dart';
 import '../../services/services_locator.dart';
 import '../config/constants.dart';
+import '../config/font_constants.dart';
 import '../global_widgets/primary_padding.dart';
-
 
 class HomePageListTile extends StatelessWidget {
   const HomePageListTile({
@@ -24,12 +24,11 @@ class HomePageListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeManager = getIt<ThemeManager>();
 
-
     return GestureDetector(
       onTap: onTap,
       child: ValueListenableBuilder<ThemeMode>(
         valueListenable: themeManager.themeMode,
-        builder: (context,theme, snapshot) {
+        builder: (context, theme, snapshot) {
           return PrimaryPadding(
             child: Container(
               padding: const EdgeInsets.all(10),
@@ -42,7 +41,7 @@ class HomePageListTile extends StatelessWidget {
                   Container(
                     height: 90,
                     width: 90,
-                margin: const EdgeInsets.all(3),
+                    margin: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(innerBorderRadius),
                       image: DecorationImage(
@@ -56,16 +55,21 @@ class HomePageListTile extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(title, style: homePageListTitleStyleLight),
-                        Text(subtitle, style: subTitleStyle),
+                        Text(
+                          title,
+                          style: AppTextStyles.primaryBigBold
+                        ),
+                        Text(subtitle,    style: AppTextStyles.secondaryRegular.copyWith(
+                         color:  const Color.fromARGB(255, 63, 63, 63)
+                        )),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
           );
-        }
+        },
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../config/font_constants.dart';
 import '../config/theme_manager.dart';
 import '../services/services_locator.dart';
 
@@ -18,11 +19,12 @@ class SectionHeader extends StatelessWidget {
       builder: (context, theme, snapshot) {
         return Text(
           title,
-          style: TextStyle(
-            color: theme == ThemeMode.dark ? Colors.white : Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          // style: TextStyle(
+          //   color: theme == ThemeMode.dark ? Colors.white : Colors.black,
+          //   fontSize: 20,
+          //   fontWeight: FontWeight.bold,
+          // ),
+             style: AppTextStyles.title
         );
       },
     );

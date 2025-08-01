@@ -4,13 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:youthspot/providers/community_events_provider.dart';
 import 'package:youthspot/providers/event_provider.dart';
 import 'package:youthspot/screens/Account/account.dart';
-import 'package:youthspot/screens/events_screen.dart';
 import 'package:youthspot/screens/homepage.dart';
 import 'package:youthspot/screens/resources/resources.dart';
 import 'package:youthspot/screens/services/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import 'article_page.dart';
 import 'config/constants.dart';
 import 'config/theme_manager.dart';
 import 'services/services_locator.dart';

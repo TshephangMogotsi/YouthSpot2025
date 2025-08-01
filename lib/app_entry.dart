@@ -1,4 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:youthspot/providers/community_events_provider.dart';
+import 'package:youthspot/providers/event_provider.dart';
 import 'package:youthspot/screens/Account/account.dart';
 import 'package:youthspot/screens/events_screen.dart';
 import 'package:youthspot/screens/homepage.dart';
@@ -34,6 +38,29 @@ class _AppEntryState extends State<AppEntry> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this); // Observe app lifecycle changes
+    
+    // Sync user's attended events to personal calendar on app start
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncUserAttendedEvents();
+    });
+  }
+
+  /// Syncs user's attended events to personal calendar
+  void _syncUserAttendedEvents() async {
+    try {
+      final context = this.context;
+      if (!context.mounted) return;
+      
+      final communityEventsProvider = Provider.of<CommunityEventsProvider>(context, listen: false);
+      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+      
+      await communityEventsProvider.syncAttendedEventsToCalendar(eventProvider);
+    } catch (e) {
+      // Silently handle errors in background sync
+      if (kDebugMode) {
+        print('Error during app startup event sync: $e');
+      }
+    }
   }
 
   @override

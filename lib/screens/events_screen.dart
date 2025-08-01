@@ -22,8 +22,20 @@ class _EventsScreenState extends State<EventsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CommunityEventsProvider>().loadCommunityEvents();
+      _loadEventsAndSync();
     });
+  }
+
+  /// Load community events and sync attended events to calendar
+  Future<void> _loadEventsAndSync() async {
+    final communityEventsProvider = context.read<CommunityEventsProvider>();
+    final eventProvider = context.read<EventProvider>();
+    
+    // Load community events first
+    await communityEventsProvider.loadCommunityEvents();
+    
+    // Then sync attended events to personal calendar
+    await communityEventsProvider.syncAttendedEventsToCalendar(eventProvider);
   }
 
   @override
@@ -249,7 +261,7 @@ class EventCard extends StatelessWidget {
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: event.isUserAttending 
-                            ? Colors.orange 
+                            ? Colors.red.shade600  // Red for cancel action
                             : event.isFull 
                                 ? Colors.grey 
                                 : kSSIorange,
@@ -260,7 +272,7 @@ class EventCard extends StatelessWidget {
                       ),
                       child: Text(
                         event.isUserAttending 
-                            ? 'Going' 
+                            ? 'Cancel' 
                             : event.isFull 
                                 ? 'Full' 
                                 : 'Join',

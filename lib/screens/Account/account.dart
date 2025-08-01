@@ -4,10 +4,12 @@ import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/auth/auth_switcher.dart';
 import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/config/font_constants.dart';
+import 'package:youthspot/config/theme_manager.dart';
 import 'package:youthspot/global_widgets/initials_avatar.dart';
 import 'package:youthspot/global_widgets/primary_padding.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
 import 'package:youthspot/screens/Account/AccountSettings/account_settings.dart';
+import 'package:youthspot/services/services_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:youthspot/screens/Account/profile.dart';
 
@@ -119,7 +121,9 @@ class _AccountState extends State<Account> {
               },
             ),
             const Height10(),
-            const ThemeModeListTile(title: 'Day Mode', initialValue: false),
+            const ThemeModeListTile(
+              title: 'Day Mode',
+            ),
             const Height20(),
             const Height20(),
             const Height20(),
@@ -226,7 +230,7 @@ class ProfileListTile extends StatelessWidget {
   }
 }
 
-class ThemeModeListTile extends StatefulWidget {
+class ThemeModeListTile extends StatelessWidget {
   const ThemeModeListTile({
     super.key,
     required this.title,
@@ -239,78 +243,76 @@ class ThemeModeListTile extends StatefulWidget {
   final ValueChanged<bool>? onChanged;
 
   @override
-  State<ThemeModeListTile> createState() => _ThemeModeListTileState();
-}
-
-class _ThemeModeListTileState extends State<ThemeModeListTile> {
-  late bool isOn;
-
-  @override
-  void initState() {
-    super.initState();
-    isOn = widget.initialValue;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return PrimaryContainer(
-      borderRadius: BorderRadius.circular(25),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Left section (icon + title)
-          Row(
+    final themeManager = getIt<ThemeManager>();
+    
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeManager.themeMode,
+      builder: (context, themeMode, child) {
+        // Day mode toggle: true = light theme (day), false = dark theme (night)
+        final isDayMode = themeMode == ThemeMode.light;
+        
+        return PrimaryContainer(
+          borderRadius: BorderRadius.circular(25),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Image.asset(
-                'assets/icon/Settings/DayIcon.png',
-                width: 40,
-                height: 40,
+              // Left section (icon + title)
+              Row(
+                children: [
+                  Image.asset(
+                    'assets/icon/Settings/DayIcon.png',
+                    width: 40,
+                    height: 40,
+                  ),
+                  const SizedBox(width: 20),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontFamily: 'Onest',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 20),
-              Text(
-                widget.title,
-                style: const TextStyle(
-                  fontFamily: 'Onest',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+              // Right section (custom toggle)
+              GestureDetector(
+                onTap: () {
+                  final newDayMode = !isDayMode;
+                  themeManager.toggleTheme(!newDayMode); // toggle theme
+                  if (onChanged != null) onChanged!(newDayMode);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                  width: 60,
+                  height: 32,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: isDayMode ? Colors.yellow : Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: AnimatedAlign(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.fastEaseInToSlowEaseOut,
+                    alignment: isDayMode ? Alignment.centerRight : Alignment.centerLeft,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
-          // Right section (custom toggle)
-          GestureDetector(
-            onTap: () {
-              setState(() => isOn = !isOn);
-              if (widget.onChanged != null) widget.onChanged!(isOn);
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeInOut,
-              width: 60,
-              height: 32,
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: isOn ? Colors.yellow : Colors.grey.shade400,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: AnimatedAlign(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.fastEaseInToSlowEaseOut,
-                alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

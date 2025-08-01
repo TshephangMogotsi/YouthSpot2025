@@ -33,7 +33,6 @@ class _ArticleViewState extends State<ArticleView> {
 
   String? language;
   String? languageCode;
-  List<String> languages = <String>[];
   List<String> languageCodes = <String>[];
   String? voice;
 
@@ -63,29 +62,17 @@ class _ArticleViewState extends State<ArticleView> {
   }
 
   Future<void> initLanguages() async {
-    /// populate lang code (i.e. en-US)
-    languageCodes = await tts.getLanguages;
+    // Get available language codes
+    languageCodes = List<String>.from(await tts.getLanguages);
 
-    /// populate displayed language (i.e. English)
-    final List<dynamic>? displayLanguages = await tts.getDisplayLanguages;
-    if (displayLanguages == null) {
-      return;
-    }
-
-    languages.clear();
-    for (final dynamic lang in displayLanguages) {
-      languages.add(lang as String);
-    }
-
-    final String? defaultLangCode = await tts.getDefaultLanguage;
-    if (defaultLangCode != null && languageCodes.contains(defaultLangCode)) {
-      languageCode = defaultLangCode;
-    } else {
+    // Pick default language if available
+    if (languageCodes.contains(defaultLanguage)) {
       languageCode = defaultLanguage;
+    } else if (languageCodes.isNotEmpty) {
+      languageCode = languageCodes.first;
     }
-    language = await tts.getDisplayLanguageByCode(languageCode!);
 
-    /// get voice
+    language = languageCode; // No display name available in flutter_tts
     voice = await getVoiceByLang(languageCode!);
 
     if (mounted) {
@@ -94,9 +81,13 @@ class _ArticleViewState extends State<ArticleView> {
   }
 
   Future<String?> getVoiceByLang(String lang) async {
-    final List<dynamic>? voices = await tts.getVoiceByLang(languageCode!);
+    final voices = await tts.getVoices;
     if (voices != null && voices.isNotEmpty) {
-      return voices.first;
+      final voiceForLang = voices.firstWhere(
+        (v) => v['locale'] == lang,
+        orElse: () => null,
+      );
+      return voiceForLang?['name'];
     }
     return null;
   }
@@ -120,7 +111,7 @@ class _ArticleViewState extends State<ArticleView> {
     tts.stop();
   }
 
-  //stop speaking when the screen is closed
+  // Stop speaking when the screen is closed
   @override
   void dispose() {
     tts.stop();
@@ -129,13 +120,12 @@ class _ArticleViewState extends State<ArticleView> {
 
   @override
   Widget build(BuildContext context) {
-
     final themeManager = getIt<ThemeManager>();
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeManager.themeMode,
       builder: (context, theme, child) {
         return PrimaryScaffold(
-        child: SingleChildScrollView(
+          child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,9 +173,9 @@ class _ArticleViewState extends State<ArticleView> {
                               color: kSSIorange,
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            child:  Text(
+                            child: Text(
                               '2 days ago',
-                             style: AppTextStyles.secondarySemiBold.copyWith(
+                              style: AppTextStyles.secondarySemiBold.copyWith(
                                 fontSize: 12,
                                 color: Colors.white,
                               ),
@@ -194,7 +184,7 @@ class _ArticleViewState extends State<ArticleView> {
                           const Width10(),
                           Text(
                             'By ${widget.article.author}',
-                            style: AppTextStyles.primaryBold
+                            style: AppTextStyles.primaryBold,
                           ),
                         ],
                       ),

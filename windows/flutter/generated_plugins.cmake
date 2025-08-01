@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   awesome_notifications
+  flutter_tts
   local_auth_windows
   maps_launcher
   pdfx

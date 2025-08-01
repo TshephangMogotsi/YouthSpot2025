@@ -2,7 +2,7 @@ import 'package:provider/provider.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 
-import '../../../config/constants.dart';
+import '../config/constants.dart';
 import '../../../config/theme_manager.dart';
 import '../../../services/services_locator.dart';
 import '../global_widgets/custom_textfield.dart';
@@ -33,30 +33,48 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   Future<void> signIn() async {
-  if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
 
-  setState(() => _isLoading = true);
+    setState(() => _isLoading = true);
 
-  try {
-    final auth = Provider.of<AuthService>(context, listen: false);
-    await auth.signIn(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: pinkClr,
-        content: Text(
-          e.toString(),
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-      ),
-    );
-  } finally {
-    setState(() => _isLoading = false);
+    try {
+      final auth = Provider.of<AuthService>(context, listen: false);
+      await auth.signIn(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+    } on AuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: pinkClr,
+            content: Text(
+              e.message,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: pinkClr,
+            content: Text(
+              'An unexpected error occurred. Please try again.',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
-}
 
 
   @override
@@ -96,11 +114,13 @@ class _SignInPageState extends State<SignInPage> {
                               hintText: "Enter your email",
                               controller: emailController,
                               validator: (value) {
-                                if (value == null || value.isEmpty) {
+                                if (value == null || value.trim().isEmpty) {
                                   return 'Please enter your email';
                                 }
-                                if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                                  return 'Enter a valid email';
+                                // More robust email validation
+                                final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                                if (!emailRegex.hasMatch(value.trim())) {
+                                  return 'Please enter a valid email address';
                                 }
                                 return null;
                               },
@@ -116,8 +136,11 @@ class _SignInPageState extends State<SignInPage> {
                               //   setState(() => _isPasswordVisible = !_isPasswordVisible);
                               // },
                               validator: (value) {
-                                if (value == null || value.isEmpty) {
+                                if (value == null || value.trim().isEmpty) {
                                   return 'Please enter your password';
+                                }
+                                if (value.trim().length < 6) {
+                                  return 'Password must be at least 6 characters';
                                 }
                                 return null;
                               },

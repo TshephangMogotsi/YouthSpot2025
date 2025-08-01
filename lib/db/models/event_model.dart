@@ -63,16 +63,29 @@ class Event {
     );
   }
 
-  Map<String, Object?> toJson() => {
-        EventFields.id: notificationId,
-        EventFields.title: title,
-        EventFields.description: description,
-        EventFields.from: from.toIso8601String(),
-        EventFields.to: to.toIso8601String(),
-        EventFields.backgroundColor: backgroundColor.value,
-        EventFields.isAllDay: isAllDay ? 1 : 0,
-        EventFields.notificationId: notificationId,
-      };
+  Map<String, Object?> toJson() {
+    final json = <String, Object?>{
+      EventFields.title: title,
+      EventFields.description: description,
+      EventFields.from: from.toIso8601String(),
+      EventFields.to: to.toIso8601String(),
+      EventFields.backgroundColor: backgroundColor.value,
+      EventFields.isAllDay: isAllDay ? 1 : 0,
+    };
+    
+    if (notificationId != null) {
+      // For existing events, include both ID fields
+      json[EventFields.id] = notificationId;
+      json[EventFields.notificationId] = notificationId;
+    } else {
+      // For new events, don't include _id (let it auto-increment)
+      // but provide a placeholder for notificationId to satisfy NOT NULL constraint
+      // The createEvent method will update this with the generated _id
+      json[EventFields.notificationId] = 0;
+    }
+    
+    return json;
+  }
 
   static Event fromJson(Map<String, Object?> json) => Event(
         notificationId: json[EventFields.id] as int?,

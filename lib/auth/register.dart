@@ -96,14 +96,18 @@ class _RegisterPageState extends State<RegisterPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.green,
-            content: Text('Account successfully registered. Please verify your email.'),
+            content: Text(
+              'Account successfully registered! Please check your email to verify your account before signing in.',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            duration: Duration(seconds: 6),
           ),
         );
       }
     } on AuthException catch (e) {
       showSnackBar(e.message);
     } catch (e) {
-      showSnackBar('An error occurred. Please try again.');
+      showSnackBar('An unexpected error occurred. Please try again.');
     }
 
     setState(() {
@@ -112,12 +116,18 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.red,
-        content: Text(message),
-      ),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            message,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
   }
 
 
@@ -180,8 +190,15 @@ class _RegisterPageState extends State<RegisterPage> {
                                 hintText: "Username",
                                 controller: _userNameController,
                                 validator: (username) {
-                                  if (_userNameController.text.isEmpty) {
+                                  if (_userNameController.text.trim().isEmpty) {
                                     return 'Please enter username';
+                                  }
+                                  if (_userNameController.text.trim().length < 3) {
+                                    return 'Username must be at least 3 characters';
+                                  }
+                                  // Check for valid username characters (alphanumeric and underscore)
+                                  if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(_userNameController.text.trim())) {
+                                    return 'Username can only contain letters, numbers, and underscores';
                                   }
                                   return null;
                                 },
@@ -323,11 +340,15 @@ class _RegisterPageState extends State<RegisterPage> {
                                 isPasswordField: true,
                                 controller: _passwordController,
                                 validator: (value) {
-                                  if (_passwordController.text.isEmpty) {
+                                  if (_passwordController.text.trim().isEmpty) {
                                     return "Enter password";
                                   }
-                                  if (_passwordController.text.length < 6) {
-                                    return 'Password should be at least 6 characters';
+                                  if (_passwordController.text.trim().length < 6) {
+                                    return 'Password must be at least 6 characters';
+                                  }
+                                  // Add stronger password validation
+                                  if (!RegExp(r'^(?=.*[a-zA-Z])(?=.*\d).+$').hasMatch(_passwordController.text.trim())) {
+                                    return 'Password must contain at least one letter and one number';
                                   }
                                   return null; // No error
                                 },
@@ -339,12 +360,12 @@ class _RegisterPageState extends State<RegisterPage> {
                                 isPasswordField: true,
                                 controller: _passwordConfirmController,
                                 validator: (value) {
-                                  if (_passwordConfirmController.text !=
-                                      _passwordController.text) {
-                                    return "Passwords don't match";
+                                  if (_passwordConfirmController.text.trim().isEmpty) {
+                                    return "Please confirm your password";
                                   }
-                                  if (_passwordConfirmController.text.isEmpty) {
-                                    return "Enter password";
+                                  if (_passwordConfirmController.text.trim() !=
+                                      _passwordController.text.trim()) {
+                                    return "Passwords don't match";
                                   }
                                   return null; // No error
                                 },

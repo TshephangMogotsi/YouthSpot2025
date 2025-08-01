@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+
 import '../providers/community_events_provider.dart';
 import '../providers/event_provider.dart';
 import '../models/community_event.dart';
@@ -26,15 +27,12 @@ class _EventsScreenState extends State<EventsScreen> {
     });
   }
 
-  /// Load community events and sync attended events to calendar
+  /// Loads events and syncs attended ones to calendar
   Future<void> _loadEventsAndSync() async {
     final communityEventsProvider = context.read<CommunityEventsProvider>();
     final eventProvider = context.read<EventProvider>();
-    
-    // Load community events first
+
     await communityEventsProvider.loadCommunityEvents();
-    
-    // Then sync attended events to personal calendar
     await communityEventsProvider.syncAttendedEventsToCalendar(eventProvider);
   }
 
@@ -46,14 +44,10 @@ class _EventsScreenState extends State<EventsScreen> {
       valueListenable: themeManager.themeMode,
       builder: (context, theme, child) {
         return Scaffold(
-          backgroundColor:
-              theme == ThemeMode.dark ? darkmodeLight : backgroundColorLight,
+          backgroundColor: theme == ThemeMode.dark ? darkmodeLight : backgroundColorLight,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(60),
-            child: CustomAppBar(
-              context: context,
-              isHomePage: false,
-            ),
+            child: CustomAppBar(context: context, isHomePage: false),
           ),
           body: Consumer<CommunityEventsProvider>(
             builder: (context, provider, child) {
@@ -64,47 +58,10 @@ class _EventsScreenState extends State<EventsScreen> {
               }
 
               if (provider.error != null) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Error loading events',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: theme == ThemeMode.dark ? Colors.white : Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        provider.error!,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: theme == ThemeMode.dark ? Colors.white70 : Colors.black54,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          provider.clearError();
-                          provider.loadCommunityEvents();
-                        },
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                );
+                return _ErrorView(provider: provider, theme: theme);
               }
 
               final upcomingEvents = provider.upcomingEvents;
-
               return Column(
                 children: [
                   PrimaryPadding(
@@ -120,53 +77,15 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                         const Spacer(),
                         IconButton(
-                          onPressed: () => provider.loadCommunityEvents(),
-                          icon: Icon(
-                            Icons.refresh,
-                            color: theme == ThemeMode.dark ? Colors.white : Colors.black,
-                          ),
+                          icon: Icon(Icons.refresh, color: theme == ThemeMode.dark ? Colors.white : Colors.black),
+                          onPressed: provider.loadCommunityEvents,
                         ),
                       ],
                     ),
                   ),
                   Expanded(
                     child: upcomingEvents.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.event_busy,
-                                  size: 64,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'No upcoming events',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: theme == ThemeMode.dark ? Colors.white70 : Colors.black54,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Check back later for new events!',
-                                  style: TextStyle(
-                                    color: theme == ThemeMode.dark ? Colors.white54 : Colors.black38,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                ElevatedButton(
-                                  onPressed: () => provider.loadCommunityEvents(),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: kSSIorange,
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  child: const Text('Refresh Events'),
-                                ),
-                              ],
-                            ),
-                          )
+                        ? _NoEventsView(theme: theme, onRefresh: provider.loadCommunityEvents)
                         : RefreshIndicator(
                             onRefresh: provider.loadCommunityEvents,
                             child: ListView.builder(
@@ -174,10 +93,7 @@ class _EventsScreenState extends State<EventsScreen> {
                               itemCount: upcomingEvents.length,
                               itemBuilder: (context, index) {
                                 final event = upcomingEvents[index];
-                                return EventCard(
-                                  event: event,
-                                  theme: theme,
-                                );
+                                return EventCard(event: event, theme: theme);
                               },
                             ),
                           ),
@@ -192,15 +108,98 @@ class _EventsScreenState extends State<EventsScreen> {
   }
 }
 
+class _ErrorView extends StatelessWidget {
+  final CommunityEventsProvider provider;
+  final ThemeMode theme;
+
+  const _ErrorView({required this.provider, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(
+            'Error loading events',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: theme == ThemeMode.dark ? Colors.white : Colors.black,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            provider.error ?? '',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: theme == ThemeMode.dark ? Colors.white70 : Colors.black54,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              provider.clearError();
+              provider.loadCommunityEvents();
+            },
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NoEventsView extends StatelessWidget {
+  final ThemeMode theme;
+  final Future<void> Function() onRefresh;
+
+  const _NoEventsView({required this.theme, required this.onRefresh});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.event_busy, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(
+            'No upcoming events',
+            style: TextStyle(
+              fontSize: 18,
+              color: theme == ThemeMode.dark ? Colors.white70 : Colors.black54,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Check back later for new events!',
+            style: TextStyle(
+              color: theme == ThemeMode.dark ? Colors.white54 : Colors.black38,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: onRefresh,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kSSIorange,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Refresh Events'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class EventCard extends StatelessWidget {
   final CommunityEvent event;
   final ThemeMode theme;
 
-  const EventCard({
-    super.key,
-    required this.event,
-    required this.theme,
-  });
+  const EventCard({super.key, required this.event, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -209,31 +208,51 @@ class EventCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 4,
+      elevation: 0,
       color: theme == ThemeMode.dark ? const Color(0xFF1E1E1E) : Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(mainBorderRadius),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+      child: PrimaryPadding(
+        verticalPadding: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Event image placeholder
+            Container(
+              width: double.infinity,
+              height: 180,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.grey,
+                // TODO: Uncomment and handle image loading logic
+                // image: event.imageUrl != null
+                //     ? DecorationImage(
+                //         image: NetworkImage(event.imageUrl!),
+                //         fit: BoxFit.cover,
+                //       )
+                //     : null,
+              ),
+            ),
+            Height10(),
+            // Event Title
+            Text(
+              event.title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: theme == ThemeMode.dark ? Colors.white : Colors.black,
+              ),
+            ),
+            // Description and Join/Cancel Button
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Description
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        event.title,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: theme == ThemeMode.dark ? Colors.white : Colors.black,
-                        ),
-                      ),
                       const SizedBox(height: 8),
                       Text(
                         event.description,
@@ -247,6 +266,7 @@ class EventCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                // Join/Cancel Button
                 Consumer2<CommunityEventsProvider, EventProvider>(
                   builder: (context, communityProvider, eventProvider, child) {
                     return ElevatedButton(
@@ -260,10 +280,10 @@ class EventCard extends StatelessWidget {
                               }
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: event.isUserAttending 
-                            ? Colors.red.shade600  // Red for cancel action
-                            : event.isFull 
-                                ? Colors.grey 
+                        backgroundColor: event.isUserAttending
+                            ? Colors.red.shade600
+                            : event.isFull
+                                ? Colors.grey
                                 : kSSIorange,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
@@ -271,10 +291,10 @@ class EventCard extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        event.isUserAttending 
-                            ? 'Cancel' 
-                            : event.isFull 
-                                ? 'Full' 
+                        event.isUserAttending
+                            ? 'Cancel'
+                            : event.isFull
+                                ? 'Full'
                                 : 'Join',
                         style: const TextStyle(fontSize: 12),
                       ),
@@ -284,32 +304,54 @@ class EventCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
+            // Date/Time & Organized By
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.access_time,
-                  size: 16,
-                  color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
+                Row(
+                  children: [
+                    Icon(Icons.access_time, size: 16, color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${dateFormat.format(event.eventDate)} • ${timeFormat.format(event.eventDate)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  '${dateFormat.format(event.eventDate)} • ${timeFormat.format(event.eventDate)}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
+                Width10(),
+                // "Organized by" section, with wrapping
+                if (event.organizer != null)
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.person, size: 16, color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            'Organized by ${event.organizer}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
+                            ),
+                            softWrap: true,
+                            overflow: TextOverflow.visible,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
+            // Location
             if (event.location != null) ...[
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Icon(
-                    Icons.location_on,
-                    size: 16,
-                    color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
-                  ),
+                  Icon(Icons.location_on, size: 16, color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
@@ -324,35 +366,12 @@ class EventCard extends StatelessWidget {
                 ],
               ),
             ],
-            if (event.organizer != null) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(
-                    Icons.person,
-                    size: 16,
-                    color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Organized by ${event.organizer}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            // Attendees
             if (event.maxAttendees != null) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(
-                    Icons.group,
-                    size: 16,
-                    color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54,
-                  ),
+                  Icon(Icons.group, size: 16, color: theme == ThemeMode.dark ? Colors.white54 : Colors.black54),
                   const SizedBox(width: 4),
                   Text(
                     '${event.currentAttendees} / ${event.maxAttendees} attendees',
@@ -380,3 +399,6 @@ class EventCard extends StatelessWidget {
     );
   }
 }
+
+// If you have custom padding or spacing widgets, keep them as is.
+// Otherwise, replace Height10() and Width10() with SizedBox(height: 10) and SizedBox(width: 10).

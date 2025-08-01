@@ -1,56 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
-import '../config/supabase_manager.dart';
 import '../services/connectivity_helper.dart';
 
 class AuthService extends ChangeNotifier {
-  GoTrueClient? get _supabaseAuth => SupabaseManager.client?.auth;
-  StreamSubscription<AuthState>? _authSubscription;
+  final GoTrueClient supabaseAuth = Supabase.instance.client.auth;
+  late StreamSubscription<AuthState> _authSubscription;
 
   AuthService() {
-    _initializeAuthListener();
+    // Listen to auth state changes and notify our listeners
+    _authSubscription = supabaseAuth.onAuthStateChange.listen((data) {
+      notifyListeners();
+    });
   }
 
-  void _initializeAuthListener() {
-    if (SupabaseManager.isReady && _supabaseAuth != null) {
-      // Listen to auth state changes and notify our listeners
-      _authSubscription = _supabaseAuth!.onAuthStateChange.listen((data) {
-        notifyListeners();
-      });
+  // Helper method to check if Supabase is properly initialized
+  bool get _isSupabaseInitialized {
+    try {
+      return Supabase.instance.client.auth != null;
+    } catch (e) {
+      return false;
     }
-  }
-
-  // Reinitialize listener when Supabase becomes available
-  void reinitialize() {
-    _authSubscription?.cancel();
-    _initializeAuthListener();
-    notifyListeners();
   }
 
   @override
   void dispose() {
-    _authSubscription?.cancel();
+    _authSubscription.cancel();
     super.dispose();
   }
 
-  User? get currentUser => _supabaseAuth?.currentUser;
-  Stream<AuthState>? get authStateChanges => _supabaseAuth?.onAuthStateChange;
+  User? get currentUser => supabaseAuth.currentUser;
+  Stream<AuthState> get authStateChanges => supabaseAuth.onAuthStateChange;
   
   bool get isAuthenticated => currentUser != null;
-  bool get isServiceAvailable => SupabaseManager.isReady && _supabaseAuth != null;
 
   Future<AuthResponse> signIn({
     required String email,
     required String password,
   }) async {
-    // Check if authentication service is available
-    if (!isServiceAvailable) {
-      throw AuthException('Authentication service is not available. Please check your connection and try again.');
+    // Check if Supabase is properly initialized
+    if (!_isSupabaseInitialized) {
+      throw AuthException('Authentication service is not available. Please restart the app.');
     }
 
     try {
-      final res = await _supabaseAuth!.signInWithPassword(
+      final res = await supabaseAuth.signInWithPassword(
         email: email,
         password: password,
       ).timeout(
@@ -62,7 +56,7 @@ class AuthService extends ChangeNotifier {
 
       if (res.user != null) {
         try {
-          final profile = await SupabaseManager.client!
+          final profile = await Supabase.instance.client
               .from('profiles')
               .select()
               .eq('id', res.user!.id)
@@ -75,7 +69,7 @@ class AuthService extends ChangeNotifier {
               );
 
           if (profile['marked_for_deletion_at'] != null) {
-            await SupabaseManager.client!
+            await Supabase.instance.client
                 .from('profiles')
                 .update({'marked_for_deletion_at': null})
                 .eq('id', res.user!.id);
@@ -125,13 +119,13 @@ class AuthService extends ChangeNotifier {
     required String dateOfBirth,
     required String mobileNumber,
   }) async {
-    // Check if authentication service is available
-    if (!isServiceAvailable) {
-      throw AuthException('Authentication service is not available. Please check your connection and try again.');
+    // Check if Supabase is properly initialized
+    if (!_isSupabaseInitialized) {
+      throw AuthException('Authentication service is not available. Please restart the app.');
     }
 
     try {
-      final res = await _supabaseAuth!.signUp(email: email, password: password).timeout(
+      final res = await supabaseAuth.signUp(email: email, password: password).timeout(
         const Duration(seconds: 30),
         onTimeout: () {
           throw AuthException('Request timed out. Please check your internet connection and try again.');
@@ -140,7 +134,7 @@ class AuthService extends ChangeNotifier {
 
       if (res.user != null) {
         try {
-          await SupabaseManager.client!.from('profiles').insert({
+          await Supabase.instance.client.from('profiles').insert({
             'id': res.user!.id,
             'username': username,
             'full_name': fullName,
@@ -197,20 +191,19 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    if (!isServiceAvailable) return;
-    await _supabaseAuth!.signOut();
+    await supabaseAuth.signOut();
     // Notify listeners that authentication state has changed
     notifyListeners();
   }
 
   Future<void> resetPassword({required String email}) async {
-    // Check if authentication service is available
-    if (!isServiceAvailable) {
-      throw AuthException('Authentication service is not available. Please check your connection and try again.');
+    // Check if Supabase is properly initialized
+    if (!_isSupabaseInitialized) {
+      throw AuthException('Authentication service is not available. Please restart the app.');
     }
 
     try {
-      await _supabaseAuth!.resetPasswordForEmail(email).timeout(
+      await supabaseAuth.resetPasswordForEmail(email).timeout(
         const Duration(seconds: 30),
         onTimeout: () {
           throw AuthException('Request timed out. Please check your internet connection and try again.');
@@ -240,33 +233,23 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> updateUsername({required String username}) async {
-    if (!isServiceAvailable) {
-      throw AuthException('Authentication service is not available. Please check your connection and try again.');
-    }
-    await _supabaseAuth!.updateUser(UserAttributes(data: {'username': username}));
+    await supabaseAuth.updateUser(UserAttributes(data: {'username': username}));
   }
 
   Future<void> deleteAccount({
     required String email,
     required String password,
   }) async {
-    if (!isServiceAvailable) {
-      throw AuthException('Authentication service is not available. Please check your connection and try again.');
-    }
-    await SupabaseManager.client!.rpc('delete_user');
-    await _supabaseAuth!.signOut();
+    await Supabase.instance.client.rpc('delete_user');
+    await supabaseAuth.signOut();
   }
 
   Future<void> reauthenticateUser({required String currentPassword}) async {
-    if (!isServiceAvailable) {
-      throw AuthException('Authentication service is not available. Please check your connection and try again.');
-    }
-    
-    final email = _supabaseAuth!.currentUser?.email;
+    final email = supabaseAuth.currentUser?.email;
     if (email == null || email.isEmpty) {
       throw Exception("User email is missing. Please log in again.");
     }
-    await _supabaseAuth!.signInWithPassword(
+    await supabaseAuth.signInWithPassword(
       email: email,
       password: currentPassword,
     );

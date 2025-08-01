@@ -36,5 +36,47 @@ void main() {
       expect(event.isAllDay, equals(true));
       expect(event.notificationId, equals(67890));
     });
+
+    test('Event toJson should include ID fields when notificationId is not null', () {
+      final now = DateTime.now();
+      final event = Event(
+        title: 'Test Event',
+        description: 'Test Description',
+        from: now,
+        to: now.add(const Duration(hours: 1)),
+        isAllDay: false,
+        notificationId: 12345,
+      );
+
+      final json = event.toJson();
+
+      expect(json[EventFields.id], equals(12345));
+      expect(json[EventFields.notificationId], equals(12345));
+      expect(json[EventFields.title], equals('Test Event'));
+      expect(json[EventFields.description], equals('Test Description'));
+      expect(json[EventFields.isAllDay], equals(0)); // false = 0
+    });
+
+    test('Event toJson should exclude ID fields when notificationId is null', () {
+      final now = DateTime.now();
+      final event = Event(
+        title: 'Test Event',
+        description: 'Test Description',
+        from: now,
+        to: now.add(const Duration(hours: 1)),
+        isAllDay: false,
+        // notificationId is null by default
+      );
+
+      final json = event.toJson();
+
+      expect(json.containsKey(EventFields.id), false, 
+        reason: '_id should not be included for new events');
+      expect(json[EventFields.notificationId], equals(0),
+        reason: 'notificationId should have placeholder value for new events');
+      expect(json[EventFields.title], equals('Test Event'));
+      expect(json[EventFields.description], equals('Test Description'));
+      expect(json[EventFields.isAllDay], equals(0)); // false = 0
+    });
   });
 }

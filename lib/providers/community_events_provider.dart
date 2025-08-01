@@ -29,6 +29,18 @@ class CommunityEventsProvider extends ChangeNotifier {
       // Get current user ID
       final currentUserId = supabase.auth.currentUser?.id;
 
+      // First, test database connectivity
+      if (kDebugMode) {
+        print('Testing database connectivity...');
+        try {
+          await supabase.from('community_events').select('count').limit(1);
+          print('Database connection successful');
+        } catch (connectivityError) {
+          print('Database connectivity issue: $connectivityError');
+          throw Exception('Unable to connect to database: ${connectivityError.toString()}');
+        }
+      }
+
       // First, get all active events
       if (kDebugMode) {
         print('Loading community events...');
@@ -57,6 +69,8 @@ class CommunityEventsProvider extends ChangeNotifier {
             print('Total events in table: ${(allEventsResponse as List).length}');
             if ((allEventsResponse as List).isNotEmpty) {
               print('Sample event: ${allEventsResponse.first}');
+            } else {
+              print('Table appears to be empty - no events found');
             }
           }
         }
@@ -68,6 +82,15 @@ class CommunityEventsProvider extends ChangeNotifier {
       }
 
       final eventsList = eventsResponse as List;
+
+      // Handle empty results gracefully
+      if (eventsList.isEmpty) {
+        _events = [];
+        if (kDebugMode) {
+          print('No upcoming events found');
+        }
+        return; // Early return for empty results
+      }
 
       // Then, get user's attendances if user is logged in
       List<String> userEventIds = [];
@@ -111,12 +134,18 @@ class CommunityEventsProvider extends ChangeNotifier {
         }
       }).toList();
 
+      if (kDebugMode) {
+        print('Successfully loaded ${_events.length} events');
+      }
+
     } catch (e) {
       _error = 'Error loading community events: ${e.toString()}';
       if (kDebugMode) {
         print('Error loading community events: $e');
         if (e is ArgumentError) {
           print('Data validation error: ${e.message}');
+        } else if (e.toString().contains('connection')) {
+          print('Network/database connection error');
         }
       }
     } finally {

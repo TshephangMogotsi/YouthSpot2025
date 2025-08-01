@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:youthspot/config/font_constants.dart';
 
 import '../../config/theme_manager.dart';
 import '../../services/services_locator.dart';
@@ -89,33 +90,40 @@ class NewsArticle extends StatelessWidget {
                       Text(
                         title,
                         maxLines: 2,
-                        style: TextStyle(
-                          color: theme == ThemeMode.dark
-                              ? Colors.white
-                              : Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 19,
-                        ),
+                        style: AppTextStyles.primaryBold,
+                        // style: TextStyle(
+                        //   color: theme == ThemeMode.dark
+                        //       ? Colors.white
+                        //       : Colors.black,
+                        //   fontWeight: FontWeight.bold,
+                        //   fontSize: 19,
+                        // ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 5),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'By $author',
-                            style: const TextStyle(
+                            style: AppTextStyles.secondarySmallBold.copyWith(
                               color: Color(0xFFFF9600),
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
                             ),
+                            // style: const TextStyle(
+                            //   color: Color(0xFFFF9600),
+                            //   fontSize: 12,
+                            //   fontWeight: FontWeight.bold,
+                            // ),
                           ),
                           Text(
                             duration,
-                            style: const TextStyle(
+                              style: AppTextStyles.secondarySmallBold.copyWith(
                               color: Colors.grey,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
                             ),
+                            // style: const TextStyle(
+                            //   color: Colors.grey,
+                            //   fontSize: 12,
+                            //   fontWeight: FontWeight.bold,
+                            // ),
                           ),
                         ],
                       ),

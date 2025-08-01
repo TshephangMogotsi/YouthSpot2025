@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:youthspot/global_widgets/primary_container.dart';
 import 'package:youthspot/global_widgets/primary_padding.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
 

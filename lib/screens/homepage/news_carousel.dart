@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../config/constants.dart';
+import '../../config/font_constants.dart';
 import '../../global_widgets/primary_padding.dart';
 import '../../global_widgets/section_header.dart';
 import '../../providers/articles_provider.dart';
@@ -32,13 +32,16 @@ class NewsCarousel extends StatelessWidget {
                     ),
                   );
                 },
-                child: const Text(
+                child:  Text(
                   "Read All",
-                  style: TextStyle(
-                    color: kSSIorange,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
+                    style: AppTextStyles.secondarySemiBold.copyWith(
+                              color: Color(0xFFFF9600),
+                            ),
+                  // style: TextStyle(
+                  //   color: kSSIorange,
+                  //   fontSize: 12,
+                  //   fontWeight: FontWeight.bold,
+                  // ),
                 ),
               ),
             ],

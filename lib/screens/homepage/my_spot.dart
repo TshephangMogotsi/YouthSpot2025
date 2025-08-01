@@ -2,22 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../config/theme_manager.dart';
-// import '../../../provider/event_provider.dart';
-// import '../../../provider/medication_provider.dart';
+
 import '../../../services/services_locator.dart';
-// import '../../../widgets/heights_and_widths.dart';
-// import '../../../widgets/my_spot_card/my_spot_card.dart';
-// import '../../../widgets/primary_padding.dart';
+
 import '../../global_widgets/primary_padding.dart';
-import '../../motivational_quotes/motivational_qoutes.dart';
 import '../../providers/event_provider.dart';
 import '../../providers/goal_provider.dart';
 import '../../providers/medication_provider.dart';
-import '../../providers/quotes_provider.dart';
-// import '../my_spot/calendar/calendar_page.dart';
-// import '../my_spot/goals/goals.dart';
-// import '../my_spot/medication/medication.dart';
-// import '../my_spot/mood_tracker/mood_tracker.dart';
+
 import 'my_spot/calendar/calendar_page.dart';
 import 'my_spot/goals/goals.dart';
 import 'my_spot/medication/medication.dart';

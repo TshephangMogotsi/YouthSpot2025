@@ -152,10 +152,11 @@ class _ArticleViewState extends State<ArticleView> {
                 PrimaryPadding(
                   child: Text(
                     widget.article.title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                      style: AppTextStyles.title
+                    // style: const TextStyle(
+                    //   fontSize: 20,
+                    //   fontWeight: FontWeight.bold,
+                    // ),
                   ),
                 ),
                 const Height20(),
@@ -175,10 +176,13 @@ class _ArticleViewState extends State<ArticleView> {
                             ),
                             child: Text(
                               '2 days ago',
-                              style: AppTextStyles.secondarySemiBold.copyWith(
-                                fontSize: 12,
-                                color: Colors.white,
-                              ),
+                                style: AppTextStyles.secondarySmallBold.copyWith(
+                              color: Colors.white,
+                            ),
+                              // style: AppTextStyles.secondarySemiBold.copyWith(
+                              //   fontSize: 12,
+                              //   color: Colors.white,
+                              // ),
                             ),
                           ),
                           const Width10(),
@@ -210,8 +214,8 @@ class _ArticleViewState extends State<ArticleView> {
                     decoration: BoxDecoration(
                       color: articlePlayerBackgroundColor,
                       border: Border.all(
-                        color: Colors.grey[300]!.withOpacity(0.4),
-                        width: 0.5,
+                        color: Colors.grey[400]!.withValues(alpha: .7),
+                        width: 1.5,
                       ),
                       borderRadius: BorderRadius.circular(50),
                     ),
@@ -258,9 +262,10 @@ class _ArticleViewState extends State<ArticleView> {
                         widget.article.description.replaceAll(r'\n', '\n'),
                         autofocus: true,
                         textAlign: TextAlign.justify,
-                        style: const TextStyle(
-                          fontSize: 15.0,
-                        ),
+                        // style: const TextStyle(
+                        //   fontSize: 15.0,
+                        // ),
+                          style: AppTextStyles.primaryRegular
                       ),
                       const SizedBox(height: 16.0),
                     ],

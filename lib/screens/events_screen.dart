@@ -143,6 +143,15 @@ class _EventsScreenState extends State<EventsScreen> {
                                     color: theme == ThemeMode.dark ? Colors.white54 : Colors.black38,
                                   ),
                                 ),
+                                const SizedBox(height: 16),
+                                ElevatedButton(
+                                  onPressed: () => provider.loadCommunityEvents(),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: kSSIorange,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Refresh Events'),
+                                ),
                               ],
                             ),
                           )

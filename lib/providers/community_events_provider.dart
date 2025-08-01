@@ -29,13 +29,68 @@ class CommunityEventsProvider extends ChangeNotifier {
       // Get current user ID
       final currentUserId = supabase.auth.currentUser?.id;
 
+      // First, test database connectivity
+      if (kDebugMode) {
+        print('Testing database connectivity...');
+        try {
+          await supabase.from('community_events').select('count').limit(1);
+          print('Database connection successful');
+        } catch (connectivityError) {
+          print('Database connectivity issue: $connectivityError');
+          throw Exception('Unable to connect to database: ${connectivityError.toString()}');
+        }
+      }
+
       // First, get all active events
+      if (kDebugMode) {
+        print('Loading community events...');
+        print('Current time: ${DateTime.now().toIso8601String()}');
+      }
+      
       final eventsResponse = await supabase
           .from('community_events')
           .select('*')
           .eq('is_active', true)
           .gte('event_date', DateTime.now().toIso8601String())
           .order('event_date');
+
+      if (kDebugMode) {
+        print('Events response type: ${eventsResponse.runtimeType}');
+        print('Events response: $eventsResponse');
+        if (eventsResponse is List) {
+          print('Number of events: ${eventsResponse.length}');
+          if (eventsResponse.isEmpty) {
+            // Try to get any events without date filter to see if table has data
+            print('No upcoming events found, checking if table has any data...');
+            final allEventsResponse = await supabase
+                .from('community_events')
+                .select('*')
+                .limit(5);
+            print('Total events in table: ${(allEventsResponse as List).length}');
+            if ((allEventsResponse as List).isNotEmpty) {
+              print('Sample event: ${allEventsResponse.first}');
+            } else {
+              print('Table appears to be empty - no events found');
+            }
+          }
+        }
+      }
+
+      // Validate response format
+      if (eventsResponse is! List) {
+        throw Exception('Unexpected response format: ${eventsResponse.runtimeType}');
+      }
+
+      final eventsList = eventsResponse as List;
+
+      // Handle empty results gracefully
+      if (eventsList.isEmpty) {
+        _events = [];
+        if (kDebugMode) {
+          print('No upcoming events found');
+        }
+        return; // Early return for empty results
+      }
 
       // Then, get user's attendances if user is logged in
       List<String> userEventIds = [];
@@ -45,26 +100,53 @@ class CommunityEventsProvider extends ChangeNotifier {
             .select('event_id')
             .eq('user_id', currentUserId);
         
-        userEventIds = (attendanceResponse as List)
-            .map((attendance) => attendance['event_id'] as String)
-            .toList();
+        if (attendanceResponse is List) {
+          userEventIds = attendanceResponse
+              .map((attendance) => attendance['event_id'] as String?)
+              .where((id) => id != null)
+              .cast<String>()
+              .toList();
+        }
       }
 
-      _events = (eventsResponse as List).map((eventData) {
-        // Check if current user is attending this event
-        final isUserAttending = userEventIds.contains(eventData['id']);
+      _events = eventsList.map<CommunityEvent>((eventData) {
+        try {
+          // Validate eventData is a Map
+          if (eventData is! Map<String, dynamic>) {
+            throw ArgumentError('Event data is not a valid Map: ${eventData.runtimeType}');
+          }
 
-        // Add the user attending flag
-        final eventMap = Map<String, dynamic>.from(eventData);
-        eventMap['is_user_attending'] = isUserAttending;
+          // Check if current user is attending this event
+          final eventId = eventData['id'] as String?;
+          final isUserAttending = eventId != null && userEventIds.contains(eventId);
 
-        return CommunityEvent.fromJson(eventMap);
+          // Add the user attending flag
+          final eventMap = Map<String, dynamic>.from(eventData);
+          eventMap['is_user_attending'] = isUserAttending;
+
+          return CommunityEvent.fromJson(eventMap);
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error parsing event data: $e');
+            print('Event data: $eventData');
+          }
+          rethrow;
+        }
       }).toList();
 
+      if (kDebugMode) {
+        print('Successfully loaded ${_events.length} events');
+      }
+
     } catch (e) {
-      _error = 'Failed to load events: ${e.toString()}';
+      _error = 'Error loading community events: ${e.toString()}';
       if (kDebugMode) {
         print('Error loading community events: $e');
+        if (e is ArgumentError) {
+          print('Data validation error: ${e.message}');
+        } else if (e.toString().contains('connection')) {
+          print('Network/database connection error');
+        }
       }
     } finally {
       _isLoading = false;

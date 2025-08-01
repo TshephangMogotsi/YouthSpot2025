@@ -32,11 +32,28 @@ class CommunityEvent {
   });
 
   factory CommunityEvent.fromJson(Map<String, dynamic> json) {
+    // Add validation for required fields
+    final id = json['id'] as String?;
+    final title = json['title'] as String?;
+    final eventDateStr = json['event_date'] as String?;
+    final createdAtStr = json['created_at'] as String?;
+    final updatedAtStr = json['updated_at'] as String?;
+
+    if (id == null || id.isEmpty) {
+      throw ArgumentError('Event ID cannot be null or empty');
+    }
+    if (title == null || title.isEmpty) {
+      throw ArgumentError('Event title cannot be null or empty');
+    }
+    if (eventDateStr == null || eventDateStr.isEmpty) {
+      throw ArgumentError('Event date cannot be null or empty');
+    }
+
     return CommunityEvent(
-      id: json['id'] as String,
-      title: json['title'] as String,
+      id: id,
+      title: title,
       description: json['description'] as String? ?? '',
-      eventDate: DateTime.parse(json['event_date'] as String),
+      eventDate: DateTime.parse(eventDateStr),
       endDate: json['end_date'] != null 
         ? DateTime.parse(json['end_date'] as String) 
         : null,
@@ -46,8 +63,12 @@ class CommunityEvent {
       maxAttendees: json['max_attendees'] as int?,
       currentAttendees: json['current_attendees'] as int? ?? 0,
       isActive: json['is_active'] as bool? ?? true,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: createdAtStr != null && createdAtStr.isNotEmpty 
+        ? DateTime.parse(createdAtStr)
+        : DateTime.now(),
+      updatedAt: updatedAtStr != null && updatedAtStr.isNotEmpty 
+        ? DateTime.parse(updatedAtStr)
+        : DateTime.now(),
       isUserAttending: json['is_user_attending'] as bool? ?? false,
     );
   }

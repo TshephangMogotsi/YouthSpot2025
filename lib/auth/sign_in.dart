@@ -1,4 +1,5 @@
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 

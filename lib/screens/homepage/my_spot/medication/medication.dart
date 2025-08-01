@@ -31,8 +31,9 @@ class Medication extends StatefulWidget {
 class _MedicationState extends State<Medication> {
   late List<Medicine> medication;
   bool isLoading = false;
-  ValueNotifier<DateTime> selectedDateNotifier =
-      ValueNotifier<DateTime>(DateTime.now());
+  ValueNotifier<DateTime> selectedDateNotifier = ValueNotifier<DateTime>(
+    DateTime.now(),
+  );
 
   @override
   void initState() {
@@ -63,21 +64,16 @@ class _MedicationState extends State<Medication> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Medication',
-                  style: headingStyle,
-                ),
+                Text('Medication', style: headingStyle),
                 PillButton2(
                   title: 'Add',
-                  icon: const Icon(
-                    Icons.add,
-                    color: Colors.white,
-                  ),
+                  icon: const Icon(Icons.add, color: Colors.white),
                   onTap: () async {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const AddMedicationPage()),
+                        builder: (context) => const AddMedicationPage(),
+                      ),
                     );
                     refreshMedicine();
                   },
@@ -86,36 +82,30 @@ class _MedicationState extends State<Medication> {
             ),
           ),
           const Height20(),
-          const PrimaryPadding(
-            child: MedicationInfoHeader(),
-          ),
+          const PrimaryPadding(child: MedicationInfoHeader()),
           const Height20(),
           const PrimaryDivider(),
           const Height10(),
-          const PrimaryPadding(
-            child: SectionHeader(title: 'My Medication'),
-          ),
+          const PrimaryPadding(child: SectionHeader(title: 'My Medication')),
           const Height20(),
           Expanded(
             child: isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(),
-                  )
+                ? const Center(child: CircularProgressIndicator())
                 : medication.isEmpty
-                    ? const PrimaryPadding(
-                        child: PrimaryContainer(
-                          child: Center(
-                            child: Text(
-                              'No Medication Added',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
+                ? const PrimaryPadding(
+                    child: PrimaryContainer(
+                      child: Center(
+                        child: Text(
+                          'No Medication Added',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
-                      )
-                    : buildMedicationList(),
+                      ),
+                    ),
+                  )
+                : buildMedicationList(),
           ),
           const Height20(),
         ],
@@ -155,11 +145,17 @@ class _MedicationState extends State<Medication> {
   }
 
   bool isMedicineToday(
-      DateTime startDay, DateTime endDay, DateTime selectedDate) {
+    DateTime startDay,
+    DateTime endDay,
+    DateTime selectedDate,
+  ) {
     DateTime start = DateTime(startDay.year, startDay.month, startDay.day);
     DateTime end = DateTime(endDay.year, endDay.month, endDay.day);
-    DateTime selected =
-        DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+    DateTime selected = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+    );
 
     if (selected.isAfter(end) || selected.isBefore(start)) {
       return false;
@@ -204,22 +200,22 @@ class _MedicationState extends State<Medication> {
                         Container(
                           padding: const EdgeInsets.all(15),
                           decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(mainBorderRadius),
-                            color: setIconBgColor(medicine.color),
+                            borderRadius: BorderRadius.circular(
+                              mainBorderRadius,
+                            ),
+                            color: Colors.white
                           ),
-                          child: SvgPicture.asset(
-                              medicine.medicineType == 'pill'
-                                  ? 'assets/icons/pill.svg'
-                                  : medicine.medicineType == 'capsule'
-                                      ? 'assets/icons/capsule.svg'
-                                      : medicine.medicineType == 'syrup'
-                                          ? 'assets/icons/medicine.svg'
-                                          : 'assets/icons/capsule.svg',
-                              height: 30,
-                              width: 30,
-                              colorFilter: const ColorFilter.mode(
-                                  Colors.white, BlendMode.srcIn)),
+                          child: Image.asset(
+                            medicine.medicineType == 'pill'
+                                ? 'assets/icon/pill_small.png'
+                                : medicine.medicineType == 'capsule'
+                                ? 'assets/icon/pill.png'
+                                : medicine.medicineType == 'syrup'
+                                ? 'assets/icon/syrup_icon.png'
+                                : 'assets/icon/syrup_icon.png',
+                            height: 30,
+                            width: 30,
+                          ),
                         ),
                         const Width20(),
                         Expanded(
@@ -237,8 +233,9 @@ class _MedicationState extends State<Medication> {
                               Row(
                                 children: [
                                   SnackPill(
-                                      pillColor: Colors.green,
-                                      title: medicine.medicineType),
+                                    pillColor: Colors.green,
+                                    title: medicine.medicineType,
+                                  ),
                                   const Width10(),
                                   Text(
                                     medicine.doses.length == 1
@@ -273,25 +270,25 @@ class _MedicationState extends State<Medication> {
                                       children: [
                                         const Height20(),
                                         PrimaryButton(
-                                            label: 'Edit',
-                                            customBackgroundColor:
-                                                Colors.blueGrey,
-                                            onTap: () async {
-                                              Navigator.pop(context);
-                                              bool refresh =
-                                                  await Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      AddMedicationPage(
-                                                    medicine: medicine,
-                                                  ),
-                                                ),
-                                              );
-                                              if (refresh) {
-                                                refreshMedicine();
-                                              }
-                                            }),
+                                          label: 'Edit',
+                                          customBackgroundColor:
+                                              Colors.blueGrey,
+                                          onTap: () async {
+                                            Navigator.pop(context);
+                                            bool refresh = await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    AddMedicationPage(
+                                                      medicine: medicine,
+                                                    ),
+                                              ),
+                                            );
+                                            if (refresh) {
+                                              refreshMedicine();
+                                            }
+                                          },
+                                        ),
                                         const Height20(),
                                         PrimaryButton(
                                           label: 'Delete',
@@ -302,7 +299,8 @@ class _MedicationState extends State<Medication> {
                                               context: context,
                                               builder: (context) =>
                                                   ConfirmMedicineDeleteDialog(
-                                                      medicine: medicine),
+                                                    medicine: medicine,
+                                                  ),
                                             );
                                             if (refresh) {
                                               refreshMedicine();
@@ -336,10 +334,7 @@ class _MedicationState extends State<Medication> {
 }
 
 class ConfirmMedicineDeleteDialog extends StatelessWidget {
-  const ConfirmMedicineDeleteDialog({
-    super.key,
-    required this.medicine,
-  });
+  const ConfirmMedicineDeleteDialog({super.key, required this.medicine});
 
   final Medicine medicine;
 
@@ -359,8 +354,10 @@ class ConfirmMedicineDeleteDialog extends StatelessWidget {
               : backgroundColorLight,
           title: Text(
             'Delete Medicine',
-            style:
-                titleStyle.copyWith(fontSize: 22, fontWeight: FontWeight.bold),
+            style: titleStyle.copyWith(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -379,8 +376,10 @@ class ConfirmMedicineDeleteDialog extends StatelessWidget {
                       label: "Cancel",
                       customBackgroundColor: kSSIorange,
                       onTap: () {
-                        Navigator.pop(context,
-                            false); // Return false to indicate no refresh
+                        Navigator.pop(
+                          context,
+                          false,
+                        ); // Return false to indicate no refresh
                       },
                     ),
                   ),
@@ -388,19 +387,24 @@ class ConfirmMedicineDeleteDialog extends StatelessWidget {
                   Expanded(
                     child: PrimaryButton(
                       label: "Delete",
-                      customBackgroundColor:
-                          Colors.blueGrey.withValues(alpha: 0.3),
+                      customBackgroundColor: Colors.blueGrey.withValues(
+                        alpha: 0.3,
+                      ),
                       onTap: () async {
                         final medicationProvider =
-                            Provider.of<MedicationProvider>(context,
-                                listen: false);
+                            Provider.of<MedicationProvider>(
+                              context,
+                              listen: false,
+                            );
 
                         await medicationProvider.deleteMedication(
-                            medicine); // Use provider to delete
+                          medicine,
+                        ); // Use provider to delete
 
                         // Close the confirm delete dialog
-                        Navigator.of(context)
-                            .pop(true); // Return true to indicate refresh
+                        Navigator.of(
+                          context,
+                        ).pop(true); // Return true to indicate refresh
                       },
                     ),
                   ),

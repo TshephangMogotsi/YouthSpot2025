@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
 import '../../../../../../config/constants.dart';
 import '../../../../../../config/theme_manager.dart';
@@ -52,21 +51,16 @@ class MedicineTile extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SvgPicture.asset(
+                  Image.asset(
                     index == 0
-                        ? 'assets/icons/pill.svg'
+                        ? 'assets/icon/pill_small.png'
                         : index == 1
-                            ? 'assets/icons/capsule_icon.svg'
-                            : 'assets/icons/medicine.svg',
-                    height: 30,
-                    width: 30,
-                    colorFilter: !isOtherSelected
-                        ? selectedIndex == index
-                            ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-                            : theme == ThemeMode.light
-                                ? const ColorFilter.mode(Color(0xFF252150), BlendMode.srcIn)
-                                : const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-                        : null,
+                            ? 'assets/icon/pill.png'
+                            : 'assets/icon/syrup_icon.png',
+                    height: 40,
+                    width: 40,
+                    fit: BoxFit.cover,
+               
                   ),
                   const Height10(),
                   Text(

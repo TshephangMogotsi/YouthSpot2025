@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:youthspot/config/constants.dart';
 import '../config/theme_manager.dart';
 import '../services/services_locator.dart';
 
@@ -33,7 +34,7 @@ class _RoundIconButtonState extends State<RoundIconButton> {
           ),
           fillColor: theme == ThemeMode.dark
               ? const Color(0xFF2A2A34)
-              : const Color(0xFFFF9600),
+              : kSSIorange,
           child: const Icon(
             Icons.add,
             color: Colors.white,

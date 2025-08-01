@@ -46,75 +46,77 @@ class _DropDownWithIconsState extends State<DropDownWithIcons> {
   Widget build(BuildContext context) {
     final themeManager = getIt<ThemeManager>();
     return ValueListenableBuilder<ThemeMode>(
-        valueListenable: themeManager.themeMode,
-        builder: (context, theme, snapshot) {
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: theme == ThemeMode.light ? Colors.white : darkmodeFore,
-              
-              borderRadius: BorderRadius.circular(50),
-             
-            ),
-            child: DropdownButton<String>(
-              borderRadius: BorderRadius.circular(mainBorderRadius),
-              isExpanded: true,
-              value: selectedOption,
-                dropdownColor: theme == ThemeMode.dark
-                      ? darkmodeFore
-                      : Colors.white,
-              items: dropdownOptions.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  
-                  child: Row(
-                    children: [
-                      Icon(getIconForOption(value)),
-                      const SizedBox(width: 10),
-                      Text(value),
-                    ],
-                  ),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedOption = value!;
-                });
-                widget.onDropDownOptionSelected(selectedOption);
-              },
-              hint: const Text('Select an option'),
-              underline: Container(),
-            ),
-          );
-        });
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, snapshot) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: theme == ThemeMode.light ? Colors.white : darkmodeFore,
+
+            borderRadius: BorderRadius.circular(50),
+          ),
+          child: DropdownButton<String>(
+            borderRadius: BorderRadius.circular(mainBorderRadius),
+            isExpanded: true,
+            value: selectedOption,
+            dropdownColor: theme == ThemeMode.dark
+                ? darkmodeFore
+                : Colors.white,
+            items: dropdownOptions.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+
+                child: Row(
+                  children: [
+                    // Icon(getIconForOption(value)),
+                    Width10(),
+                    Image.asset(getIconForOption(value),width: 30,),
+                    const SizedBox(width: 10),
+                    Text(value),
+                  ],
+                ),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                selectedOption = value!;
+              });
+              widget.onDropDownOptionSelected(selectedOption);
+            },
+            hint: const Text('Select an option'),
+            underline: Container(),
+          ),
+        );
+      },
+    );
   }
 
-  IconData getIconForOption(String option) {
+  String getIconForOption(String option) {
     switch (option) {
       case 'Financial':
-        return Icons.attach_money;
+        return 'assets/icon/finances.png';
       case 'Fitness':
-        return Icons.fitness_center;
+        return 'assets/icon/fitness.png';
       case 'Diet & Nutrition':
-        return Icons.restaurant;
+        return 'assets/icon/nutrition.png';
       case 'Medication':
-        return Icons.local_pharmacy;
+        return 'assets/icon/medication.png';
       case 'Study':
-        return Icons.book;
+        return 'assets/icon/study.png';
       case 'Mindset':
-        return Icons.self_improvement;
+        return 'assets/icon/mindset.png';
       case 'Reading':
-        return Icons.menu_book;
+        return 'assets/icon/read.png';
       case 'Time Management':
-        return Icons.access_time;
+        return 'assets/icon/time.png';
       case 'Meditation':
-        return Icons.spa;
+        return 'assets/icon/meditation.png';
       case 'Relationships':
-        return Icons.favorite;
+        return 'assets/icon/relationships.png';
       case 'Lifestyle':
-        return Icons.style;
+        return 'assets/icon/lifestyle.png';
       default:
-        return Icons.help_outline;
+        return 'assets/icon/lifestyle.png';
     }
   }
 }

@@ -34,7 +34,7 @@ class PrimaryButton extends StatelessWidget {
           style: TextButton.styleFrom(
             backgroundColor: kSSIorange,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(50),
+              borderRadius: BorderRadius.circular(13),
             ),
           ),
           onPressed: onTap,

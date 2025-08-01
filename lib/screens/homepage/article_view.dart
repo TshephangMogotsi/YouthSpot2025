@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 import '../../../../config/constants.dart';
 import '../../../../config/theme_manager.dart';
@@ -24,7 +25,7 @@ class ArticleView extends StatefulWidget {
 class _ArticleViewState extends State<ArticleView> {
   final String defaultLanguage = 'en-US';
 
-  // TextToSpeech tts = TextToSpeech();
+  FlutterTts tts = FlutterTts();
 
   double volume = 1; // Range: 0-1
   double rate = 1.0; // Range: 0-2
@@ -42,72 +43,87 @@ class _ArticleViewState extends State<ArticleView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // initLanguages();
+      initLanguages();
+      setupTtsListeners();
     });
   }
 
-  // Future<void> initLanguages() async {
-  //   /// populate lang code (i.e. en-US)
-  //   languageCodes = await tts.getLanguages();
+  void setupTtsListeners() {
+    tts.setCompletionHandler(() {
+      setState(() {
+        buttonState = ButtonState.stopped;
+      });
+    });
 
-  //   /// populate displayed language (i.e. English)
-  //   final List<String>? displayLanguages = await tts.getDisplayLanguages();
-  //   if (displayLanguages == null) {
-  //     return;
-  //   }
+    tts.setErrorHandler((msg) {
+      setState(() {
+        buttonState = ButtonState.stopped;
+      });
+    });
+  }
 
-  //   languages.clear();
-  //   for (final dynamic lang in displayLanguages) {
-  //     languages.add(lang as String);
-  //   }
+  Future<void> initLanguages() async {
+    /// populate lang code (i.e. en-US)
+    languageCodes = await tts.getLanguages;
 
-  //   final String? defaultLangCode = await tts.getDefaultLanguage();
-  //   if (defaultLangCode != null && languageCodes.contains(defaultLangCode)) {
-  //     languageCode = defaultLangCode;
-  //   } else {
-  //     languageCode = defaultLanguage;
-  //   }
-  //   language = await tts.getDisplayLanguageByCode(languageCode!);
+    /// populate displayed language (i.e. English)
+    final List<dynamic>? displayLanguages = await tts.getDisplayLanguages;
+    if (displayLanguages == null) {
+      return;
+    }
 
-  //   /// get voice
-  //   voice = await getVoiceByLang(languageCode!);
+    languages.clear();
+    for (final dynamic lang in displayLanguages) {
+      languages.add(lang as String);
+    }
 
-  //   if (mounted) {
-  //     setState(() {});
-  //   }
-  // }
+    final String? defaultLangCode = await tts.getDefaultLanguage;
+    if (defaultLangCode != null && languageCodes.contains(defaultLangCode)) {
+      languageCode = defaultLangCode;
+    } else {
+      languageCode = defaultLanguage;
+    }
+    language = await tts.getDisplayLanguageByCode(languageCode!);
 
-  // Future<String?> getVoiceByLang(String lang) async {
-  //   // final List<String>? voices = await tts.getVoiceByLang(languageCode!);
-  //   if (voices != null && voices.isNotEmpty) {
-  //     return voices.first;
-  //   }
-  //   return null;
-  // }
+    /// get voice
+    voice = await getVoiceByLang(languageCode!);
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<String?> getVoiceByLang(String lang) async {
+    final List<dynamic>? voices = await tts.getVoiceByLang(languageCode!);
+    if (voices != null && voices.isNotEmpty) {
+      return voices.first;
+    }
+    return null;
+  }
 
   bool get supportPause => defaultTargetPlatform != TargetPlatform.android;
 
   bool get supportResume => defaultTargetPlatform != TargetPlatform.android;
 
   void speak() {
-    // buttonState = ButtonState.playing;
-    // tts.setVolume(volume);
-    // tts.setRate(rate);
-    // if (languageCode != null) {
-    //   tts.setLanguage(languageCode!);
-    // }
-    // tts.setPitch(pitch);
-    // tts.speak(widget.article.description);
+    buttonState = ButtonState.playing;
+    tts.setVolume(volume);
+    tts.setSpeechRate(rate);
+    if (languageCode != null) {
+      tts.setLanguage(languageCode!);
+    }
+    tts.setPitch(pitch);
+    tts.speak(widget.article.description);
   }
 
   void stop() {
-    // tts.stop();
+    tts.stop();
   }
 
   //stop speaking when the screen is closed
   @override
   void dispose() {
-    // tts.stop();
+    tts.stop();
     super.dispose();
   }
 
@@ -192,58 +208,58 @@ class _ArticleViewState extends State<ArticleView> {
                   ),
                 ),
                 const Height20(),
-                // const PrimaryPadding(
-                //   child: Text('Listen to this article'),
-                // ),
-                // const Height20(),
-                // PrimaryPadding(
-                //   child: Container(
-                //     alignment: Alignment.centerLeft,
-                //     width: double.infinity,
-                //     padding: const EdgeInsets.all(10),
-                //     decoration: BoxDecoration(
-                //       color: articlePlayerBackgroundColor,
-                //       border: Border.all(
-                //         color: Colors.grey[300]!.withOpacity(0.4),
-                //         width: 0.5,
-                //       ),
-                //       borderRadius: BorderRadius.circular(50),
-                //     ),
-                //     child: Row(
-                //       children: [
-                //         GestureDetector(
-                //           onTap: () {
-                //             setState(() {
-                //               if (buttonState == ButtonState.stopped) {
-                //                 buttonState = ButtonState.playing;
-                //                 speak();
-                //               } else if (buttonState == ButtonState.playing) {
-                //                 buttonState = ButtonState.stopped;
-                //                 stop();
-                //               }
-                //             });
-                //           },
-                //           child: Icon(
-                //             buttonState == ButtonState.playing
-                //                 ? Icons.stop_circle_rounded
-                //                 : Icons.play_circle_fill_rounded,
-                //             size: 32,
-                //             color: iconColor,
-                //           ),
-                //         ),
-                //         const Width10(),
-                //         Expanded(
-                //           child: Container(
-                //             height: 2,
-                //             color: progressBarColor,
-                //           ),
-                //         ),
-                //         const Width10(),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-                // const Height20(),
+                const PrimaryPadding(
+                  child: Text('Listen to this article'),
+                ),
+                const Height20(),
+                PrimaryPadding(
+                  child: Container(
+                    alignment: Alignment.centerLeft,
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: articlePlayerBackgroundColor,
+                      border: Border.all(
+                        color: Colors.grey[300]!.withOpacity(0.4),
+                        width: 0.5,
+                      ),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              if (buttonState == ButtonState.stopped) {
+                                buttonState = ButtonState.playing;
+                                speak();
+                              } else if (buttonState == ButtonState.playing) {
+                                buttonState = ButtonState.stopped;
+                                stop();
+                              }
+                            });
+                          },
+                          child: Icon(
+                            buttonState == ButtonState.playing
+                                ? Icons.stop_circle_rounded
+                                : Icons.play_circle_fill_rounded,
+                            size: 32,
+                            color: iconColor,
+                          ),
+                        ),
+                        const Width10(),
+                        Expanded(
+                          child: Container(
+                            height: 2,
+                            color: progressBarColor,
+                          ),
+                        ),
+                        const Width10(),
+                      ],
+                    ),
+                  ),
+                ),
+                const Height20(),
                 PrimaryPadding(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

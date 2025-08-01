@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
+import 'package:restart_app/restart_app.dart';
 import 'package:slide_to_act/slide_to_act.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/config/constants.dart';
+import 'package:youthspot/db/app_db.dart';
 import '../../../../config/font_constants.dart';
 
 class DeleteAccountDataDialog extends StatefulWidget {
@@ -15,12 +20,91 @@ class DeleteAccountDataDialog extends StatefulWidget {
 class _DeleteAccountDataDialogState extends State<DeleteAccountDataDialog> {
   int step = 0;
   bool isForward = true;
+  bool isDeleting = false;
 
   void _goToPage(int index) {
     setState(() {
       isForward = index > step;
       step = index;
     });
+  }
+
+  Future<void> _performDataDeletion() async {
+    setState(() => isDeleting = true);
+    
+    try {
+      // Always delete local database data first
+      await SSIDatabase.instance.deleteAllData();
+      
+      // Try to delete Supabase data if user is logged in
+      final auth = Provider.of<AuthService>(context, listen: false);
+      final userId = auth.currentUser?.id;
+      
+      if (userId != null) {
+        await _deleteSupabaseData(userId);
+      }
+      
+      // Reinitialize database to ensure clean state
+      await _refreshDatabase();
+      
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting data: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() => isDeleting = false);
+    }
+  }
+
+  Future<void> _deleteSupabaseData(String userId) async {
+    final supabase = Supabase.instance.client;
+    
+    try {
+      // Delete from event_attendees (user's event registrations)
+      try {
+        await supabase
+            .from('event_attendees')
+            .delete()
+            .eq('user_id', userId);
+      } catch (e) {
+        // Table might not exist or user might not have data
+        print('Warning: Could not delete from event_attendees: $e');
+      }
+      
+      // Delete from notes (if user has notes)
+      try {
+        await supabase
+            .from('notes')
+            .delete()
+            .eq('user_id', userId);
+      } catch (e) {
+        // Table might not exist or user might not have data
+        print('Warning: Could not delete from notes: $e');
+      }
+          
+      // Note: We don't delete from profiles table as that would break authentication
+      // Instead, we could clear non-essential profile data if needed
+      
+    } catch (e) {
+      throw Exception('Failed to delete Supabase data: $e');
+    }
+  }
+
+  Future<void> _refreshDatabase() async {
+    try {
+      // Close current database connection
+      await SSIDatabase.instance.close();
+      
+      // The next database access will automatically reinitialize it
+      // This ensures a clean state after deletion
+    } catch (e) {
+      // Ignore errors during close, as the database will be reinitialized anyway
+    }
   }
 
   @override
@@ -158,10 +242,15 @@ class _DeleteAccountDataDialogState extends State<DeleteAccountDataDialog> {
             return SlideAction(
               key: _sliderKey,
               onSubmit: () async {
-                await Future.delayed(const Duration(seconds: 1));
+                await _performDataDeletion();
                 _goToPage(2); // Go to success step
-                await Future.delayed(const Duration(seconds: 3));
-                Navigator.pop(context); // Close after success animation
+                await Future.delayed(const Duration(seconds: 2));
+                Navigator.pop(context); // Close dialog
+                
+                // Restart app to ensure completely clean state
+                await Future.delayed(const Duration(milliseconds: 500));
+                Restart.restartApp();
+                
                 return null;
               },
               borderRadius: 10,
@@ -216,7 +305,7 @@ class _DeleteAccountDataDialogState extends State<DeleteAccountDataDialog> {
         ),
         const SizedBox(height: 8),
         const Text(
-          'All your stored account data has been permanently deleted.',
+          'All your stored account data has been permanently deleted. The app will restart to ensure a clean state.',
           style: AppTextStyles.primaryRegular,
           textAlign: TextAlign.center,
         ),

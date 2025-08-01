@@ -10,6 +10,7 @@ import 'package:youthspot/global_widgets/full_width_dropdown.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
 import 'package:youthspot/global_widgets/primary_container.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
+import 'package:youthspot/global_widgets/user_avatar.dart';
 import 'package:youthspot/screens/homepage/my_spot/goals/widgets/date_picker.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -161,6 +162,29 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Profile Avatar at the top
+                    Center(
+                      child: Column(
+                        children: [
+                          UserAvatar(
+                            fullName: _fullNameController.text,
+                            radius: 50,
+                            backgroundColor: const Color(0xFF4A90E2),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _fullNameController.text.isNotEmpty 
+                                ? _fullNameController.text 
+                                : 'User Profile',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                      ),
+                    ),
                     CustomTextField(
                       controller: _usernameController,
                       hintText: 'Username',

@@ -1,10 +1,12 @@
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/auth/auth_switcher.dart';
 import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/config/font_constants.dart';
 import 'package:youthspot/global_widgets/primary_padding.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
+import 'package:youthspot/global_widgets/user_avatar.dart';
 import 'package:youthspot/screens/Account/AccountSettings/account_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:youthspot/screens/Account/profile.dart';
@@ -13,8 +15,47 @@ import '../../description.dart';
 import '../../global_widgets/primary_container.dart';
 import '../../terms_and_privacy.dart';
 
-class Account extends StatelessWidget {
+class Account extends StatefulWidget {
   const Account({super.key});
+
+  @override
+  State<Account> createState() => _AccountState();
+}
+
+class _AccountState extends State<Account> {
+  String userFullName = '';
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserProfile();
+  }
+
+  Future<void> _getUserProfile() async {
+    final auth = Provider.of<AuthService>(context, listen: false);
+    
+    try {
+      final userId = auth.currentUser?.id;
+      if (userId == null) return;
+
+      final response = await Supabase.instance.client
+          .from('profiles')
+          .select('full_name')
+          .eq('id', userId)
+          .single();
+
+      setState(() {
+        userFullName = response['full_name'] ?? '';
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        userFullName = '';
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +73,8 @@ class Account extends StatelessWidget {
             const SizedBox(height: 20),
             ProfileListTile(
               title: 'My Profile',
-              //profile image inside or circle avatar
-              assetImage: 'assets/icon/Settings/ProfileIcon.png',
+              fullName: userFullName,
+              isLoading: _loading,
               ontap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const ProfilePage()),
@@ -153,12 +194,14 @@ class ProfileListTile extends StatelessWidget {
   const ProfileListTile({
     super.key,
     required this.title,
-    required this.assetImage,
+    required this.fullName,
+    this.isLoading = false,
     this.ontap,
   });
 
   final String title;
-  final String assetImage;
+  final String fullName;
+  final bool isLoading;
   final VoidCallback? ontap;
 
   @override
@@ -170,11 +213,19 @@ class ProfileListTile extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          //icon image
-          CircleAvatar(radius: 25, backgroundImage: AssetImage(assetImage)),
-          //wallpaper image
+          // Circle avatar with initials
+          isLoading
+              ? const CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Color(0xFFE0E0E0),
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : UserAvatar(
+                  fullName: fullName,
+                  radius: 25,
+                  backgroundColor: const Color(0xFF4A90E2),
+                ),
           const Width20(),
-
           Text(title, style: AppTextStyles.primaryBigSemiBold),
         ],
       ),

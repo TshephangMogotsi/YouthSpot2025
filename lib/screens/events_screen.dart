@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../providers/community_events_provider.dart';
 import '../providers/event_provider.dart';
@@ -218,20 +219,68 @@ class EventCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Event image placeholder
-            Container(
-              width: double.infinity,
-              height: 180,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-                // TODO: Uncomment and handle image loading logic
-                // image: event.imageUrl != null
-                //     ? DecorationImage(
-                //         image: NetworkImage(event.imageUrl!),
-                //         fit: BoxFit.cover,
-                //       )
-                //     : null,
+            // Event image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                width: double.infinity,
+                height: 180,
+                child: event.imageUrl != null && event.imageUrl!.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: event.imageUrl!,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Colors.grey[300],
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: kSSIorange,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.grey[300],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.event,
+                                size: 40,
+                                color: Colors.grey[600],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Event Image',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(
+                        color: Colors.grey[300],
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.event,
+                              size: 40,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Event Image',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
               ),
             ),
             Height10(),

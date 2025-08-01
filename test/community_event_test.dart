@@ -12,6 +12,7 @@ void main() {
         'end_date': '2025-02-15T16:00:00.000Z',
         'location': 'Test Location',
         'organizer': 'Test Organizer',
+        'image_url': 'https://example.com/event-image.jpg',
         'max_attendees': 50,
         'current_attendees': 10,
         'is_active': true,
@@ -27,6 +28,7 @@ void main() {
       expect(event.description, 'Test Description');
       expect(event.location, 'Test Location');
       expect(event.organizer, 'Test Organizer');
+      expect(event.imageUrl, 'https://example.com/event-image.jpg');
       expect(event.maxAttendees, 50);
       expect(event.currentAttendees, 10);
       expect(event.isActive, true);
@@ -42,6 +44,7 @@ void main() {
         endDate: DateTime.parse('2025-02-15T16:00:00.000Z'),
         location: 'Test Location',
         organizer: 'Test Organizer',
+        imageUrl: 'https://example.com/event-image.jpg',
         maxAttendees: 50,
         currentAttendees: 10,
         isActive: true,
@@ -57,6 +60,7 @@ void main() {
       expect(json['description'], 'Test Description');
       expect(json['location'], 'Test Location');
       expect(json['organizer'], 'Test Organizer');
+      expect(json['image_url'], 'https://example.com/event-image.jpg');
       expect(json['max_attendees'], 50);
       expect(json['current_attendees'], 10);
       expect(json['is_active'], true);
@@ -137,6 +141,38 @@ void main() {
       expect(updatedEvent.description, 'Original Description'); // unchanged
       expect(updatedEvent.currentAttendees, 10); // changed
       expect(updatedEvent.isUserAttending, true); // changed
+    });
+
+    test('should handle null imageUrl gracefully', () {
+      final jsonWithoutImage = {
+        'id': 'test-id',
+        'title': 'Test Event',
+        'description': 'Test Description',
+        'event_date': '2025-02-15T10:00:00.000Z',
+        'created_at': '2025-01-01T00:00:00.000Z',
+        'updated_at': '2025-01-01T00:00:00.000Z',
+      };
+
+      final event = CommunityEvent.fromJson(jsonWithoutImage);
+      expect(event.imageUrl, isNull);
+
+      final json = event.toJson();
+      expect(json['image_url'], isNull);
+    });
+
+    test('should handle empty imageUrl string', () {
+      final jsonWithEmptyImage = {
+        'id': 'test-id',
+        'title': 'Test Event',
+        'description': 'Test Description',
+        'event_date': '2025-02-15T10:00:00.000Z',
+        'image_url': '',
+        'created_at': '2025-01-01T00:00:00.000Z',
+        'updated_at': '2025-01-01T00:00:00.000Z',
+      };
+
+      final event = CommunityEvent.fromJson(jsonWithEmptyImage);
+      expect(event.imageUrl, '');
     });
   });
 }

@@ -1,8 +1,10 @@
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/auth/auth_switcher.dart';
 import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/config/font_constants.dart';
+import 'package:youthspot/global_widgets/initials_avatar.dart';
 import 'package:youthspot/global_widgets/primary_padding.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
 import 'package:youthspot/screens/Account/AccountSettings/account_settings.dart';
@@ -13,8 +15,48 @@ import '../../description.dart';
 import '../../global_widgets/primary_container.dart';
 import '../../terms_and_privacy.dart';
 
-class Account extends StatelessWidget {
+class Account extends StatefulWidget {
   const Account({super.key});
+
+  @override
+  State<Account> createState() => _AccountState();
+}
+
+class _AccountState extends State<Account> {
+  String _userFullName = '';
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserProfile();
+  }
+
+  Future<void> _getUserProfile() async {
+    setState(() => _loading = true);
+    final auth = Provider.of<AuthService>(context, listen: false);
+
+    try {
+      final userId = auth.currentUser?.id;
+      if (userId == null) return;
+
+      final response = await Supabase.instance.client
+          .from('profiles')
+          .select('full_name')
+          .eq('id', userId)
+          .single();
+
+      if (mounted) {
+        setState(() {
+          _userFullName = response['full_name'] ?? '';
+        });
+      }
+    } catch (e) {
+      // Handle error silently for now
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +74,7 @@ class Account extends StatelessWidget {
             const SizedBox(height: 20),
             ProfileListTile(
               title: 'My Profile',
-              //profile image inside or circle avatar
-              assetImage: 'assets/icon/Settings/ProfileIcon.png',
+              fullName: _userFullName,
               ontap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const ProfilePage()),
@@ -153,12 +194,12 @@ class ProfileListTile extends StatelessWidget {
   const ProfileListTile({
     super.key,
     required this.title,
-    required this.assetImage,
+    required this.fullName,
     this.ontap,
   });
 
   final String title;
-  final String assetImage;
+  final String fullName;
   final VoidCallback? ontap;
 
   @override
@@ -170,8 +211,11 @@ class ProfileListTile extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          //icon image
-          CircleAvatar(radius: 25, backgroundImage: AssetImage(assetImage)),
+          //initials avatar
+          InitialsAvatar(
+            fullName: fullName,
+            radius: 25,
+          ),
           //wallpaper image
           const Width20(),
 

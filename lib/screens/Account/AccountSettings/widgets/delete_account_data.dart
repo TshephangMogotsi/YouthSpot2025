@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:youthspot/config/constants.dart';
+import 'package:youthspot/db/app_db.dart';
 import '../../../../config/font_constants.dart';
 
 class DeleteAccountDataDialog extends StatefulWidget {
@@ -158,10 +159,29 @@ class _DeleteAccountDataDialogState extends State<DeleteAccountDataDialog> {
             return SlideAction(
               key: _sliderKey,
               onSubmit: () async {
-                await Future.delayed(const Duration(seconds: 1));
-                _goToPage(2); // Go to success step
-                await Future.delayed(const Duration(seconds: 3));
-                Navigator.pop(context); // Close after success animation
+                try {
+                  await Future.delayed(const Duration(seconds: 1));
+                  
+                  // Delete all data from local database
+                  await SSIDatabase.instance.deleteAllData();
+                  
+                  // Refresh the database to ensure safe operation after deletion
+                  await SSIDatabase.instance.database;
+                  
+                  _goToPage(2); // Go to success step
+                  await Future.delayed(const Duration(seconds: 3));
+                  Navigator.pop(context); // Close after success animation
+                } catch (e) {
+                  // Handle error
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error deleting data: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
                 return null;
               },
               borderRadius: 10,

@@ -48,6 +48,24 @@
 # Keep line numbers for debugging
 -keepattributes SourceFile,LineNumberTable
 
+# Google Play Core classes for deferred components
+-keep class com.google.android.play.core.** { *; }
+-dontwarn com.google.android.play.core.**
+
+# Flutter deferred components support
+-keep class io.flutter.embedding.engine.deferredcomponents.** { *; }
+-keep class io.flutter.embedding.android.FlutterPlayStoreSplitApplication { *; }
+
+# Alternative: If the above doesn't work, uncomment the following lines to ignore the missing classes
+# This is safe if your app doesn't use deferred components
+# -dontwarn io.flutter.embedding.engine.deferredcomponents.**
+# -dontwarn io.flutter.embedding.android.FlutterPlayStoreSplitApplication
+
+# Specific Google Play Core classes that are causing R8 errors
+-dontwarn com.google.android.play.core.splitcompat.SplitCompatApplication
+-dontwarn com.google.android.play.core.splitinstall.**
+-dontwarn com.google.android.play.core.tasks.**
+
 # Remove logging (optional for production)
 -assumenosideeffects class android.util.Log {
     public static boolean isLoggable(java.lang.String, int);

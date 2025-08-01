@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'providers/articles_provider.dart';
+import 'providers/community_events_provider.dart';
 import 'providers/event_provider.dart';
 import 'providers/goal_provider.dart';
 import 'providers/leaderboard_provider.dart';
@@ -47,6 +48,9 @@ class MyApp extends StatelessWidget {
       providers: [
          ChangeNotifierProvider(
               create: (_) => EventProvider()..loadEventsFromDB(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => CommunityEventsProvider(),
             ),
             ChangeNotifierProvider(
               create: (context) => QuizLogic(),

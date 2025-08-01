@@ -12,6 +12,9 @@
 .swiftpm/
 migrate_working_dir/
 
+# Custom validation scripts
+validate_implementation.sh
+
 # IntelliJ related
 *.iml
 *.ipr

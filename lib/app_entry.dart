@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:youthspot/screens/Account/account.dart';
+import 'package:youthspot/screens/events_screen.dart';
 import 'package:youthspot/screens/homepage.dart';
 import 'package:youthspot/screens/resources/resources.dart';
 import 'package:youthspot/screens/services/services.dart';
@@ -25,7 +26,7 @@ class _AppEntryState extends State<AppEntry> with WidgetsBindingObserver {
     HomePage(),
     DocumentPage(), // Resources
     ServicesScreen(), // Services
-    // Placeholder(), // Leaderboard
+    EventsScreen(), // Events
     Account(), // Account
   ];
 
@@ -122,6 +123,14 @@ class _AppEntryState extends State<AppEntry> with WidgetsBindingObserver {
               //   ),
               //   label: 'Leaderboard',
               // ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  _selectedIndex == 3 ? Icons.event : Icons.event_outlined,
+                  size: 20,
+                  color: _selectedIndex == 3 ? kSSIorange : Colors.grey,
+                ),
+                label: 'Events',
+              ),
               BottomNavigationBarItem(
                 icon: SvgPicture.asset(
                   _selectedIndex == 4

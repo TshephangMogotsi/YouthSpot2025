@@ -17,6 +17,7 @@ import 'package:youthspot/screens/homepage/my_spot/goals/widgets/date_picker.dar
 import 'package:youthspot/config/theme_manager.dart';
 import 'package:youthspot/services/services_locator.dart';
 import 'package:youthspot/terms_and_privacy.dart';
+import 'package:youthspot/screens/onboarding/welcome_screen.dart';
 import 'fullname_validator.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -41,6 +42,7 @@ class _RegisterPageState extends State<RegisterPage> {
   String? selectedSex;
   DateTime dateOfBirth = DateTime.now();
   bool? isSexSelected;
+  bool _agreedToTerms = false;
 
   final List<String> genderList = [
     'Male',
@@ -93,15 +95,8 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Colors.green,
-            content: Text(
-              'Account successfully registered! Please check your email to verify your account before signing in.',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-            duration: Duration(seconds: 6),
-          ),
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
         );
       }
     } on AuthException catch (e) {
@@ -371,79 +366,101 @@ class _RegisterPageState extends State<RegisterPage> {
                                 },
                               ),
                               const Height20(),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: SizedBox(
-                                  width: double.infinity,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      const Text(
-                                        "By creating an account you agree to the",
-                                        style: TextStyle(
-                                          color: Color(0xFF263245),
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: RichText(
-                                          text: TextSpan(
-                                            text: "Terms of Use",
-                                            recognizer: TapGestureRecognizer()
-                                              ..onTap = () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        const TermsPrivacyScreen(),
-                                                  ),
-                                                );
-                                              },
-                                            style: const TextStyle(
-                                              color: Colors.blue,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                            children: [
-                                              const TextSpan(
-                                                  text: " & ",
-                                                  style: TextStyle(
-                                                      color: Color(0xFF263245),
-                                                      fontSize: 14)),
-                                              TextSpan(
-                                                text: "Privacy Policy",
-                                                recognizer:
-                                                    TapGestureRecognizer()
-                                                      ..onTap = () {
-                                                        Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                const TermsPrivacyScreen(),
-                                                          ),
-                                                        );
-                                                      },
-                                                style: const TextStyle(
-                                                  color: Colors.blue,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                ),
+                              // Terms and Conditions checkbox
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Checkbox(
+                                      value: _agreedToTerms,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _agreedToTerms = value ?? false;
+                                        });
+                                      },
+                                      activeColor: kSSIorange,
+                                    ),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _agreedToTerms = !_agreedToTerms;
+                                          });
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(top: 12.0),
+                                          child: RichText(
+                                            text: TextSpan(
+                                              text: "I have read and agree to the ",
+                                              style: const TextStyle(
+                                                color: Color(0xFF263245),
+                                                fontSize: 14,
                                               ),
-                                            ],
+                                              children: [
+                                                TextSpan(
+                                                  text: "Terms of Use",
+                                                  recognizer: TapGestureRecognizer()
+                                                    ..onTap = () {
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              const TermsPrivacyScreen(),
+                                                        ),
+                                                      );
+                                                    },
+                                                  style: const TextStyle(
+                                                    color: Colors.blue,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                                const TextSpan(
+                                                  text: " and ",
+                                                  style: TextStyle(
+                                                    color: Color(0xFF263245),
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text: "Privacy Policy",
+                                                  recognizer: TapGestureRecognizer()
+                                                    ..onTap = () {
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              const TermsPrivacyScreen(),
+                                                        ),
+                                                      );
+                                                    },
+                                                  style: const TextStyle(
+                                                    color: Colors.blue,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                      )
-                                    ],
-                                  ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
+                              const Height20(),
                               PrimaryButton(
                                 label: 'Create Account',
                                 onTap: () {
-                                  if (_formKey.currentState!.validate()) {}
-                                  signUp();
+                                  if (!_agreedToTerms) {
+                                    showSnackBar('Please agree to the terms and conditions to continue.');
+                                    return;
+                                  }
+                                  if (_formKey.currentState!.validate()) {
+                                    signUp();
+                                  }
                                 },
                               ),
                               const Height20(),

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'config/theme_manager.dart';
 import 'providers/articles_provider.dart';
 import 'providers/community_events_provider.dart';
 import 'providers/event_provider.dart';
@@ -85,26 +86,39 @@ class MyApp extends StatelessWidget {
             ChangeNotifierProvider(
               create: (_) => QuoteProvider(),
             ),
-            // ChangeNotifierProvider(
-            //   create: (_) => AuthState(),
-            // ),
-            // ChangeNotifierProvider(
-            //   create: (_) => DocumentProvider(),
-            // ),
-
-             ChangeNotifierProvider(
-          create: (_) => AuthService(), // Add your AuthService here
-        ),
+            ChangeNotifierProvider(
+              create: (_) => AuthService(), // Add your AuthService here
+            ),
       ],
-      child: MaterialApp(
-        navigatorKey: navigatorKey,
-        title: 'Flutter Demo',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
-        home: const AuthLayout()
+      child: Builder(
+        builder: (context) {
+          final themeManager = getIt<ThemeManager>();
+          return ValueListenableBuilder<ThemeMode>(
+            valueListenable: themeManager.themeMode,
+            builder: (context, themeMode, child) {
+              return MaterialApp(
+                navigatorKey: navigatorKey,
+                title: 'YouthSpot',
+                debugShowCheckedModeBanner: false,
+                themeMode: themeMode,
+                theme: ThemeData(
+                  colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+                  useMaterial3: true,
+                  brightness: Brightness.light,
+                ),
+                darkTheme: ThemeData(
+                  colorScheme: ColorScheme.fromSeed(
+                    seedColor: Colors.deepPurple,
+                    brightness: Brightness.dark,
+                  ),
+                  useMaterial3: true,
+                  brightness: Brightness.dark,
+                ),
+                home: const AuthLayout(),
+              );
+            },
+          );
+        },
       ),
     );
   }

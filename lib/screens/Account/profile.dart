@@ -7,6 +7,7 @@ import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/global_widgets/custom_textfield.dart';
 import 'package:youthspot/global_widgets/full_width_dropdown.dart';
+import 'package:youthspot/global_widgets/initials_avatar.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
 import 'package:youthspot/global_widgets/primary_container.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
@@ -161,6 +162,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Profile Avatar at the top
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: InitialsAvatar(
+                          fullName: _fullNameController.text,
+                          radius: 50,
+                        ),
+                      ),
+                    ),
                     CustomTextField(
                       controller: _usernameController,
                       hintText: 'Username',

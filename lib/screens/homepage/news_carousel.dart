@@ -48,7 +48,6 @@ class NewsCarousel extends StatelessWidget {
           ),
         ),
         Container(
-          padding: const EdgeInsets.only(left: 20.0),
           height: 375.0,
           child: ListView.builder(
             physics: const BouncingScrollPhysics(),

@@ -32,7 +32,7 @@ class NewsArticle extends StatelessWidget {
         return GestureDetector(
           onTap: onTap,
           child: Container(
-            margin: const EdgeInsets.only(top: 10, bottom: 30, right: 20),
+            margin: const EdgeInsets.only(top: 10, bottom: 30, left: 20),
             decoration: BoxDecoration(
               color: theme == ThemeMode.dark
                   ? const Color(0xFF191919)

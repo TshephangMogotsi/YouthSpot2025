@@ -12,7 +12,7 @@ class WelcomeScreen extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/Backgrounds/register_background.png'),
+            image: AssetImage('assets/Backgrounds/login_background.png'),
             fit: BoxFit.cover,
           ),
         ),
@@ -42,15 +42,15 @@ class WelcomeScreen extends StatelessWidget {
                 const Text(
                   'Your journey to better health and wellness starts now!',
                   style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
+                    color: Colors.white,
+                    fontSize: 22,
                     fontFamily: 'Onest',
                   ),
                   textAlign: TextAlign.center,
                 ),
                 
-                const Spacer(),
-                
+                // const Spacer(),
+                SizedBox(height: 20),
                 // Begin button
                 PrimaryButton(
                   label: 'Begin',
@@ -63,7 +63,7 @@ class WelcomeScreen extends StatelessWidget {
                   },
                 ),
                 
-                const SizedBox(height: 50),
+                const SizedBox(height: 350),
               ],
             ),
           ),

@@ -10,6 +10,7 @@ const Color darkmodeFore = Color(0xFF1C1C24);
 const Color darkmodeLight = Color(0xFF0A0A0A);
 const Color properBlack = Color(0xFF1D1B17);
 const Color darkModeBg = Color(0xFF1C1C24);
+const Color white = Colors.white;
 const bluishClr = Color(0xFF4e5ae8);
 //theme constants
 const yellowClr = Color(0xFFFFB746);

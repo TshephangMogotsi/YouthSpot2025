@@ -4,6 +4,7 @@ import 'package:youth_spot/screens/app_entry.dart';
 import 'package:youth_spot/screens/app_intro/intro_screens/intro_screen_1.dart';
 import 'package:youth_spot/screens/app_intro/intro_screens/intro_screen_2.dart';
 import 'package:youth_spot/screens/app_intro/intro_screens/intro_screen_3.dart';
+import 'package:youth_spot/config/constants.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -15,7 +16,7 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> {
   final PageController _controller = PageController();
   int currentPageIndex = 0;
-  Color backgroundColor = const Color(0xFF96B9FF); // Initial background color
+  Color backgroundColor = blue; // Initial background color using constants
 
   @override
   void initState() {
@@ -32,11 +33,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Color _getBackgroundColor(int index) {
     switch (index) {
       case 0:
-        return const Color(0xFF0A369D);
+        return blue; // Lighter blue from constants - better with light images
       case 1:
-        return const Color(0xFF06402b);
+        return teal; // Teal color from constants - better with light images
       case 2:
-        return const Color(0xFF2708A0);
+        return gold; // Gold color from constants - warm and light-friendly
       default:
         return Colors.white; // Default background color
     }

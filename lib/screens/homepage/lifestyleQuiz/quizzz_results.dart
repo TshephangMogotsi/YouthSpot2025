@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../../config/constants.dart';
 // import '../my_spot/goals/add_goal_page.dart';
-import '../../../global_widgets/pill_button.dart';
 import '../../../global_widgets/primary_button.dart';
 import '../../../global_widgets/primary_divider.dart';
 import '../../../global_widgets/primary_padding.dart';
@@ -13,7 +12,6 @@ import 'detail_widgets/gbv_detials.dart';
 import 'detail_widgets/health_and_relationships_card_details.dart';
 import 'new_widgets/results_card_alc.dart';
 import 'quiz_logic.dart';
-import 'quiz_results.dart';
 import 'detail_widgets/reproductive_health_card_details.dart';
 
 class QuizzzResults extends StatelessWidget {
@@ -201,27 +199,6 @@ class QuizzzResults extends StatelessWidget {
     );
   }
 
-  Route _createGoalRoute(Widget route) {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return route;
-      },
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0); // Start from right
-        const end = Offset.zero; // End at the center
-        const curve = Curves.ease;
-
-        var tween =
-            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(
-          position: offsetAnimation,
-          child: child,
-        );
-      },
-    );
-  }
 
   Route _createRoute(Widget route) {
     return PageRouteBuilder(

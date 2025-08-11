@@ -46,7 +46,7 @@ class QoutesCard extends StatelessWidget {
                     image: imageProvider,
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.4),
+                      Colors.black.withValues(alpha: 0.4),
                       BlendMode.darken,
                     ),
                   ),
@@ -74,8 +74,8 @@ class QoutesCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            kSSIorange.withOpacity(0.8),
-            kSSIorange.withOpacity(0.6),
+            kSSIorange.withValues(alpha: .8),
+            kSSIorange.withValues(alpha: .6),
           ],
         ),
       ),

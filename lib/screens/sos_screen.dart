@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
 import 'package:youthspot/global_widgets/primary_container.dart';

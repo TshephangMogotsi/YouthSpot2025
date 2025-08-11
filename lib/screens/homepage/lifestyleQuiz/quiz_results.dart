@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../config/constants.dart';
 import '../../../db/models/medicine_model.dart';
-import '../../../global_widgets/pill_button.dart';
 import '../../../global_widgets/primary_button.dart';
 import '../../../global_widgets/primary_divider.dart';
 import '../../../global_widgets/primary_padding.dart';

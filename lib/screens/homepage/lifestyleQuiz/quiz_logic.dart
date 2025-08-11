@@ -86,9 +86,7 @@ class QuizLogic extends ChangeNotifier {
 
   void isQuestion4Answered() {
     if (question4Answers.isNotEmpty || question4ExtraAnswers.isNotEmpty) {
-      for (var answer in question4Answers) {
-        _alcoholAndDrugsPoints += 5;
-      }
+      _alcoholAndDrugsPoints += question4Answers.length * 5;
       _questionNumber = 4;
       notifyListeners();
     }

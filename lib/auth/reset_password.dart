@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:youthspot/config/font_constants.dart';
 import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
 import '../../services/services_locator.dart';
@@ -90,26 +91,33 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         ),
                       ),
                     ),
-                    const Spacer(),
-                    if (isSubmitted) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Text(
-                          "If the email exists, a password reset link has been sent to ${emailController.text.trim()}",
-                          textAlign: TextAlign.center,
-                          // style: titleStyle.copyWith(
-                          //   fontSize: 16,
-                          // ),
-                        ),
-                      ),
-                      const Height10(),
-                      PrimaryButton(
-                        label: 'Back to Login',
-                        customBackgroundColor: kSSIorange,
-                        onTap: () => Navigator.of(context).pop(),
-                      ),
-                      const Height20(),
-                    ],
+                   if (isSubmitted)
+  Expanded(
+    child: Center(
+      child: PrimaryPadding(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "A password reset link has been sent to ${emailController.text.trim()}",
+              style: AppTextStyles.primaryBigSemiBold,
+              textAlign: TextAlign.center,
+              // style: titleStyle.copyWith(
+              //   fontSize: 16,
+              // ),
+            ),
+            const Height20(),
+            PrimaryButton(
+              label: 'Back to Login',
+              customBackgroundColor: kSSIorange,
+              onTap: () => Navigator.of(context).pop(),
+            ),
+            const Height20(),
+          ],
+        ),
+      ),
+    ),
+  ),
                   ],
                 ),
               ),

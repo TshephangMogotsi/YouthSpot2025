@@ -26,7 +26,6 @@ class Account extends StatefulWidget {
 
 class _AccountState extends State<Account> {
   String _userFullName = '';
-  bool _loading = true;
 
   @override
   void initState() {
@@ -35,7 +34,6 @@ class _AccountState extends State<Account> {
   }
 
   Future<void> _getUserProfile() async {
-    setState(() => _loading = true);
     final auth = Provider.of<AuthService>(context, listen: false);
 
     try {
@@ -55,8 +53,6 @@ class _AccountState extends State<Account> {
       }
     } catch (e) {
       // Handle error silently for now
-    } finally {
-      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -97,7 +93,7 @@ class _AccountState extends State<Account> {
               },
             ),
             const Height10(),
-             SettingsListTile(
+            SettingsListTile(
               title: 'Terms and Conditions',
               assetImage: 'assets/icon/Settings/TermsAndConditionsIcon.png',
               ontap: () {
@@ -109,7 +105,7 @@ class _AccountState extends State<Account> {
               },
             ),
             const Height10(),
-             SettingsListTile(
+            SettingsListTile(
               title: 'Description',
               assetImage: 'assets/icon/Settings/DescriptionIcon.png',
               ontap: () {
@@ -121,9 +117,7 @@ class _AccountState extends State<Account> {
               },
             ),
             const Height10(),
-            const ThemeModeListTile(
-              title: 'Day Mode',
-            ),
+            const ThemeModeListTile(title: 'Day Mode'),
             const Height20(),
             const Height20(),
             const Height20(),
@@ -216,10 +210,7 @@ class ProfileListTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           //initials avatar
-          InitialsAvatar(
-            fullName: fullName,
-            radius: 25,
-          ),
+          InitialsAvatar(fullName: fullName, radius: 25),
           //wallpaper image
           const Width20(),
 
@@ -245,13 +236,13 @@ class ThemeModeListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeManager = getIt<ThemeManager>();
-    
+
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeManager.themeMode,
       builder: (context, themeMode, child) {
         // Day mode toggle: true = light theme (day), false = dark theme (night)
         final isDayMode = themeMode == ThemeMode.light;
-        
+
         return PrimaryContainer(
           borderRadius: BorderRadius.circular(25),
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
@@ -297,7 +288,9 @@ class ThemeModeListTile extends StatelessWidget {
                   child: AnimatedAlign(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.fastEaseInToSlowEaseOut,
-                    alignment: isDayMode ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment: isDayMode
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
                     child: Container(
                       width: 24,
                       height: 24,

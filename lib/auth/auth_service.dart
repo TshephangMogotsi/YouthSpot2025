@@ -1,7 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
-import '../services/connectivity_helper.dart';
 
 class AuthService extends ChangeNotifier {
   final GoTrueClient supabaseAuth = Supabase.instance.client.auth;
@@ -17,7 +17,9 @@ class AuthService extends ChangeNotifier {
   // Helper method to check if Supabase is properly initialized
   bool get _isSupabaseInitialized {
     try {
-      return Supabase.instance.client.auth != null;
+      // Supabase.instance.client.auth cannot be null, so always return true if no exception
+      Supabase.instance.client.auth;
+      return true;
     } catch (e) {
       return false;
     }
@@ -76,7 +78,9 @@ class AuthService extends ChangeNotifier {
           }
         } catch (profileError) {
           // Profile fetch failed, but user is still authenticated
-          print('Profile fetch error: $profileError');
+          if (kDebugMode) {
+            print('Profile fetch error: $profileError');
+          }
         }
         
         // Notify listeners that authentication state has changed
@@ -98,7 +102,7 @@ class AuthService extends ChangeNotifier {
           errorMessage = 'Too many login attempts. Please wait a moment and try again.';
           break;
         default:
-          errorMessage = e.message ?? 'Authentication failed. Please try again.';
+          errorMessage = e.message;
       }
       throw AuthException(errorMessage);
     } catch (e) {
@@ -178,7 +182,7 @@ class AuthService extends ChangeNotifier {
           errorMessage = 'Please enter a valid password.';
           break;
         default:
-          errorMessage = e.message ?? 'Registration failed. Please try again.';
+          errorMessage = e.message;
       }
       throw AuthException(errorMessage);
     } catch (e) {
@@ -220,7 +224,7 @@ class AuthService extends ChangeNotifier {
           errorMessage = 'Please enter a valid email address.';
           break;
         default:
-          errorMessage = e.message ?? 'Password reset failed. Please try again.';
+          errorMessage = e.message;
       }
       throw AuthException(errorMessage);
     } catch (e) {

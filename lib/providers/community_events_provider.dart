@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/community_event.dart';
 import '../db/models/event_model.dart';
 import '../providers/event_provider.dart';
@@ -57,29 +56,22 @@ class CommunityEventsProvider extends ChangeNotifier {
       if (kDebugMode) {
         print('Events response type: ${eventsResponse.runtimeType}');
         print('Events response: $eventsResponse');
-        if (eventsResponse is List) {
-          print('Number of events: ${eventsResponse.length}');
-          if (eventsResponse.isEmpty) {
-            // Try to get any events without date filter to see if table has data
-            print('No upcoming events found, checking if table has any data...');
-            final allEventsResponse = await supabase
-                .from('community_events')
-                .select('*')
-                .limit(5);
-            print('Total events in table: ${(allEventsResponse as List).length}');
-            if ((allEventsResponse as List).isNotEmpty) {
-              print('Sample event: ${allEventsResponse.first}');
-            } else {
-              print('Table appears to be empty - no events found');
-            }
+        print('Number of events: ${eventsResponse.length}');
+        if (eventsResponse.isEmpty) {
+          // Try to get any events without date filter to see if table has data
+          print('No upcoming events found, checking if table has any data...');
+          final allEventsResponse = await supabase
+              .from('community_events')
+              .select('*')
+              .limit(5);
+          print('Total events in table: ${(allEventsResponse as List).length}');
+          if ((allEventsResponse as List).isNotEmpty) {
+            print('Sample event: ${allEventsResponse.first}');
+          } else {
+            print('Table appears to be empty - no events found');
           }
         }
-      }
-
-      // Validate response format
-      if (eventsResponse is! List) {
-        throw Exception('Unexpected response format: ${eventsResponse.runtimeType}');
-      }
+            }
 
       final eventsList = eventsResponse as List;
 
@@ -100,14 +92,12 @@ class CommunityEventsProvider extends ChangeNotifier {
             .select('event_id')
             .eq('user_id', currentUserId);
         
-        if (attendanceResponse is List) {
-          userEventIds = attendanceResponse
-              .map((attendance) => attendance['event_id'] as String?)
-              .where((id) => id != null)
-              .cast<String>()
-              .toList();
-        }
-      }
+        userEventIds = attendanceResponse
+            .map((attendance) => attendance['event_id'] as String?)
+            .where((id) => id != null)
+            .cast<String>()
+            .toList();
+            }
 
       _events = eventsList.map<CommunityEvent>((eventData) {
         try {
@@ -302,7 +292,7 @@ class CommunityEventsProvider extends ChangeNotifier {
           .select('event_id')
           .eq('user_id', currentUserId);
 
-      if (attendanceResponse is! List || attendanceResponse.isEmpty) {
+      if (attendanceResponse.isEmpty) {
         if (kDebugMode) {
           print('No event attendances found for user');
         }
@@ -328,10 +318,6 @@ class CommunityEventsProvider extends ChangeNotifier {
           .select('*')
           .inFilter('id', userEventIds)
           .eq('is_active', true);
-
-      if (attendedEventsResponse is! List) {
-        throw Exception('Unexpected response format for attended events');
-      }
 
       final attendedEventsList = attendedEventsResponse as List;
       if (attendedEventsList.isEmpty) {

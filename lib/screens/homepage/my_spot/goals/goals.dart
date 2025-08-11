@@ -463,7 +463,7 @@ class DeleteGoalDialog extends StatelessWidget {
                     Expanded(
                       child: PrimaryButton(
                         label: "Delete",
-                        customBackgroundColor: Colors.blueGrey.withOpacity(.3),
+                        customBackgroundColor: Colors.blueGrey.withValues(alpha: .3),
                         onTap: () async {
                           final goalProvider =
                               Provider.of<GoalProvider>(context, listen: false);

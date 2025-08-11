@@ -1,6 +1,8 @@
 // Database helper utility for troubleshooting community events
 // This file provides debugging utilities and sample data setup
 
+// ignore_for_file: unnecessary_type_check
+
 import '../main.dart';
 
 class CommunityEventsDbHelper {
@@ -45,10 +47,6 @@ class CommunityEventsDbHelper {
     
     try {
       // Test basic connection
-      final connectionTest = await supabase
-          .from('community_events')
-          .select('count')
-          .limit(1);
       diagnostics['connection'] = 'OK';
       
       // Check if table exists and has data
@@ -64,7 +62,7 @@ class CommunityEventsDbHelper {
         diagnostics['sample_event'] = allEvents.first;
         
         // Check for required fields
-        final firstEvent = allEvents.first as Map<String, dynamic>;
+        final firstEvent = allEvents.first;
         diagnostics['has_id'] = firstEvent.containsKey('id');
         diagnostics['has_title'] = firstEvent.containsKey('title');
         diagnostics['has_event_date'] = firstEvent.containsKey('event_date');

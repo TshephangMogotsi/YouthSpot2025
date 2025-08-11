@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:slide_to_act/slide_to_act.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/main.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:youthspot/config/constants.dart';
+import 'package:youthspot/config/font_constants.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
 import 'package:youthspot/navigation_layout.dart';
 
@@ -37,14 +37,12 @@ class WelcomeScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
                 
-                const Text(
+                 Text(
                   'Your journey to better health and wellness starts now!',
-                  style: TextStyle(
+                 style: AppTextStyles.primaryBigSemiBold.copyWith(
                     color: Colors.white,
-                    fontSize: 22,
-                    fontFamily: 'Onest',
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -53,6 +51,8 @@ class WelcomeScreen extends StatelessWidget {
                 SizedBox(height: 20),
                 // Begin button
                 PrimaryButton(
+                  customBackgroundColor: Colors.white,
+                  customTextColor: Colors.black,
                   label: 'Begin',
                   onTap: () {
                     Navigator.of(context).pushReplacement(

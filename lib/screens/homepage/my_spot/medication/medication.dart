@@ -1,7 +1,6 @@
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import '../../../../config/constants.dart';
 import '../../../../config/theme_manager.dart';

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/services/onboarding_service.dart';
 import 'package:youthspot/auth/auth_switcher.dart';
 

@@ -13,6 +13,7 @@ import 'package:youthspot/config/font_constants.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
 import 'package:youthspot/global_widgets/primary_container.dart';
 import 'package:youthspot/global_widgets/primary_padding.dart';
+import 'package:youthspot/global_widgets/field_with_live_validation.dart';
 import 'package:youthspot/config/theme_manager.dart';
 import 'package:youthspot/screens/homepage/my_spot/goals/widgets/date_picker_2.dart';
 import 'package:youthspot/services/services_locator.dart';
@@ -225,7 +226,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                               Height20(),
 
-                              _FieldWithLiveValidation(
+                              FieldWithLiveValidation(
                                 title: "Full Name",
                                 hintText: "Full Name",
                                 controller: _fullNameController,
@@ -236,7 +237,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 validator: _validateFullName,
                               ),
                               const Height20(),
-                              _FieldWithLiveValidation(
+                              FieldWithLiveValidation(
                                 title: "Username",
                                 hintText: "Username",
                                 controller: _userNameController,
@@ -247,7 +248,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 validator: _validateUsername,
                               ),
                               const Height20(),
-                              _FieldWithLiveValidation(
+                              FieldWithLiveValidation(
                                 title: "Email",
                                 hintText: "johndoe@mail.com",
                                 controller: _emailController,
@@ -277,7 +278,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 children: [
                                   // Gender Dropdown
                                   Expanded(
-                                    child: _DropdownWithLiveValidation(
+                                    child: DropdownWithLiveValidation(
                                       title: "Gender",
                                       hintText: "Select Gender",
                                       value: selectedSex,
@@ -326,7 +327,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ],
                               ),
                               const Height20(),
-                              _FieldWithLiveValidation(
+                              FieldWithLiveValidation(
                                 title: "Password",
                                 hintText: "Enter Password",
                                 controller: _passwordController,
@@ -346,7 +347,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 validator: _validatePassword,
                               ),
                               const Height20(),
-                              _FieldWithLiveValidation(
+                              FieldWithLiveValidation(
                                 title: "Confirm Password",
                                 hintText: "Re-Enter your password",
                                 controller: _passwordConfirmController,
@@ -580,176 +581,5 @@ class _RegisterPageState extends State<RegisterPage> {
       return "Phone number too short";
     }
     return null;
-  }
-}
-
-///
-/// Reusable text field with live validation and password visibility toggle.
-///
-class _FieldWithLiveValidation extends StatefulWidget {
-  final String title;
-  final String hintText;
-  final TextEditingController controller;
-  final String? errorText;
-  final String? Function(String?) validator;
-  final bool isPassword;
-  final IconData? trailingIcon;
-  final VoidCallback? onTrailingPressed;
-  final Function(String)? onChanged;
-
-  const _FieldWithLiveValidation({
-    required this.title,
-    required this.hintText,
-    required this.controller,
-    required this.validator,
-    this.errorText,
-    this.isPassword = false,
-    this.trailingIcon,
-    this.onTrailingPressed,
-    this.onChanged,
-  });
-
-  @override
-  State<_FieldWithLiveValidation> createState() =>
-      _FieldWithLiveValidationState();
-}
-
-class _FieldWithLiveValidationState extends State<_FieldWithLiveValidation> {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Width20(),
-            Text(widget.title, style: AppTextStyles.primaryBold),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFEEF0F2),
-            borderRadius: BorderRadius.circular(11),
-            border: Border.all(
-              color: widget.errorText != null ? Colors.red : Colors.transparent,
-              width: 1.2,
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: widget.controller,
-                  obscureText: widget.isPassword,
-                  style: const TextStyle(fontSize: 18),
-                  decoration: InputDecoration(
-                    hintText: widget.hintText,
-                    hintStyle: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
-                    border: InputBorder.none,
-                    errorText: null,
-                  ),
-                  onChanged: widget.onChanged,
-                ),
-              ),
-              if (widget.trailingIcon != null)
-                IconButton(
-                  icon: Icon(widget.trailingIcon, color: Colors.grey[700]),
-                  onPressed: widget.onTrailingPressed,
-                ),
-            ],
-          ),
-        ),
-        if (widget.errorText != null)
-          Padding(
-            padding: const EdgeInsets.only(left: 12.0, top: 4.0),
-            child: Text(
-              widget.errorText!,
-              style: const TextStyle(color: Colors.red, fontSize: 12),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-///
-/// Dropdown with live validation for gender.
-///
-class _DropdownWithLiveValidation extends StatelessWidget {
-  final String title;
-  final String hintText;
-  final String? value;
-  final List<String> items;
-  final String? errorText;
-  final void Function(String?)? onChanged;
-
-  const _DropdownWithLiveValidation({
-    required this.title,
-    required this.hintText,
-    required this.value,
-    required this.items,
-    this.errorText,
-    this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Width20(),
-            Text(title, style: AppTextStyles.primaryBold),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFEEF0F2),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: errorText != null ? Colors.red : Colors.transparent,
-              width: 1.2,
-            ),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: value,
-              hint: Text(
-                hintText,
-                style: const TextStyle(fontSize: 18, color: Colors.grey),
-              ),
-              isExpanded: true,
-              items: items
-                  .map(
-                    (item) => DropdownMenuItem(
-                      value: item,
-                      child: Text(item, style: const TextStyle(fontSize: 18)),
-                    ),
-                  )
-                  .toList(),
-              onChanged: onChanged,
-            ),
-          ),
-        ),
-        if (errorText != null)
-          Padding(
-            padding: const EdgeInsets.only(left: 12.0, top: 4.0),
-            child: Text(
-              errorText!,
-              style: const TextStyle(color: Colors.red, fontSize: 12),
-            ),
-          ),
-      ],
-    );
   }
 }

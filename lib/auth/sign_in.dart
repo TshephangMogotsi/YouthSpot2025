@@ -6,8 +6,8 @@ import 'package:email_validator/email_validator.dart';
 
 import '../config/constants.dart';
 import '../config/font_constants.dart';
-import '../../../config/theme_manager.dart';
-import '../../../services/services_locator.dart';
+import '../config/theme_manager.dart';
+import '../services/services_locator.dart';
 import '../global_widgets/custom_textfield.dart';
 import '../global_widgets/primary_padding.dart';
 import '../global_widgets/field_with_live_validation.dart';

@@ -212,7 +212,7 @@ class _SignInPageState extends State<SignInPage> {
                                     padding: const EdgeInsets.only(right: 20.0),
                                     child:  Text(
                                       "Forgot Password?",
-                                     style: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
+                                     style: AppTextStyles.secondarySemiBold.copyWith(color: Colors.grey),
                                     ),
                                   ),
                                 ),

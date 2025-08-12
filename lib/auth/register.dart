@@ -7,18 +7,19 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
+import 'package:youthspot/auth/widget/custom_phone_field2.dart';
 import 'package:youthspot/config/constants.dart';
-import 'package:youthspot/global_widgets/custom_textfield.dart';
-import 'package:youthspot/global_widgets/full_width_dropdown.dart';
+import 'package:youthspot/config/font_constants.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
 import 'package:youthspot/global_widgets/primary_container.dart';
 import 'package:youthspot/global_widgets/primary_padding.dart';
-import 'package:youthspot/screens/homepage/my_spot/goals/widgets/date_picker.dart';
 import 'package:youthspot/config/theme_manager.dart';
+import 'package:youthspot/screens/homepage/my_spot/goals/widgets/date_picker_2.dart';
 import 'package:youthspot/services/services_locator.dart';
 import 'package:youthspot/terms_and_privacy.dart';
 import 'package:youthspot/screens/onboarding/welcome_screen.dart';
 import 'fullname_validator.dart';
+import 'widget/custom_phone_field.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key, required this.onToggle});
@@ -39,16 +40,22 @@ class _RegisterPageState extends State<RegisterPage> {
 
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  bool _genderError = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String? selectedSex;
   DateTime dateOfBirth = DateTime.now();
-  bool? isSexSelected;
   bool _agreedToTerms = false;
 
-  final List<String> genderList = [
-    'Male',
-    'Female',
-    'Non-binary',
-  ];
+  // Live validation error state for each field
+  String? _fullNameError;
+  String? _usernameError;
+  String? _emailError;
+  String? _passwordError;
+  String? _confirmPasswordError;
+  String? _mobileNumberError;
+
+  final List<String> genderList = ['Male', 'Female', 'Non-binary'];
 
   @override
   void dispose() {
@@ -67,18 +74,39 @@ class _RegisterPageState extends State<RegisterPage> {
       _isLoading = true;
     });
 
-    if (!_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
+    // validate each field manually
+    final fullNameError = _validateFullName(_fullNameController.text);
+    final usernameError = _validateUsername(_userNameController.text);
+    final emailError = _validateEmail(_emailController.text);
+    final passwordError = _validatePassword(_passwordController.text);
+    final confirmPasswordError = _validateConfirmPassword(
+      _passwordConfirmController.text,
+    );
+    final mobileNumberError = _validateMobileNumber(_mobileNumber.text);
 
-    if (selectedSex == null) {
-      showSnackBar('Please select gender');
+    setState(() {
+      _fullNameError = fullNameError;
+      _usernameError = usernameError;
+      _emailError = emailError;
+      _passwordError = passwordError;
+      _confirmPasswordError = confirmPasswordError;
+      _mobileNumberError = mobileNumberError;
+      _genderError = selectedSex == null;
+    });
+
+    if (fullNameError != null ||
+        usernameError != null ||
+        emailError != null ||
+        passwordError != null ||
+        confirmPasswordError != null ||
+        mobileNumberError != null ||
+        selectedSex == null) {
       setState(() {
         _isLoading = false;
       });
+      if (selectedSex == null) {
+        showSnackBar('Please select gender');
+      }
       return;
     }
 
@@ -117,7 +145,10 @@ class _RegisterPageState extends State<RegisterPage> {
           backgroundColor: Colors.red,
           content: Text(
             message,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           duration: const Duration(seconds: 5),
         ),
@@ -125,17 +156,16 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final themeManager = getIt<ThemeManager>();
-
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeManager.themeMode,
       builder: (context, theme, snapshot) {
         return Scaffold(
-          backgroundColor:
-              theme == ThemeMode.dark ? const Color(0xFF1C1C24) : kSSIorange,
+          backgroundColor: theme == ThemeMode.dark
+              ? const Color(0xFF1C1C24)
+              : kSSIorange,
           body: Stack(
             children: [
               Container(
@@ -143,24 +173,22 @@ class _RegisterPageState extends State<RegisterPage> {
                   image: DecorationImage(
                     image: AssetImage(
                       'assets/Backgrounds/register_background.png',
-                    ), // Replace with your image path
-                    fit: BoxFit.fitWidth, // You can adjust the fit as needed
+                    ),
+                    fit: BoxFit.fitWidth,
                   ),
                 ),
               ),
               SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
                 child: Form(
                   key: _formKey,
+                  // No autovalidateMode!
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        height: 250,
-                      ),
+                      Container(height: 250),
                       Container(
                         decoration: const BoxDecoration(
-                          color: backgroundColorLight,
+                          color: Colors.white,
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(34),
                             topRight: Radius.circular(34),
@@ -173,155 +201,124 @@ class _RegisterPageState extends State<RegisterPage> {
                             children: [
                               const Height20(),
                               const Height20(),
-                              CustomTextField(
+                              Row(
+                                children: [
+                                  Width20(),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Go Ahead and set up',
+                                        style: AppTextStyles.primaryBigBold
+                                            .copyWith(fontSize: 30, height: .8),
+                                      ),
+                                      Text(
+                                        'your account',
+                                        style: AppTextStyles.primaryBigBold
+                                            .copyWith(fontSize: 30),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+
+                              Height20(),
+
+                              _FieldWithLiveValidation(
                                 title: "Full Name",
                                 hintText: "Full Name",
                                 controller: _fullNameController,
-                                validator: FullNameValidator.validate,
+                                errorText: _fullNameError,
+                                onChanged: (value) => setState(() {
+                                  _fullNameError = _validateFullName(value);
+                                }),
+                                validator: _validateFullName,
                               ),
                               const Height20(),
-                              CustomTextField(
+                              _FieldWithLiveValidation(
                                 title: "Username",
                                 hintText: "Username",
                                 controller: _userNameController,
-                                validator: (username) {
-                                  if (_userNameController.text.trim().isEmpty) {
-                                    return 'Please enter username';
-                                  }
-                                  if (_userNameController.text.trim().length < 3) {
-                                    return 'Username must be at least 3 characters';
-                                  }
-                                  // Check for valid username characters (alphanumeric and underscore)
-                                  if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(_userNameController.text.trim())) {
-                                    return 'Username can only contain letters, numbers, and underscores';
-                                  }
-                                  return null;
-                                },
+                                errorText: _usernameError,
+                                onChanged: (value) => setState(() {
+                                  _usernameError = _validateUsername(value);
+                                }),
+                                validator: _validateUsername,
                               ),
                               const Height20(),
-                              CustomTextField(
+                              _FieldWithLiveValidation(
                                 title: "Email",
                                 hintText: "johndoe@mail.com",
                                 controller: _emailController,
-                                validator: (value) {
-                                  if (!EmailValidator.validate(value!)) {
-                                    return "Please enter valid email";
-                                  }
-                                  return null; // No error
-                                },
+                                errorText: _emailError,
+                                onChanged: (value) => setState(() {
+                                  _emailError = _validateEmail(value);
+                                }),
+                                validator: _validateEmail,
                               ),
                               const Height20(),
-                              Text('Mobile Number', style: inputTitle),
-                              const Height10(),
-                              IntlPhoneField(
+                              RegisterPhoneField(
+                                title: 'Mobile Number',
                                 controller: _mobileNumber,
-                                keyboardType: TextInputType.number,
-                                dropdownIconPosition: IconPosition.leading,
-                                decoration: const InputDecoration(
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(mainBorderRadius)),
-                                    borderSide: BorderSide(
-                                      width: 1,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(mainBorderRadius)),
-                                    borderSide: BorderSide(
-                                      width: 1.3,
-                                      color: kSSIorange,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(mainBorderRadius)),
-                                    borderSide: BorderSide(
-                                      width: 1,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  focusedErrorBorder: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(15)),
-                                    borderSide: BorderSide(
-                                      color:
-                                          kSSIorange, // Customize the color here
-                                      width: 1, // Customize the width here
-                                    ),
-                                  ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(15)),
-                                    borderSide: BorderSide(
-                                      color:
-                                          pinkClr, // Customize the color here
-                                      width: 1.0, // Customize the width here
-                                    ),
-                                  ),
-                                  errorStyle: TextStyle(color: pinkClr),
-                                ),
-                                initialCountryCode: 'BW',
-                                onChanged: (phone) {},
-                                validator: (phone) {
-                                  if (phone == null ||
-                                      !RegExp(r'^[0-9]+$')
-                                          .hasMatch(phone.number)) {
-                                    return 'Please enter a valid phone number';
-                                  }
-                                  return null;
-                                },
+                                errorText: _mobileNumberError,
+                                onChanged: (val) => setState(() {
+                                  _mobileNumberError = _validateMobileNumber(
+                                    val,
+                                  );
+                                }),
+                                initialCountryCode:
+                                    "BW", // or whatever you want as default
                               ),
-                              const Height10(),
-                              Text('Gender', style: inputTitle),
+
                               const Height20(),
-                              FullWidthDropdownButton(
-                                hintText: 'Select gender',
-                                showError: isSexSelected != null,
-                                options: genderList,
-                                onOptionSelect: (option) {
-                                  if (kDebugMode) {
-                                    print(option);
-                                  }
-                                  selectedSex = option;
-                                },
-                              ),
-                              const Height20(),
-                              Text('Date of Birth', style: inputTitle),
-                              const Height20(),
+
                               Row(
                                 children: [
-                                  const Expanded(
-                                    flex: 1,
-                                    child: PrimaryContainer(
-                                      child: Icon(Icons.calendar_month),
+                                  // Gender Dropdown
+                                  Expanded(
+                                    child: _DropdownWithLiveValidation(
+                                      title: "Gender",
+                                      hintText: "Select Gender",
+                                      value: selectedSex,
+                                      items: genderList,
+                                      errorText: _genderError
+                                          ? "Please select gender"
+                                          : null,
+                                      onChanged: (val) {
+                                        setState(() {
+                                          selectedSex = val;
+                                          _genderError = false;
+                                        });
+                                      },
                                     ),
                                   ),
-                                  const Width20(),
+                                  const SizedBox(width: 12),
+                                  // Date of Birth Picker
                                   Expanded(
-                                    flex: 3,
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        PrimaryContainer(
-                                          child: CustomDatePicker(
-                                            initialDate: DateTime.now(),
-                                            showIcon: false,
-                                            isDoBField: true,
-                                            labelText: 'Date of Birth',
-                                            onDateSelected: (date) {
-                                              setState(() {
-                                                dateOfBirth = date;
-                                                if (kDebugMode) {
-                                                  print(dateOfBirth);
-                                                }
-                                              });
-                                            },
-                                          ),
+                                        Row(
+                                          children: [
+                                            Width20(),
+                                            const Text(
+                                              "Date of Birth",
+                                              style: AppTextStyles.primaryBold,
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 6),
+                                        CustomDatePicker2(
+                                          labelText: "Date of Birth",
+                                          initialDate: dateOfBirth,
+                                          isDoBField: true,
+                                          onDateSelected: (date) {
+                                            setState(() {
+                                              dateOfBirth = date;
+                                            });
+                                          },
                                         ),
                                       ],
                                     ),
@@ -329,46 +326,52 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ],
                               ),
                               const Height20(),
-                              CustomTextField(
+                              _FieldWithLiveValidation(
                                 title: "Password",
-                                hintText: "Password",
-                                isPasswordField: true,
+                                hintText: "Enter Password",
                                 controller: _passwordController,
-                                validator: (value) {
-                                  if (_passwordController.text.trim().isEmpty) {
-                                    return "Enter password";
-                                  }
-                                  if (_passwordController.text.trim().length < 6) {
-                                    return 'Password must be at least 6 characters';
-                                  }
-                                  // Add stronger password validation
-                                  if (!RegExp(r'^(?=.*[a-zA-Z])(?=.*\d).+$').hasMatch(_passwordController.text.trim())) {
-                                    return 'Password must contain at least one letter and one number';
-                                  }
-                                  return null; // No error
+                                errorText: _passwordError,
+                                isPassword: _obscurePassword,
+                                trailingIcon: _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                onTrailingPressed: () {
+                                  setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  );
                                 },
+                                onChanged: (value) => setState(() {
+                                  _passwordError = _validatePassword(value);
+                                }),
+                                validator: _validatePassword,
                               ),
                               const Height20(),
-                              CustomTextField(
+                              _FieldWithLiveValidation(
                                 title: "Confirm Password",
-                                hintText: "Password",
-                                isPasswordField: true,
+                                hintText: "Re-Enter your password",
                                 controller: _passwordConfirmController,
-                                validator: (value) {
-                                  if (_passwordConfirmController.text.trim().isEmpty) {
-                                    return "Please confirm your password";
-                                  }
-                                  if (_passwordConfirmController.text.trim() !=
-                                      _passwordController.text.trim()) {
-                                    return "Passwords don't match";
-                                  }
-                                  return null; // No error
+                                errorText: _confirmPasswordError,
+                                isPassword: _obscureConfirmPassword,
+                                trailingIcon: _obscureConfirmPassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                onTrailingPressed: () {
+                                  setState(
+                                    () => _obscureConfirmPassword =
+                                        !_obscureConfirmPassword,
+                                  );
                                 },
+                                onChanged: (value) => setState(() {
+                                  _confirmPasswordError =
+                                      _validateConfirmPassword(value);
+                                }),
+                                validator: _validateConfirmPassword,
                               ),
                               const Height20(),
-                              // Terms and Conditions checkbox
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                ),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -389,14 +392,18 @@ class _RegisterPageState extends State<RegisterPage> {
                                           });
                                         },
                                         child: Padding(
-                                          padding: const EdgeInsets.only(top: 12.0),
+                                          padding: const EdgeInsets.only(
+                                            top: 12.0,
+                                          ),
                                           child: RichText(
                                             text: TextSpan(
-                                              text: "I have read and agree to the ",
-                                              style: const TextStyle(
-                                                color: Color(0xFF263245),
-                                                fontSize: 14,
-                                              ),
+                                              text:
+                                                  "I have read and agree to the ",
+                                              style: AppTextStyles
+                                                  .primaryBold
+                                                  .copyWith(
+                                                    color: Colors.grey.shade700,
+                                                  ),
                                               children: [
                                                 TextSpan(
                                                   text: "Terms of Use",
@@ -410,18 +417,19 @@ class _RegisterPageState extends State<RegisterPage> {
                                                         ),
                                                       );
                                                     },
-                                                  style: const TextStyle(
-                                                    color: Colors.blue,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14,
-                                                  ),
+                                                  style: AppTextStyles
+                                                      .primaryBold
+                                                      .copyWith(
+                                                        color: Colors.blue,
+                                                      ),
                                                 ),
-                                                const TextSpan(
+                                                TextSpan(
                                                   text: " and ",
-                                                  style: TextStyle(
-                                                    color: Color(0xFF263245),
-                                                    fontSize: 14,
-                                                  ),
+                                                  style: AppTextStyles
+                                                      .primaryBold
+                                                      .copyWith(
+                                                        color: Colors.grey.shade700,
+                                                      ),
                                                 ),
                                                 TextSpan(
                                                   text: "Privacy Policy",
@@ -435,11 +443,11 @@ class _RegisterPageState extends State<RegisterPage> {
                                                         ),
                                                       );
                                                     },
-                                                  style: const TextStyle(
-                                                    color: Colors.blue,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14,
-                                                  ),
+                                                  style: AppTextStyles
+                                                      .primaryBold
+                                                      .copyWith(
+                                                        color: Colors.blue,
+                                                      ),
                                                 ),
                                               ],
                                             ),
@@ -454,37 +462,24 @@ class _RegisterPageState extends State<RegisterPage> {
                               PrimaryButton(
                                 label: 'Create Account',
                                 onTap: () {
-                                  if (!_agreedToTerms) {
-                                    showSnackBar('Please agree to the terms and conditions to continue.');
-                                    return;
-                                  }
-                                  if (_formKey.currentState!.validate()) {
-                                    signUp();
-                                  }
+                                  signUp();
                                 },
                               ),
                               const Height20(),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text(
+                                   Text(
                                     "Already have an account?",
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                    ),
+                                              style: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
+                                    
                                   ),
                                   const Width10(),
                                   InkWell(
                                     onTap: widget.onToggle,
-                                    child: const Text(
+                                    child:  Text(
                                       "Sign In",
-                                      style: TextStyle(
-                                        color: Colors.blue,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                      ),
+                                      style: AppTextStyles.primaryBold.copyWith(color: Colors.blue),
                                     ),
                                   ),
                                 ],
@@ -501,17 +496,260 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               if (_isLoading)
                 Container(
-                  color: Colors.black54, // Opaque overlay
+                  color: Colors.black54,
                   child: const Center(
-                    child: CircularProgressIndicator(
-                      color: kSSIorange,
-                    ),
+                    child: CircularProgressIndicator(color: kSSIorange),
                   ),
                 ),
             ],
           ),
         );
       },
+    );
+  }
+
+  String? _validateFullName(String? value) {
+    final result = FullNameValidator.validate(value);
+    if (result != null) return result;
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your full name';
+    }
+    if (!RegExp(r'^[A-Za-z ]+$').hasMatch(value.trim())) {
+      return 'Full name can only contain letters and spaces';
+    }
+    if (value.trim().length < 2) {
+      return 'Full name must be at least 2 characters';
+    }
+    return null;
+  }
+
+  String? _validateUsername(String? username) {
+    if (username == null || username.trim().isEmpty) {
+      return 'Please enter username';
+    }
+    if (username.trim().length < 3) {
+      return 'Username must be at least 3 characters';
+    }
+    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username.trim())) {
+      return 'Username can only contain letters, numbers, and underscores';
+    }
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Please enter your email";
+    }
+    if (!EmailValidator.validate(value.trim())) {
+      return "Please enter valid email";
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Enter password";
+    }
+    if (value.trim().length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    if (!RegExp(r'^(?=.*[a-zA-Z])(?=.*\d).+$').hasMatch(value.trim())) {
+      return 'Password must contain at least one letter and one number';
+    }
+    return null;
+  }
+
+  String? _validateConfirmPassword(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Please confirm your password";
+    }
+    if (value.trim() != _passwordController.text.trim()) {
+      return "Passwords don't match";
+    }
+    return null;
+  }
+
+  String? _validateMobileNumber(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Please enter your phone number";
+    }
+    if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
+      return "Please enter a valid phone number";
+    }
+    if (value.trim().length < 7) {
+      return "Phone number too short";
+    }
+    return null;
+  }
+}
+
+///
+/// Reusable text field with live validation and password visibility toggle.
+///
+class _FieldWithLiveValidation extends StatefulWidget {
+  final String title;
+  final String hintText;
+  final TextEditingController controller;
+  final String? errorText;
+  final String? Function(String?) validator;
+  final bool isPassword;
+  final IconData? trailingIcon;
+  final VoidCallback? onTrailingPressed;
+  final Function(String)? onChanged;
+
+  const _FieldWithLiveValidation({
+    required this.title,
+    required this.hintText,
+    required this.controller,
+    required this.validator,
+    this.errorText,
+    this.isPassword = false,
+    this.trailingIcon,
+    this.onTrailingPressed,
+    this.onChanged,
+  });
+
+  @override
+  State<_FieldWithLiveValidation> createState() =>
+      _FieldWithLiveValidationState();
+}
+
+class _FieldWithLiveValidationState extends State<_FieldWithLiveValidation> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Width20(),
+            Text(widget.title, style: AppTextStyles.primaryBold),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEEF0F2),
+            borderRadius: BorderRadius.circular(11),
+            border: Border.all(
+              color: widget.errorText != null ? Colors.red : Colors.transparent,
+              width: 1.2,
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: widget.controller,
+                  obscureText: widget.isPassword,
+                  style: const TextStyle(fontSize: 18),
+                  decoration: InputDecoration(
+                    hintText: widget.hintText,
+                    hintStyle: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey,
+                    ),
+                    border: InputBorder.none,
+                    errorText: null,
+                  ),
+                  onChanged: widget.onChanged,
+                ),
+              ),
+              if (widget.trailingIcon != null)
+                IconButton(
+                  icon: Icon(widget.trailingIcon, color: Colors.grey[700]),
+                  onPressed: widget.onTrailingPressed,
+                ),
+            ],
+          ),
+        ),
+        if (widget.errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 12.0, top: 4.0),
+            child: Text(
+              widget.errorText!,
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+///
+/// Dropdown with live validation for gender.
+///
+class _DropdownWithLiveValidation extends StatelessWidget {
+  final String title;
+  final String hintText;
+  final String? value;
+  final List<String> items;
+  final String? errorText;
+  final void Function(String?)? onChanged;
+
+  const _DropdownWithLiveValidation({
+    required this.title,
+    required this.hintText,
+    required this.value,
+    required this.items,
+    this.errorText,
+    this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Width20(),
+            Text(title, style: AppTextStyles.primaryBold),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEEF0F2),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: errorText != null ? Colors.red : Colors.transparent,
+              width: 1.2,
+            ),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: value,
+              hint: Text(
+                hintText,
+                style: const TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+              isExpanded: true,
+              items: items
+                  .map(
+                    (item) => DropdownMenuItem(
+                      value: item,
+                      child: Text(item, style: const TextStyle(fontSize: 18)),
+                    ),
+                  )
+                  .toList(),
+              onChanged: onChanged,
+            ),
+          ),
+        ),
+        if (errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 12.0, top: 4.0),
+            child: Text(
+              errorText!,
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          ),
+      ],
     );
   }
 }

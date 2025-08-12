@@ -121,14 +121,14 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                 ),
               ),
-              SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(height: 250),
-                      Container(
+              Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(height: 250),
+                    Expanded(
+                      child: Container(
                         decoration: const BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.only(
@@ -164,9 +164,9 @@ class _SignInPageState extends State<SignInPage> {
                                   ),
                                 ],
                               ),
-
+                                    
                               Height20(),
-
+                                    
                               FieldWithLiveValidation(
                                 title: "Email",
                                 hintText: "johndoe@mail.com",
@@ -246,13 +246,34 @@ class _SignInPageState extends State<SignInPage> {
                                 ],
                               ),
                               const Height20(),
+                              Divider(),
                               const Height20(),
+
+                              Center(
+                                child: Text(
+                                        "Proudly sponsored by",
+                                        style: AppTextStyles.secondarySmallBold.copyWith(color: Color(0Xff99999A)),
+                                      ),
+                              ),
+                              const Height20(),
+
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Image.asset('assets/sponsors/pepfar.png', width: 50,),
+                                  Image.asset('assets/sponsors/unicef.png', width: 60,),
+                                  Image.asset('assets/sponsors/usaid.jpg', width: 50,),
+                                  Image.asset('assets/sponsors/stepping.png', width: 50,),
+                                  Image.asset('assets/sponsors/baylor.png', width: 50,),
+
+                                ],
+                              )
                             ],
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               if (_isLoading)

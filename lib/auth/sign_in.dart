@@ -8,7 +8,6 @@ import '../config/constants.dart';
 import '../config/font_constants.dart';
 import '../config/theme_manager.dart';
 import '../services/services_locator.dart';
-import '../global_widgets/custom_textfield.dart';
 import '../global_widgets/primary_padding.dart';
 import '../global_widgets/field_with_live_validation.dart';
 import 'reset_password.dart';
@@ -211,13 +210,9 @@ class _SignInPageState extends State<SignInPage> {
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.only(right: 20.0),
-                                    child: const Text(
+                                    child:  Text(
                                       "Forgot Password?",
-                                      style: TextStyle(
-                                        color: Colors.blue,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                      ),
+                                     style: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
                                     ),
                                   ),
                                 ),
@@ -248,6 +243,7 @@ class _SignInPageState extends State<SignInPage> {
                               const Height20(),
                               Divider(),
                               const Height20(),
+                              Spacer(),
 
                               Center(
                                 child: Text(
@@ -255,6 +251,7 @@ class _SignInPageState extends State<SignInPage> {
                                         style: AppTextStyles.secondarySmallBold.copyWith(color: Color(0Xff99999A)),
                                       ),
                               ),
+
                               const Height20(),
 
                               Row(
@@ -267,7 +264,9 @@ class _SignInPageState extends State<SignInPage> {
                                   Image.asset('assets/sponsors/baylor.png', width: 50,),
 
                                 ],
-                              )
+                              ),
+                              const Height20(),
+
                             ],
                           ),
                         ),

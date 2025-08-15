@@ -139,13 +139,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   child: AbsorbPointer(
                     absorbing: true,
                     child: Container(
-                      color: Colors.black.withOpacity(0.15),
+                      color: Colors.black.withOpacity(0.4),
                       child: const Center(
                         child: SizedBox(
-                          width: 56,
-                          height: 56,
+                     
                           child: CircularProgressIndicator(
-                            strokeWidth: 4,
+                    
                             color: Colors.white,
                           ),
                         ),

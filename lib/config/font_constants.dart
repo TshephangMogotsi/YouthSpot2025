@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppTextStyles {
-
   static const TextStyle title = TextStyle(
     fontFamily: 'Onest',
     fontWeight: FontWeight.w700, // Bold
@@ -32,13 +31,19 @@ class AppTextStyles {
     fontSize: 16,
   );
 
+  static const TextStyle primarySemiBold = TextStyle(
+    fontFamily: 'Onest',
+    fontWeight: FontWeight.w600, // Regular
+    fontSize: 16,
+  );
+
   static const TextStyle primaryRegular = TextStyle(
     fontFamily: 'Onest',
     fontWeight: FontWeight.w400, // Regular
     fontSize: 16,
   );
 
-   static const TextStyle secondarySemiBold = TextStyle(
+  static const TextStyle secondarySemiBold = TextStyle(
     fontFamily: 'Onest',
     fontWeight: FontWeight.w600, // Regular
     fontSize: 14,
@@ -55,8 +60,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w700, // Regular
     fontSize: 12,
   );
-
-  
 
   static const TextStyle secondary = TextStyle(
     fontFamily: 'Onest',

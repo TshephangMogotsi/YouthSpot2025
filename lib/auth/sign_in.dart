@@ -167,6 +167,7 @@ class _SignInPageState extends State<SignInPage> {
                               Height20(),
                                     
                               FieldWithLiveValidation(
+                                leadingAsset: 'assets/icon/mail.png',
                                 title: "Email",
                                 hintText: "johndoe@mail.com",
                                 controller: emailController,
@@ -178,6 +179,7 @@ class _SignInPageState extends State<SignInPage> {
                               ),
                               const Height20(),
                               FieldWithLiveValidation(
+                                leadingAsset: 'assets/icon/password.png',
                                 title: "Password",
                                 hintText: "Enter your password",
                                 controller: passwordController,
@@ -243,17 +245,16 @@ class _SignInPageState extends State<SignInPage> {
                               const Height20(),
                               Divider(),
                               const Height20(),
-                              Spacer(),
-
+              
                               Center(
                                 child: Text(
                                         "Proudly sponsored by",
                                         style: AppTextStyles.secondarySmallBold.copyWith(color: Color(0Xff99999A)),
                                       ),
                               ),
-
+              
                               const Height20(),
-
+              
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -262,11 +263,11 @@ class _SignInPageState extends State<SignInPage> {
                                   Image.asset('assets/sponsors/usaid.jpg', width: 50,),
                                   Image.asset('assets/sponsors/stepping.png', width: 50,),
                                   Image.asset('assets/sponsors/baylor.png', width: 50,),
-
+              
                                 ],
                               ),
                               const Height20(),
-
+              
                             ],
                           ),
                         ),

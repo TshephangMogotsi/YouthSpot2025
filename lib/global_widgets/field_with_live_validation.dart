@@ -16,6 +16,7 @@ class FieldWithLiveValidation extends StatefulWidget {
   final IconData? trailingIcon;
   final VoidCallback? onTrailingPressed;
   final Function(String)? onChanged;
+  final String? leadingAsset; // <-- NEW
 
   const FieldWithLiveValidation({
     super.key,
@@ -28,6 +29,7 @@ class FieldWithLiveValidation extends StatefulWidget {
     this.trailingIcon,
     this.onTrailingPressed,
     this.onChanged,
+    this.leadingAsset, // <-- NEW
   });
 
   @override
@@ -61,6 +63,16 @@ class _FieldWithLiveValidationState extends State<FieldWithLiveValidation> {
           ),
           child: Row(
             children: [
+              if (widget.leadingAsset != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Image.asset(
+                    widget.leadingAsset!,
+                    height: 24,
+                    width: 24,
+                  ),
+                ),
+                SizedBox(width: 5,),
               Expanded(
                 child: TextFormField(
                   controller: widget.controller,
@@ -98,7 +110,6 @@ class _FieldWithLiveValidationState extends State<FieldWithLiveValidation> {
     );
   }
 }
-
 ///
 /// Dropdown with live validation for gender.
 /// Includes built-in 20px left spacing for consistent styling.
@@ -149,14 +160,14 @@ class DropdownWithLiveValidation extends StatelessWidget {
               value: value,
               hint: Text(
                 hintText,
-                style: const TextStyle(fontSize: 18, color: Colors.grey),
+                style: AppTextStyles.primaryRegular
               ),
               isExpanded: true,
               items: items
                   .map(
                     (item) => DropdownMenuItem(
                       value: item,
-                      child: Text(item, style: const TextStyle(fontSize: 18)),
+                      child: Text(item, style: AppTextStyles.primaryRegular),
                     ),
                   )
                   .toList(),

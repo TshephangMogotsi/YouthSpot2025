@@ -262,4 +262,106 @@ class AuthService extends ChangeNotifier {
   Future<void> updatePassword({required String newPassword}) async {
     await supabaseAuth.updateUser(UserAttributes(password: newPassword));
   }
+
+  /// Verify the reset password token
+  Future<void> verifyResetToken({
+    required String email,
+    required String token,
+  }) async {
+    // Check if Supabase is properly initialized
+    if (!_isSupabaseInitialized) {
+      throw AuthException('Authentication service is not available. Please restart the app.');
+    }
+
+    try {
+      await supabaseAuth.verifyOTP(
+        email: email,
+        token: token,
+        type: OtpType.recovery,
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw AuthException('Request timed out. Please check your internet connection and try again.');
+        },
+      );
+    } on AuthException catch (e) {
+      // Handle specific Supabase auth errors
+      String errorMessage;
+      switch (e.message) {
+        case 'Invalid token':
+        case 'Token has expired':
+          errorMessage = 'Invalid or expired token. Please request a new password reset.';
+          break;
+        case 'Email not found':
+          errorMessage = 'No account found with this email address.';
+          break;
+        default:
+          errorMessage = e.message;
+      }
+      throw AuthException(errorMessage);
+    } catch (e) {
+      // Handle network and other errors
+      if (e.toString().contains('timeout') || e.toString().contains('SocketException')) {
+        throw AuthException('Network timeout. Please check your internet connection and try again.');
+      }
+      throw AuthException('Network error. Please check your internet connection and try again.');
+    }
+  }
+
+  /// Update password using reset token
+  Future<void> updatePasswordWithToken({
+    required String email,
+    required String token,
+    required String newPassword,
+  }) async {
+    // Check if Supabase is properly initialized
+    if (!_isSupabaseInitialized) {
+      throw AuthException('Authentication service is not available. Please restart the app.');
+    }
+
+    try {
+      await supabaseAuth.verifyOTP(
+        email: email,
+        token: token,
+        type: OtpType.recovery,
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw AuthException('Request timed out. Please check your internet connection and try again.');
+        },
+      );
+
+      // If token verification succeeds, update the password
+      await supabaseAuth.updateUser(UserAttributes(password: newPassword)).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw AuthException('Password update timed out. Please try again.');
+        },
+      );
+    } on AuthException catch (e) {
+      // Handle specific Supabase auth errors
+      String errorMessage;
+      switch (e.message) {
+        case 'Invalid token':
+        case 'Token has expired':
+          errorMessage = 'Invalid or expired token. Please request a new password reset.';
+          break;
+        case 'Email not found':
+          errorMessage = 'No account found with this email address.';
+          break;
+        case 'Password should be at least 6 characters':
+          errorMessage = 'Password must be at least 6 characters long.';
+          break;
+        default:
+          errorMessage = e.message;
+      }
+      throw AuthException(errorMessage);
+    } catch (e) {
+      // Handle network and other errors
+      if (e.toString().contains('timeout') || e.toString().contains('SocketException')) {
+        throw AuthException('Network timeout. Please check your internet connection and try again.');
+      }
+      throw AuthException('Network error. Please check your internet connection and try again.');
+    }
+  }
 }

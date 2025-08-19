@@ -21,10 +21,24 @@ class ResetPasswordPage extends StatefulWidget {
 
 class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController tokenController = TextEditingController();
+  final TextEditingController newPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _tokenFormKey = GlobalKey<FormState>();
+  final _passwordFormKey = GlobalKey<FormState>();
+  
+  // Flow states
   bool isSubmitted = false;
   bool isLoading = false;
   String? error;
+  
+  // New states for token-based flow
+  enum ResetPasswordState { emailEntry, emailSent, tokenEntry, newPasswordForm, resetComplete }
+  ResetPasswordState currentState = ResetPasswordState.emailEntry;
+  
+  bool _newPasswordVisible = false;
+  bool _confirmPasswordVisible = false;
 
   // How far from the top the panel should start BEFORE submit
   static const double _collapsedTopOffset = 250;
@@ -44,6 +58,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       await auth.resetPassword(email: emailController.text.trim());
       if (!mounted) return;
       setState(() {
+        currentState = ResetPasswordState.emailSent;
         isSubmitted = true;
       });
     } on AuthException catch (e) {
@@ -66,13 +81,99 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     }
   }
 
+  Future<void> verifyToken() async {
+    final isValid = _tokenFormKey.currentState?.validate() ?? false;
+    if (!isValid) return;
+
+    setState(() {
+      isLoading = true;
+      error = null;
+    });
+
+    final auth = Provider.of<AuthService>(context, listen: false);
+    try {
+      await auth.verifyResetToken(
+        email: emailController.text.trim(),
+        token: tokenController.text.trim(),
+      );
+      if (!mounted) return;
+      setState(() {
+        currentState = ResetPasswordState.newPasswordForm;
+      });
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        error = e.message;
+      });
+      if (kDebugMode) print('Token verification error: $error');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        error = 'Network error. Please check your internet connection and try again.';
+      });
+      if (kDebugMode) print('Token verification error: $e');
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> updatePassword() async {
+    final isValid = _passwordFormKey.currentState?.validate() ?? false;
+    if (!isValid) return;
+
+    if (newPasswordController.text != confirmPasswordController.text) {
+      setState(() {
+        error = 'Passwords do not match.';
+      });
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+      error = null;
+    });
+
+    final auth = Provider.of<AuthService>(context, listen: false);
+    try {
+      await auth.updatePasswordWithToken(
+        email: emailController.text.trim(),
+        token: tokenController.text.trim(),
+        newPassword: newPasswordController.text,
+      );
+      if (!mounted) return;
+      setState(() {
+        currentState = ResetPasswordState.resetComplete;
+      });
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        error = e.message;
+      });
+      if (kDebugMode) print('Password update error: $error');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        error = 'Network error. Please check your internet connection and try again.';
+      });
+      if (kDebugMode) print('Password update error: $e');
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeManager = getIt<ThemeManager>();
     final size = MediaQuery.of(context).size;
 
     // Panel height is full height minus the top offset (0 after submit -> full screen)
-    final double panelHeight = size.height - (isSubmitted ? 0 : _collapsedTopOffset);
+    final double panelHeight = size.height - (currentState == ResetPasswordState.emailEntry ? _collapsedTopOffset : 0);
 
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeManager.themeMode,
@@ -97,7 +198,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   duration: const Duration(milliseconds: 350),
                   curve: Curves.easeInOut,
                   // Your tweak: keep content at top before submit
-                  alignment: !isSubmitted ? Alignment.topCenter : null,
+                  alignment: currentState == ResetPasswordState.emailEntry ? Alignment.topCenter : null,
                   height: panelHeight.clamp(0.0, size.height),
                   width: double.infinity,
                   color: Colors.white,
@@ -106,7 +207,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     child: PrimaryPadding(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
-                        child: isSubmitted ? _buildSuccessContent() : _buildFormContent(),
+                        child: _buildCurrentContent(),
                       ),
                     ),
                   ),
@@ -114,7 +215,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               ),
 
               // Back button row (visible only pre-submit so success stays all white)
-              if (!isSubmitted)
+              if (currentState == ResetPasswordState.emailEntry)
                 SafeArea(
                   child: PrimaryPadding(
                     child: InkWell(
@@ -159,6 +260,21 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     );
   }
 
+  Widget _buildCurrentContent() {
+    switch (currentState) {
+      case ResetPasswordState.emailEntry:
+        return _buildFormContent();
+      case ResetPasswordState.emailSent:
+        return _buildEmailSentContent();
+      case ResetPasswordState.tokenEntry:
+        return _buildTokenEntryContent();
+      case ResetPasswordState.newPasswordForm:
+        return _buildNewPasswordContent();
+      case ResetPasswordState.resetComplete:
+        return _buildResetCompleteContent();
+    }
+  }
+
   // Form content wrapped in a Form with the key
   Widget _buildFormContent() {
     // Keep a small spacer so content sits ~20–30px from the top of the sheet.
@@ -185,7 +301,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 const Width20(),
                 Flexible(
                   child: Text(
-                    'Enter the email address with your account and we`ll send an email link to reset your password',
+                    'Enter the email address with your account and we`ll send a reset token to your email',
                     style: AppTextStyles.primarySemiBold.copyWith(
                       height: 1.2,
                       color: const Color(0xFF454545),
@@ -231,7 +347,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     );
   }
 
-  Widget _buildSuccessContent() {
+  Widget _buildEmailSentContent() {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
@@ -252,7 +368,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             children: [
               const Width20(),
               Text(
-                'Password Reset\nEmail has been Sent',
+                'Password Reset\nToken has been Sent',
                 textAlign: TextAlign.center,
                 style: AppTextStyles.primaryBigBold.copyWith(fontSize: 30, height: 1.1),
               ),
@@ -264,7 +380,306 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               const Width20(),
               Flexible(
                 child: Text(
-                  'A password reset email has been sent \nto your email address',
+                  'A password reset token has been sent \nto your email address',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.primaryBigSemiBold.copyWith(
+                    height: 1.2,
+                    color: const Color(0x95454545),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Height20(),
+          if (error != null)
+            Text(
+              error!,
+              style: const TextStyle(color: pinkClr, fontSize: 14),
+            ),
+          const Height10(),
+          PrimaryButton(
+            label: 'Proceed',
+            customBackgroundColor: kSSIorange,
+            onTap: () {
+              setState(() {
+                currentState = ResetPasswordState.tokenEntry;
+                error = null;
+              });
+            },
+          ),
+          const Height20(),
+          Column(
+            children: [
+              Text(
+                "Did not get your email? Check your",
+                style: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
+              ),
+              const Width10(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "spam folder or ",
+                    style: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        currentState = ResetPasswordState.emailEntry;
+                        error = null;
+                      });
+                    },
+                    child: Text(
+                      "Try another email",
+                      style: AppTextStyles.primaryBold.copyWith(color: Colors.blue),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const Height20(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTokenEntryContent() {
+    return Form(
+      key: _tokenFormKey,
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 30),
+            Row(
+              children: [
+                const Width20(),
+                Text(
+                  'Enter Reset Token',
+                  style: AppTextStyles.primaryBigBold.copyWith(fontSize: 30, height: .8),
+                ),
+              ],
+            ),
+            const Height20(),
+            Row(
+              children: [
+                const Width20(),
+                Flexible(
+                  child: Text(
+                    'Enter the reset token that was sent to your email address',
+                    style: AppTextStyles.primarySemiBold.copyWith(
+                      height: 1.2,
+                      color: const Color(0xFF454545),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Height20(),
+            FieldWithLiveValidation(
+              leadingAsset: 'assets/icon/Calendar.png',
+              title: "Reset Token",
+              hintText: "Enter the 6-digit token",
+              controller: tokenController,
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Token is required';
+                if (value.trim().length < 6) return 'Token must be at least 6 characters';
+                return null;
+              },
+            ),
+            const Height20(),
+            if (error != null)
+              Text(
+                error!,
+                style: const TextStyle(color: pinkClr, fontSize: 14),
+              ),
+            const Height10(),
+            Row(
+              children: [
+                Expanded(
+                  child: PrimaryButton(
+                    label: 'Back',
+                    customBackgroundColor: Colors.grey,
+                    onTap: () {
+                      setState(() {
+                        currentState = ResetPasswordState.emailSent;
+                        error = null;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: PrimaryButton(
+                    label: 'Verify Token',
+                    customBackgroundColor: kSSIorange,
+                    onTap: () async {
+                      final isValid = _tokenFormKey.currentState?.validate() ?? false;
+                      if (isValid) {
+                        await verifyToken();
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const Height20(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNewPasswordContent() {
+    return Form(
+      key: _passwordFormKey,
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 30),
+            Row(
+              children: [
+                const Width20(),
+                Text(
+                  'Set New Password',
+                  style: AppTextStyles.primaryBigBold.copyWith(fontSize: 30, height: .8),
+                ),
+              ],
+            ),
+            const Height20(),
+            Row(
+              children: [
+                const Width20(),
+                Flexible(
+                  child: Text(
+                    'Enter your new password',
+                    style: AppTextStyles.primarySemiBold.copyWith(
+                      height: 1.2,
+                      color: const Color(0xFF454545),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Height20(),
+            FieldWithLiveValidation(
+              leadingAsset: 'assets/image_assets/Padlock.png',
+              title: "New Password",
+              hintText: "Enter new password",
+              controller: newPasswordController,
+              isPassword: true,
+              isPasswordVisible: _newPasswordVisible,
+              onPasswordToggle: () {
+                setState(() {
+                  _newPasswordVisible = !_newPasswordVisible;
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Password is required';
+                if (value.length < 6) return 'Password must be at least 6 characters';
+                return null;
+              },
+            ),
+            const Height20(),
+            FieldWithLiveValidation(
+              leadingAsset: 'assets/image_assets/Padlock.png',
+              title: "Confirm Password",
+              hintText: "Confirm new password",
+              controller: confirmPasswordController,
+              isPassword: true,
+              isPasswordVisible: _confirmPasswordVisible,
+              onPasswordToggle: () {
+                setState(() {
+                  _confirmPasswordVisible = !_confirmPasswordVisible;
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Password confirmation is required';
+                if (value != newPasswordController.text) return 'Passwords do not match';
+                return null;
+              },
+            ),
+            const Height20(),
+            if (error != null)
+              Text(
+                error!,
+                style: const TextStyle(color: pinkClr, fontSize: 14),
+              ),
+            const Height10(),
+            Row(
+              children: [
+                Expanded(
+                  child: PrimaryButton(
+                    label: 'Back',
+                    customBackgroundColor: Colors.grey,
+                    onTap: () {
+                      setState(() {
+                        currentState = ResetPasswordState.tokenEntry;
+                        error = null;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: PrimaryButton(
+                    label: 'Reset Password',
+                    customBackgroundColor: kSSIorange,
+                    onTap: () async {
+                      final isValid = _passwordFormKey.currentState?.validate() ?? false;
+                      if (isValid) {
+                        await updatePassword();
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const Height20(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResetCompleteContent() {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Height20(),
+          const Height20(),
+          const SizedBox(height: 10),
+          Lottie.asset(
+            'assets/icon/Settings/email.json',
+            width: 180,
+            repeat: true,
+            reverse: false,
+            animate: true,
+            fit: BoxFit.contain,
+          ),
+          Row(
+            children: [
+              const Width20(),
+              Text(
+                'Password Reset\nSuccessful',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.primaryBigBold.copyWith(fontSize: 30, height: 1.1),
+              ),
+            ],
+          ),
+          const Height20(),
+          Row(
+            children: [
+              const Width20(),
+              Flexible(
+                child: Text(
+                  'Your password has been successfully reset.\nYou can now sign in with your new password.',
                   textAlign: TextAlign.center,
                   style: AppTextStyles.primaryBigSemiBold.copyWith(
                     height: 1.2,
@@ -285,37 +700,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             label: 'Back to login',
             customBackgroundColor: Colors.black,
             onTap: () => Navigator.of(context).pop(),
-          ),
-          const Height20(),
-          Column(
-            children: [
-              Text(
-                "Did not get your email? Check your",
-                style: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
-              ),
-              const Width10(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "spam folder or ",
-                    style: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        isSubmitted = false;
-                        error = null;
-                      });
-                    },
-                    child: Text(
-                      "Try another email",
-                      style: AppTextStyles.primaryBold.copyWith(color: Colors.blue),
-                    ),
-                  ),
-                ],
-              ),
-            ],
           ),
           const Height20(),
         ],

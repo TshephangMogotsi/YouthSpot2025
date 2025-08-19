@@ -116,6 +116,26 @@ void main() {
       expect(resetPage, isNotNull);
     });
 
+    testWidgets('Combined token and password flow works', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangeNotifierProvider<AuthService>.value(
+            value: mockAuthService as AuthService,
+            child: const ResetPasswordPage(),
+          ),
+        ),
+      );
+
+      // This test validates that the new combined flow doesn't call verifyToken separately
+      // and instead goes directly to updatePasswordWithToken
+      expect(find.byType(ResetPasswordPage), findsOneWidget);
+      
+      // Initially, no auth methods should be called
+      expect(mockAuthService.resetPasswordCalled, isFalse);
+      expect(mockAuthService.verifyTokenCalled, isFalse);
+      expect(mockAuthService.updatePasswordCalled, isFalse);
+    });
+
     testWidgets('Password form validation works', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(

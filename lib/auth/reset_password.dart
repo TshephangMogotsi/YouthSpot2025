@@ -121,15 +121,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   }
 
   Future<void> updatePassword() async {
-    final isValid = _passwordFormKey.currentState?.validate() ?? false;
+    final isValid = _tokenFormKey.currentState?.validate() ?? false;
     if (!isValid) return;
-
-    if (newPasswordController.text != confirmPasswordController.text) {
-      setState(() {
-        error = 'Passwords do not match.';
-      });
-      return;
-    }
 
     setState(() {
       isLoading = true;
@@ -269,7 +262,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       case ResetPasswordState.tokenEntry:
         return _buildTokenEntryContent();
       case ResetPasswordState.newPasswordForm:
-        return _buildNewPasswordContent();
+        // This state is now handled by tokenEntry, but keep for backward compatibility
+        return _buildTokenEntryContent();
       case ResetPasswordState.resetComplete:
         return _buildResetCompleteContent();
     }
@@ -457,7 +451,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               children: [
                 const Width20(),
                 Text(
-                  'Enter Reset Token',
+                  'Reset Your Password',
                   style: AppTextStyles.primaryBigBold.copyWith(fontSize: 30, height: .8),
                 ),
               ],
@@ -468,7 +462,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 const Width20(),
                 Flexible(
                   child: Text(
-                    'Enter the reset token that was sent to your email address',
+                    'Enter the reset token and your new password',
                     style: AppTextStyles.primarySemiBold.copyWith(
                       height: 1.2,
                       color: const Color(0xFF454545),
@@ -486,6 +480,44 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               validator: (value) {
                 if (value == null || value.isEmpty) return 'Token is required';
                 if (value.trim().length < 6) return 'Token must be at least 6 characters';
+                return null;
+              },
+            ),
+            const Height20(),
+            FieldWithLiveValidation(
+              leadingAsset: 'assets/image_assets/Padlock.png',
+              title: "New Password",
+              hintText: "Enter new password",
+              controller: newPasswordController,
+              isPassword: !_newPasswordVisible,
+              trailingIcon: _newPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              onTrailingPressed: () {
+                setState(() {
+                  _newPasswordVisible = !_newPasswordVisible;
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Password is required';
+                if (value.length < 6) return 'Password must be at least 6 characters';
+                return null;
+              },
+            ),
+            const Height20(),
+            FieldWithLiveValidation(
+              leadingAsset: 'assets/image_assets/Padlock.png',
+              title: "Confirm Password",
+              hintText: "Confirm new password",
+              controller: confirmPasswordController,
+              isPassword: !_confirmPasswordVisible,
+              trailingIcon: _confirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              onTrailingPressed: () {
+                setState(() {
+                  _confirmPasswordVisible = !_confirmPasswordVisible;
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Password confirmation is required';
+                if (value != newPasswordController.text) return 'Passwords do not match';
                 return null;
               },
             ),
@@ -513,12 +545,13 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: PrimaryButton(
-                    label: 'Verify Token',
+                    label: 'Reset Password',
                     customBackgroundColor: kSSIorange,
                     onTap: () async {
                       final isValid = _tokenFormKey.currentState?.validate() ?? false;
                       if (isValid) {
-                        await verifyToken();
+                        // Skip verifyToken() and go directly to updatePassword()
+                        await updatePassword();
                       }
                     },
                   ),

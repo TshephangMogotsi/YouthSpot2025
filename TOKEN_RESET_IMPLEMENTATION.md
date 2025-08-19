@@ -6,9 +6,15 @@ Implemented a token-based password reset flow for mobile apps that don't have a 
 ## New Flow
 1. **Email Entry**: User enters their email address
 2. **Email Sent**: Shows confirmation that token was sent, with "Proceed" button
-3. **Token Entry**: User enters the 6-digit token from their email
-4. **New Password**: User sets a new password and confirms it
-5. **Reset Complete**: Confirmation that password was successfully reset
+3. **Token Entry & Password Reset**: User enters the 6-digit token and sets new password in one step
+4. **Reset Complete**: Confirmation that password was successfully reset
+
+## Recent Fix: One-Step Token Verification
+The flow has been updated to address token verification issues. Previously, the token was verified in a separate step, which could cause it to be consumed before the password update. Now:
+
+- Token entry and password setting are combined in one form
+- The app calls `updatePasswordWithToken()` directly, which handles both token verification and password update atomically
+- This prevents "Token verification error" issues that occurred when tokens were consumed in the verification step
 
 ## Changes Made
 
@@ -23,8 +29,8 @@ Implemented a token-based password reset flow for mobile apps that don't have a 
 - Added separate form keys for each step
 - Modified UI to show different content based on current state
 - Changed "Back to login" button to "Proceed" after email is sent
-- Added token entry form with validation
-- Added new password form with password visibility toggles
+- **Updated**: Combined token entry and password forms into one step to prevent token consumption issues
+- Added password visibility toggles
 - Added completion screen
 
 ### Email Template Update

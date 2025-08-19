@@ -508,6 +508,43 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   ),
                 ],
               ),
+              const Height10(),
+              // Additional troubleshooting info for release builds
+              if (kReleaseMode) ...[
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Troubleshooting Tips:",
+                        style: AppTextStyles.primaryBold.copyWith(
+                          fontSize: 14,
+                          color: Colors.blue.shade800,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "• Check spam/junk folder\n"
+                        "• Email may take 1-5 minutes\n"
+                        "• Ensure stable internet connection\n"
+                        "• Try a different email provider if issues persist",
+                        style: AppTextStyles.primaryMedium.copyWith(
+                          fontSize: 12,
+                          color: Colors.blue.shade700,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
           const Height20(),

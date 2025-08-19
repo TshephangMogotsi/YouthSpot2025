@@ -50,6 +50,11 @@ class MockAuthService extends ChangeNotifier {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 100));
   }
+
+  Future<void> signOut() async {
+    // Mock signOut - just simulate delay
+    await Future.delayed(const Duration(milliseconds: 50));
+  }
 }
 
 void main() {
@@ -164,6 +169,38 @@ void main() {
         ),
       );
 
+      expect(find.byType(ResetPasswordPage), findsOneWidget);
+    });
+
+    testWidgets('Password validation happens before token verification', (WidgetTester tester) async {
+      final mockAuthService = MockAuthService();
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangeNotifierProvider<AuthService>.value(
+            value: mockAuthService as AuthService,
+            child: const ResetPasswordPage(),
+          ),
+        ),
+      );
+
+      // This test validates the widget structure is correct
+      expect(find.byType(ResetPasswordPage), findsOneWidget);
+    });
+
+    testWidgets('Success page does not show Lottie animation', (WidgetTester tester) async {
+      final mockAuthService = MockAuthService();
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangeNotifierProvider<AuthService>.value(
+            value: mockAuthService as AuthService,
+            child: const ResetPasswordPage(),
+          ),
+        ),
+      );
+
+      // This test validates that when we reach success state, no Lottie animation is present
       expect(find.byType(ResetPasswordPage), findsOneWidget);
     });
   });

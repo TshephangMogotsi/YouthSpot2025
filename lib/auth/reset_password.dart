@@ -1,4 +1,3 @@
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
@@ -131,8 +130,31 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   }
 
   Future<void> updatePassword() async {
+    // First validate the form including password matching
     final isValid = _tokenFormKey.currentState?.validate() ?? false;
     if (!isValid) return;
+
+    // Additional password validation before consuming the token
+    if (newPasswordController.text.trim().isEmpty) {
+      setState(() {
+        error = 'Password is required';
+      });
+      return;
+    }
+
+    if (newPasswordController.text.length < 6) {
+      setState(() {
+        error = 'Password must be at least 6 characters long';
+      });
+      return;
+    }
+
+    if (newPasswordController.text != confirmPasswordController.text) {
+      setState(() {
+        error = 'Passwords do not match';
+      });
+      return;
+    }
 
     setState(() {
       isLoading = true;
@@ -141,6 +163,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     final auth = Provider.of<AuthService>(context, listen: false);
     try {
+      // Only after password validation succeeds, verify token and update password
       await auth.updatePasswordWithToken(
         email: emailController.text.trim(),
         token: tokenController.text.trim(),
@@ -350,7 +373,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             const Height10(),
             PrimaryButton(
               label: 'Reset Password',
-              customBackgroundColor: kSSIorange,
+              customBackgroundColor: Colors.black,
               onTap: () async {
                 final isValid = _formKey.currentState?.validate() ?? false;
                 if (isValid) {
@@ -417,7 +440,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           const Height10(),
           PrimaryButton(
             label: 'Proceed',
-            customBackgroundColor: kSSIorange,
+            customBackgroundColor: Colors.black,
             onTap: () {
               setState(() {
                 currentState = ResetPasswordState.tokenEntry;
@@ -573,7 +596,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 Expanded(
                   child: PrimaryButton(
                     label: 'Back',
-                    customBackgroundColor: Colors.grey,
+                    customBackgroundColor: Colors.black,
+                    customTextColor: Colors.white,
                     onTap: () {
                       setState(() {
                         currentState = ResetPasswordState.emailSent;
@@ -586,7 +610,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 Expanded(
                   child: PrimaryButton(
                     label: 'Reset Password',
-                    customBackgroundColor: kSSIorange,
+                    customBackgroundColor: Colors.black,
                     onTap: () async {
                       final isValid =
                           _tokenFormKey.currentState?.validate() ?? false;
@@ -700,7 +724,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 Expanded(
                   child: PrimaryButton(
                     label: 'Back',
-                    customBackgroundColor: Colors.grey,
+                    customBackgroundColor: Colors.black,
+                    customTextColor: Colors.white,
                     onTap: () {
                       setState(() {
                         currentState = ResetPasswordState.tokenEntry;
@@ -713,7 +738,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 Expanded(
                   child: PrimaryButton(
                     label: 'Reset Password',
-                    customBackgroundColor: kSSIorange,
+                    customBackgroundColor: Colors.black,
                     onTap: () async {
                       final isValid =
                           _passwordFormKey.currentState?.validate() ?? false;
@@ -740,43 +765,30 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         children: [
           const Height20(),
           const Height20(),
-          const SizedBox(height: 10),
-          Lottie.asset(
-            'assets/icon/Settings/email.json',
-            width: 180,
-            repeat: true,
-            reverse: false,
-            animate: true,
-            fit: BoxFit.contain,
-          ),
-          Row(
-            children: [
-              const Width20(),
-              Text(
-                'Password Reset\nSuccessful',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.primaryBigBold.copyWith(
-                  fontSize: 30,
-                  height: 1.1,
-                ),
-              ),
-            ],
+          const SizedBox(height: 50), // Extra spacing instead of animation
+          
+          // Centered title without Row wrapper
+          Text(
+            'Password Reset\nSuccessful',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.primaryBigBold.copyWith(
+              fontSize: 30,
+              height: 1.1,
+            ),
           ),
           const Height20(),
-          Row(
-            children: [
-              const Width20(),
-              Flexible(
-                child: Text(
-                  'Your password has been successfully reset.\nYou can now sign in with your new password.',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.primaryBigSemiBold.copyWith(
-                    height: 1.2,
-                    color: const Color(0x95454545),
-                  ),
-                ),
+          
+          // Centered description without Row wrapper
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'Your password has been successfully reset.\nYou can now sign in with your new password.',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.primaryBigSemiBold.copyWith(
+                height: 1.2,
+                color: const Color(0x95454545),
               ),
-            ],
+            ),
           ),
           const Height20(),
           if (error != null)
@@ -785,7 +797,13 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           PrimaryButton(
             label: 'Back to login',
             customBackgroundColor: Colors.black,
-            onTap: () => Navigator.of(context).pop(),
+            onTap: () async {
+              // Sign out the user before going back to login
+              final auth = Provider.of<AuthService>(context, listen: false);
+              await auth.signOut();
+              if (!mounted) return;
+              Navigator.of(context).pop();
+            },
           ),
           const Height20(),
         ],

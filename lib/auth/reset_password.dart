@@ -12,6 +12,14 @@ import '../global_widgets/field_with_live_validation.dart';
 import '../global_widgets/primary_button.dart';
 import '../global_widgets/primary_padding.dart';
 
+enum ResetPasswordState {
+  emailEntry,
+  emailSent,
+  tokenEntry,
+  newPasswordForm,
+  resetComplete,
+}
+
 class ResetPasswordPage extends StatefulWidget {
   const ResetPasswordPage({super.key});
 
@@ -23,20 +31,20 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController tokenController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final _tokenFormKey = GlobalKey<FormState>();
   final _passwordFormKey = GlobalKey<FormState>();
-  
+
   // Flow states
   bool isSubmitted = false;
   bool isLoading = false;
   String? error;
-  
+
   // New states for token-based flow
-  enum ResetPasswordState { emailEntry, emailSent, tokenEntry, newPasswordForm, resetComplete }
   ResetPasswordState currentState = ResetPasswordState.emailEntry;
-  
+
   bool _newPasswordVisible = false;
   bool _confirmPasswordVisible = false;
 
@@ -70,7 +78,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        error = 'Network error. Please check your internet connection and try again.';
+        error =
+            'Network error. Please check your internet connection and try again.';
       });
       if (kDebugMode) print('Reset password error: $e');
     } finally {
@@ -109,7 +118,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        error = 'Network error. Please check your internet connection and try again.';
+        error =
+            'Network error. Please check your internet connection and try again.';
       });
       if (kDebugMode) print('Token verification error: $e');
     } finally {
@@ -149,7 +159,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        error = 'Network error. Please check your internet connection and try again.';
+        error =
+            'Network error. Please check your internet connection and try again.';
       });
       if (kDebugMode) print('Password update error: $e');
     } finally {
@@ -166,13 +177,19 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     final size = MediaQuery.of(context).size;
 
     // Panel height is full height minus the top offset (0 after submit -> full screen)
-    final double panelHeight = size.height - (currentState == ResetPasswordState.emailEntry ? _collapsedTopOffset : 0);
+    final double panelHeight =
+        size.height -
+        (currentState == ResetPasswordState.emailEntry
+            ? _collapsedTopOffset
+            : 0);
 
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeManager.themeMode,
       builder: (context, theme, _) {
         return Scaffold(
-          backgroundColor: theme == ThemeMode.dark ? const Color(0xFF1C1C24) : Colors.white,
+          backgroundColor: theme == ThemeMode.dark
+              ? const Color(0xFF1C1C24)
+              : Colors.white,
           body: Stack(
             children: [
               // Background image (visible only before submit above the panel)
@@ -191,7 +208,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   duration: const Duration(milliseconds: 350),
                   curve: Curves.easeInOut,
                   // Your tweak: keep content at top before submit
-                  alignment: currentState == ResetPasswordState.emailEntry ? Alignment.topCenter : null,
+                  alignment: currentState == ResetPasswordState.emailEntry
+                      ? Alignment.topCenter
+                      : null,
                   height: panelHeight.clamp(0.0, size.height),
                   width: double.infinity,
                   color: Colors.white,
@@ -215,11 +234,17 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       onTap: () => Navigator.of(context).pop(),
                       child: Row(
                         children: [
-                          const Icon(Icons.arrow_back, size: 28, color: Colors.white),
+                          const Icon(
+                            Icons.arrow_back,
+                            size: 28,
+                            color: Colors.white,
+                          ),
                           const Width10(),
                           Text(
                             'Back',
-                            style: AppTextStyles.primaryBold.copyWith(color: Colors.white),
+                            style: AppTextStyles.primaryBold.copyWith(
+                              color: Colors.white,
+                            ),
                           ),
                         ],
                       ),
@@ -236,11 +261,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       color: Colors.black.withOpacity(0.4),
                       child: const Center(
                         child: SizedBox(
-                     
-                          child: CircularProgressIndicator(
-                    
-                            color: Colors.white,
-                          ),
+                          child: CircularProgressIndicator(color: Colors.white),
                         ),
                       ),
                     ),
@@ -285,7 +306,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 const Width20(),
                 Text(
                   'Reset password',
-                  style: AppTextStyles.primaryBigBold.copyWith(fontSize: 30, height: .8),
+                  style: AppTextStyles.primaryBigBold.copyWith(
+                    fontSize: 30,
+                    height: .8,
+                  ),
                 ),
               ],
             ),
@@ -364,7 +388,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               Text(
                 'Password Reset\nToken has been Sent',
                 textAlign: TextAlign.center,
-                style: AppTextStyles.primaryBigBold.copyWith(fontSize: 30, height: 1.1),
+                style: AppTextStyles.primaryBigBold.copyWith(
+                  fontSize: 30,
+                  height: 1.1,
+                ),
               ),
             ],
           ),
@@ -386,10 +413,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           ),
           const Height20(),
           if (error != null)
-            Text(
-              error!,
-              style: const TextStyle(color: pinkClr, fontSize: 14),
-            ),
+            Text(error!, style: const TextStyle(color: pinkClr, fontSize: 14)),
           const Height10(),
           PrimaryButton(
             label: 'Proceed',
@@ -414,7 +438,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 children: [
                   Text(
                     "spam folder or ",
-                    style: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
+                    style: AppTextStyles.primaryBold.copyWith(
+                      color: Colors.grey,
+                    ),
                   ),
                   InkWell(
                     onTap: () {
@@ -425,7 +451,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     },
                     child: Text(
                       "Try another email",
-                      style: AppTextStyles.primaryBold.copyWith(color: Colors.blue),
+                      style: AppTextStyles.primaryBold.copyWith(
+                        color: Colors.blue,
+                      ),
                     ),
                   ),
                 ],
@@ -452,7 +480,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 const Width20(),
                 Text(
                   'Reset Your Password',
-                  style: AppTextStyles.primaryBigBold.copyWith(fontSize: 30, height: .8),
+                  style: AppTextStyles.primaryBigBold.copyWith(
+                    fontSize: 30,
+                    height: .8,
+                  ),
                 ),
               ],
             ),
@@ -479,7 +510,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               controller: tokenController,
               validator: (value) {
                 if (value == null || value.isEmpty) return 'Token is required';
-                if (value.trim().length < 6) return 'Token must be at least 6 characters';
+                if (value.trim().length < 6)
+                  return 'Token must be at least 6 characters';
                 return null;
               },
             ),
@@ -490,15 +522,19 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               hintText: "Enter new password",
               controller: newPasswordController,
               isPassword: !_newPasswordVisible,
-              trailingIcon: _newPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              trailingIcon: _newPasswordVisible
+                  ? Icons.visibility
+                  : Icons.visibility_off,
               onTrailingPressed: () {
                 setState(() {
                   _newPasswordVisible = !_newPasswordVisible;
                 });
               },
               validator: (value) {
-                if (value == null || value.isEmpty) return 'Password is required';
-                if (value.length < 6) return 'Password must be at least 6 characters';
+                if (value == null || value.isEmpty)
+                  return 'Password is required';
+                if (value.length < 6)
+                  return 'Password must be at least 6 characters';
                 return null;
               },
             ),
@@ -509,15 +545,19 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               hintText: "Confirm new password",
               controller: confirmPasswordController,
               isPassword: !_confirmPasswordVisible,
-              trailingIcon: _confirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              trailingIcon: _confirmPasswordVisible
+                  ? Icons.visibility
+                  : Icons.visibility_off,
               onTrailingPressed: () {
                 setState(() {
                   _confirmPasswordVisible = !_confirmPasswordVisible;
                 });
               },
               validator: (value) {
-                if (value == null || value.isEmpty) return 'Password confirmation is required';
-                if (value != newPasswordController.text) return 'Passwords do not match';
+                if (value == null || value.isEmpty)
+                  return 'Password confirmation is required';
+                if (value != newPasswordController.text)
+                  return 'Passwords do not match';
                 return null;
               },
             ),
@@ -548,7 +588,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     label: 'Reset Password',
                     customBackgroundColor: kSSIorange,
                     onTap: () async {
-                      final isValid = _tokenFormKey.currentState?.validate() ?? false;
+                      final isValid =
+                          _tokenFormKey.currentState?.validate() ?? false;
                       if (isValid) {
                         // Skip verifyToken() and go directly to updatePassword()
                         await updatePassword();
@@ -579,7 +620,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 const Width20(),
                 Text(
                   'Set New Password',
-                  style: AppTextStyles.primaryBigBold.copyWith(fontSize: 30, height: .8),
+                  style: AppTextStyles.primaryBigBold.copyWith(
+                    fontSize: 30,
+                    height: .8,
+                  ),
                 ),
               ],
             ),
@@ -605,15 +649,19 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               hintText: "Enter new password",
               controller: newPasswordController,
               isPassword: !_newPasswordVisible,
-              trailingIcon: _newPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              trailingIcon: _newPasswordVisible
+                  ? Icons.visibility
+                  : Icons.visibility_off,
               onTrailingPressed: () {
                 setState(() {
                   _newPasswordVisible = !_newPasswordVisible;
                 });
               },
               validator: (value) {
-                if (value == null || value.isEmpty) return 'Password is required';
-                if (value.length < 6) return 'Password must be at least 6 characters';
+                if (value == null || value.isEmpty)
+                  return 'Password is required';
+                if (value.length < 6)
+                  return 'Password must be at least 6 characters';
                 return null;
               },
             ),
@@ -624,15 +672,19 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               hintText: "Confirm new password",
               controller: confirmPasswordController,
               isPassword: !_confirmPasswordVisible,
-              trailingIcon: _confirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              trailingIcon: _confirmPasswordVisible
+                  ? Icons.visibility
+                  : Icons.visibility_off,
               onTrailingPressed: () {
                 setState(() {
                   _confirmPasswordVisible = !_confirmPasswordVisible;
                 });
               },
               validator: (value) {
-                if (value == null || value.isEmpty) return 'Password confirmation is required';
-                if (value != newPasswordController.text) return 'Passwords do not match';
+                if (value == null || value.isEmpty)
+                  return 'Password confirmation is required';
+                if (value != newPasswordController.text)
+                  return 'Passwords do not match';
                 return null;
               },
             ),
@@ -663,7 +715,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     label: 'Reset Password',
                     customBackgroundColor: kSSIorange,
                     onTap: () async {
-                      final isValid = _passwordFormKey.currentState?.validate() ?? false;
+                      final isValid =
+                          _passwordFormKey.currentState?.validate() ?? false;
                       if (isValid) {
                         await updatePassword();
                       }
@@ -702,7 +755,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               Text(
                 'Password Reset\nSuccessful',
                 textAlign: TextAlign.center,
-                style: AppTextStyles.primaryBigBold.copyWith(fontSize: 30, height: 1.1),
+                style: AppTextStyles.primaryBigBold.copyWith(
+                  fontSize: 30,
+                  height: 1.1,
+                ),
               ),
             ],
           ),
@@ -724,10 +780,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           ),
           const Height20(),
           if (error != null)
-            Text(
-              error!,
-              style: const TextStyle(color: pinkClr, fontSize: 14),
-            ),
+            Text(error!, style: const TextStyle(color: pinkClr, fontSize: 14)),
           const Height10(),
           PrimaryButton(
             label: 'Back to login',

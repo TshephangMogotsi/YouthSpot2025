@@ -206,31 +206,60 @@ class AuthService extends ChangeNotifier {
       throw AuthException('Authentication service is not available. Please restart the app.');
     }
 
+    // Log the request for debugging (works in both debug and release)
+    debugPrint('YouthSpot: Attempting password reset for email: ${email.replaceAll(RegExp(r'(?<=.{2}).(?=.*@)'), '*')}');
+    debugPrint('YouthSpot: Supabase URL: ${Supabase.instance.client.supabaseUrl}');
+    debugPrint('YouthSpot: App identifier: com.example.youthspot');
+
     try {
-      await supabaseAuth.resetPasswordForEmail(email).timeout(
+      final response = await supabaseAuth.resetPasswordForEmail(
+        email,
+        redirectTo: kIsWeb 
+          ? null 
+          : 'com.example.youthspot://reset-password', // Add deep link for mobile
+      ).timeout(
         const Duration(seconds: 30),
         onTimeout: () {
+          debugPrint('YouthSpot: Password reset request timed out');
           throw AuthException('Request timed out. Please check your internet connection and try again.');
         },
       );
+      
+      // Log success
+      debugPrint('YouthSpot: Password reset email request completed successfully');
     } on AuthException catch (e) {
+      // Log detailed error information
+      debugPrint('YouthSpot: Supabase AuthException: ${e.message}');
+      debugPrint('YouthSpot: AuthException statusCode: ${e.statusCode}');
+      
       // Handle specific Supabase auth errors
       String errorMessage;
       switch (e.message) {
         case 'Email address not found':
+        case 'User not found':
           errorMessage = 'No account found with this email address.';
           break;
         case 'Invalid email':
           errorMessage = 'Please enter a valid email address.';
+          break;
+        case 'Email rate limit exceeded':
+          errorMessage = 'Too many password reset attempts. Please wait a few minutes before trying again.';
           break;
         default:
           errorMessage = e.message;
       }
       throw AuthException(errorMessage);
     } catch (e) {
+      // Log the full error for debugging
+      debugPrint('YouthSpot: Password reset error: $e');
+      debugPrint('YouthSpot: Error type: ${e.runtimeType}');
+      
       // Handle network and other errors
       if (e.toString().contains('timeout') || e.toString().contains('SocketException')) {
         throw AuthException('Network timeout. Please check your internet connection and try again.');
+      }
+      if (e.toString().contains('XMLHttpRequest')) {
+        throw AuthException('Network request failed. This may be due to network restrictions or app configuration issues.');
       }
       throw AuthException('Network error. Please check your internet connection and try again.');
     }

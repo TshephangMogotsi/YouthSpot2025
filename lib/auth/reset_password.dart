@@ -1,6 +1,7 @@
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
+import 'package:youthspot/auth/auth_diagnostics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:youthspot/config/font_constants.dart';
@@ -60,9 +61,35 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       error = null;
     });
 
+    // Run diagnostics in release mode to help debug issues
+    if (kReleaseMode) {
+      final diagnostics = await AuthDiagnostics.checkSupabaseConnection();
+      AuthDiagnostics.printDiagnostics(diagnostics);
+      
+      if (diagnostics['supabase_reachable'] != true) {
+        setState(() {
+          error = 'Unable to connect to authentication service. Please check your internet connection.';
+          isLoading = false;
+        });
+        return;
+      }
+    }
+
     final auth = Provider.of<AuthService>(context, listen: false);
     try {
-      await auth.resetPassword(email: emailController.text.trim());
+      // Use diagnostics for detailed logging in release mode
+      if (kReleaseMode) {
+        final testResult = await AuthDiagnostics.testPasswordReset(emailController.text.trim());
+        AuthDiagnostics.printDiagnostics(testResult);
+        
+        if (!testResult['success']) {
+          throw AuthException(testResult['error'] ?? 'Password reset failed');
+        }
+      } else {
+        // Use normal auth service in debug mode
+        await auth.resetPassword(email: emailController.text.trim());
+      }
+      
       if (!mounted) return;
       setState(() {
         currentState = ResetPasswordState.emailSent;
@@ -73,14 +100,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       setState(() {
         error = e.message;
       });
-      if (kDebugMode) print('Reset password error: $error');
+      debugPrint('YouthSpot: Reset password error: $error');
     } catch (e) {
       if (!mounted) return;
       setState(() {
         error =
             'Network error. Please check your internet connection and try again.';
       });
-      if (kDebugMode) print('Reset password error: $e');
+      debugPrint('YouthSpot: Reset password error: $e');
     } finally {
       if (!mounted) return;
       setState(() {

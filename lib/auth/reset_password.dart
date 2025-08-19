@@ -571,9 +571,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               title: "New Password",
               hintText: "Enter new password",
               controller: newPasswordController,
-              isPassword: true,
-              isPasswordVisible: _newPasswordVisible,
-              onPasswordToggle: () {
+              isPassword: !_newPasswordVisible,
+              trailingIcon: _newPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              onTrailingPressed: () {
                 setState(() {
                   _newPasswordVisible = !_newPasswordVisible;
                 });
@@ -590,9 +590,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               title: "Confirm Password",
               hintText: "Confirm new password",
               controller: confirmPasswordController,
-              isPassword: true,
-              isPasswordVisible: _confirmPasswordVisible,
-              onPasswordToggle: () {
+              isPassword: !_confirmPasswordVisible,
+              trailingIcon: _confirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              onTrailingPressed: () {
                 setState(() {
                   _confirmPasswordVisible = !_confirmPasswordVisible;
                 });

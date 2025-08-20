@@ -1,9 +1,9 @@
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
-import 'package:youthspot/auth/auth_diagnostics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:youthspot/config/font_constants.dart';
 import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
@@ -61,34 +61,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       error = null;
     });
 
-    // Run diagnostics in release mode to help debug issues
-    if (kReleaseMode) {
-      final diagnostics = await AuthDiagnostics.checkSupabaseConnection();
-      AuthDiagnostics.printDiagnostics(diagnostics);
-      
-      if (diagnostics['supabase_reachable'] != true) {
-        setState(() {
-          error = 'Unable to connect to authentication service. Please check your internet connection.';
-          isLoading = false;
-        });
-        return;
-      }
-    }
-
     final auth = Provider.of<AuthService>(context, listen: false);
     try {
-      // Use diagnostics for detailed logging in release mode
-      if (kReleaseMode) {
-        final testResult = await AuthDiagnostics.testPasswordReset(emailController.text.trim());
-        AuthDiagnostics.printDiagnostics(testResult);
-        
-        if (!testResult['success']) {
-          throw AuthException(testResult['error'] ?? 'Password reset failed');
-        }
-      } else {
-        // Use normal auth service in debug mode
-        await auth.resetPassword(email: emailController.text.trim());
-      }
+      await auth.resetPassword(email: emailController.text.trim());
       
       if (!mounted) return;
       setState(() {
@@ -509,42 +484,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 ],
               ),
               const Height10(),
-              // Additional troubleshooting info for release builds
-              if (kReleaseMode) ...[
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Troubleshooting Tips:",
-                        style: AppTextStyles.primaryBold.copyWith(
-                          fontSize: 14,
-                          color: Colors.blue.shade800,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        "• Check spam/junk folder\n"
-                        "• Email may take 1-5 minutes\n"
-                        "• Ensure stable internet connection\n"
-                        "• Try a different email provider if issues persist",
-                        style: AppTextStyles.primaryMedium.copyWith(
-                          fontSize: 12,
-                          color: Colors.blue.shade700,
-                          height: 1.3,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ],
           ),
           const Height20(),

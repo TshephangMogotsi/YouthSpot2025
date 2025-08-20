@@ -13,10 +13,14 @@ if [ -f "android/local.properties" ]; then
     cat android/local.properties
 else
     echo "✗ local.properties missing"
-    echo "Creating local.properties file..."
-    cat > android/local.properties << EOF
+    echo "Creating local.properties file from template..."
+    if [ -f "android/local.properties.template" ]; then
+        cp android/local.properties.template android/local.properties
+        echo "✓ local.properties created from template"
+        echo "⚠️  Please update android/local.properties with your local SDK paths"
+    else
+        cat > android/local.properties << EOF
 # This file contains local development configuration.
-# It is typically created automatically by Flutter during project setup.
 # For development, these paths should point to your local installations.
 # This file should not be committed to version control.
 
@@ -26,7 +30,9 @@ sdk.dir=\${ANDROID_HOME:-/usr/lib/android-sdk}
 # Flutter SDK path (adjust to your local installation)  
 flutter.sdk=\${FLUTTER_ROOT:-/usr/local/flutter}
 EOF
-    echo "✓ local.properties created"
+        echo "✓ local.properties created with default paths"
+        echo "⚠️  Please update android/local.properties with your local SDK paths"
+    fi
 fi
 
 echo ""

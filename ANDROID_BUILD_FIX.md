@@ -45,12 +45,13 @@ Confirmed that `android/app/build.gradle.kts` uses correct Kotlin DSL syntax:
 
 #### Setup Instructions
 1. Ensure you have Flutter installed and in your PATH
-2. Update `android/local.properties` with your local SDK paths:
+2. Copy `android/local.properties.template` to `android/local.properties`
+3. Update `android/local.properties` with your local SDK paths:
    ```properties
    sdk.dir=/path/to/your/android-sdk
    flutter.sdk=/path/to/your/flutter-sdk
    ```
-3. Run the following commands:
+4. Run the following commands:
    ```bash
    flutter clean
    flutter pub get

@@ -1,0 +1,20 @@
+# Flutter Android local.properties template
+# Copy this file to android/local.properties and update paths for your system
+
+# Android SDK path - update to your local Android SDK installation
+# Common locations:
+# - Windows: C:/Users/YourUsername/AppData/Local/Android/Sdk  
+# - macOS: /Users/YourUsername/Library/Android/sdk
+# - Linux: /home/YourUsername/Android/Sdk
+sdk.dir=/path/to/your/android-sdk
+
+# Flutter SDK path - update to your local Flutter installation
+# Common locations:
+# - Windows: C:/flutter
+# - macOS: /usr/local/flutter or /Users/YourUsername/flutter
+# - Linux: /usr/local/flutter or /home/YourUsername/flutter
+flutter.sdk=/path/to/your/flutter-sdk
+
+# Alternative using environment variables (recommended):
+# sdk.dir=${ANDROID_HOME}
+# flutter.sdk=${FLUTTER_ROOT}

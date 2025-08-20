@@ -208,7 +208,7 @@ class AuthService extends ChangeNotifier {
 
     // Log the request for debugging (works in both debug and release)
     debugPrint('YouthSpot: Attempting password reset for email: ${email.replaceAll(RegExp(r'(?<=.{2}).(?=.*@)'), '*')}');
-    debugPrint('YouthSpot: Supabase URL: ${Supabase.instance.client.restUrl}');
+    debugPrint('YouthSpot: Supabase URL: ${Supabase.instance.client.supabaseUrl}');
     debugPrint('YouthSpot: App identifier: com.example.youthspot');
 
     try {

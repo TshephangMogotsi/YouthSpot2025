@@ -13,12 +13,12 @@ class AuthDiagnostics {
     try {
       // Check Supabase client initialization
       results['supabase_initialized'] = true;
-      results['supabase_url'] = Supabase.instance.client.restUrl;
+      results['supabase_url'] = Supabase.instance.client.supabaseUrl;
       results['auth_client_available'] = _auth != null;
       
       // Check network connectivity to Supabase
       final client = HttpClient();
-      final uri = Uri.parse('${Supabase.instance.client.restUrl}/auth/v1/health');
+      final uri = Uri.parse('${Supabase.instance.client.supabaseUrl}/auth/v1/health');
       
       try {
         final request = await client.getUrl(uri).timeout(const Duration(seconds: 10));

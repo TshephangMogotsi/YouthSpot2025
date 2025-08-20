@@ -3,8 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   group('Supabase URL Access Fix', () {
-    test('restUrl property exists on SupabaseClient', () {
-      // This test validates that restUrl is a valid property that can be accessed
+    test('supabaseUrl property exists on SupabaseClient', () {
+      // This test validates that supabaseUrl is a valid property that can be accessed
       // We can't initialize Supabase in tests without proper setup, but we can
       // verify the property exists using reflection or by checking the type
       
@@ -17,7 +17,7 @@ void main() {
     
     test('Compilation check for auth diagnostics and service', () {
       // This test ensures our fix compiles without getter errors
-      // If restUrl doesn't exist, this would fail at compile time
+      // If supabaseUrl doesn't exist, this would fail at compile time
       
       // We're just checking that our code structure is correct
       expect(true, true); // Placeholder - the real test is compilation

@@ -11,9 +11,29 @@
 -keep class io.supabase.** { *; }
 -dontwarn io.supabase.**
 
+# Enhanced Supabase auth and HTTP client rules
+-keep class io.supabase.gotrue.** { *; }
+-keep class io.supabase.realtime.** { *; }
+-keep class io.supabase.storage.** { *; }
+-dontwarn io.supabase.gotrue.**
+-dontwarn io.supabase.realtime.**
+-dontwarn io.supabase.storage.**
+
 # Dio HTTP client
 -keep class dio.** { *; }
 -dontwarn dio.**
+
+# HTTP and networking
+-keep class okhttp3.** { *; }
+-keep class okio.** { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
+
+# JSON serialization
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+-keep,allowobfuscation @interface com.google.gson.annotations.SerializedName
 
 # SQLite
 -keep class io.flutter.plugins.sqflite.** { *; }
@@ -39,6 +59,9 @@
 # Path Provider
 -keep class io.flutter.plugins.pathprovider.** { *; }
 
+# Shared Preferences
+-keep class io.flutter.plugins.sharedpreferences.** { *; }
+
 # Keep all model classes (replace with your actual model package if different)
 -keep class com.example.youthspot.models.** { *; }
 
@@ -47,6 +70,9 @@
 
 # Keep line numbers for debugging
 -keepattributes SourceFile,LineNumberTable
+
+# Keep method signatures for reflection
+-keepattributes Signature
 
 # Google Play Core classes for deferred components
 -keep class com.google.android.play.core.** { *; }
@@ -65,6 +91,12 @@
 -dontwarn com.google.android.play.core.splitcompat.SplitCompatApplication
 -dontwarn com.google.android.play.core.splitinstall.**
 -dontwarn com.google.android.play.core.tasks.**
+
+# Network security and SSL
+-keep class javax.net.ssl.** { *; }
+-keep class org.apache.http.** { *; }
+-dontwarn javax.net.ssl.**
+-dontwarn org.apache.http.**
 
 # Remove logging (optional for production)
 -assumenosideeffects class android.util.Log {

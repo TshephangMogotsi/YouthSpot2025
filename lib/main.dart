@@ -2,6 +2,7 @@ import 'package:youthspot/auth/auth_layout.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/services/notifications_helper.dart';
 import 'package:youthspot/services/services_locator.dart';
+import 'package:youthspot/services/release_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -29,26 +30,55 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
   
+  // Enhanced Supabase initialization with comprehensive error handling
+  bool supabaseInitialized = false;
   try {
+    await ReleaseLogger.logInfo('Initializing Supabase...');
+    
     await Supabase.initialize(
       url: "https://xcznelduagrrfzwkcrrs.supabase.co",
       anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhjem5lbGR1YWdycmZ6d2tjcnJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3ODkxMjAsImV4cCI6MjA2NTM2NTEyMH0.Rmp0pnQEc7RRW80oU-MI_OwnEzwJl0v0niyZHIcu8Qw",
     );
-  } catch (e) {
-    // In case Supabase initialization fails, log the error
-    print('Supabase initialization error: $e');
-    // Continue with app initialization to prevent crash
+    
+    // Test Supabase connection
+    final client = Supabase.instance.client;
+    if (client.auth.currentUser == null) {
+      await ReleaseLogger.logInfo('Supabase initialized successfully - no current user');
+    } else {
+      await ReleaseLogger.logInfo('Supabase initialized successfully - user logged in');
+    }
+    
+    supabaseInitialized = true;
+    
+  } catch (e, stackTrace) {
+    // Enhanced error logging for Supabase initialization failures
+    await ReleaseLogger.logError('Supabase initialization failed', error: e, stackTrace: stackTrace);
+    
+    // Try to identify specific failure reasons
+    if (e.toString().contains('network') || e.toString().contains('timeout')) {
+      await ReleaseLogger.logError('Network-related Supabase initialization failure');
+    } else if (e.toString().contains('Invalid API key')) {
+      await ReleaseLogger.logError('Invalid Supabase API key');
+    } else {
+      await ReleaseLogger.logError('Unknown Supabase initialization error');
+    }
+    
+    supabaseInitialized = false;
   }
   
-  runApp(const MyApp());
+  // Log initialization status for debugging
+  await ReleaseLogger.logInfo('App starting with Supabase initialized: $supabaseInitialized');
+  
+  runApp(MyApp(supabaseInitialized: supabaseInitialized));
 }
 
 final supabase = Supabase.instance.client;
 
 class MyApp extends StatelessWidget {
   static final navigatorKey = GlobalKey<NavigatorState>();
+  final bool supabaseInitialized;
 
-  const MyApp({super.key});
+  const MyApp({super.key, this.supabaseInitialized = true});
 
   // This widget is the root of your application.
   @override

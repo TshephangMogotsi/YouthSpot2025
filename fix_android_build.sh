@@ -40,7 +40,26 @@ echo "2. Checking build.gradle.kts syntax..."
 if grep -q "minSdkVersion.*flutter" android/app/build.gradle.kts; then
     echo "✗ Found old Groovy syntax in build.gradle.kts"
     echo "Fixing build.gradle.kts syntax..."
-    # This would be where we'd fix the syntax if needed
+    
+    # Fix minSdkVersion syntax
+    if grep -q "minSdkVersion flutter.minSdkVersion" android/app/build.gradle.kts; then
+        sed -i 's/minSdkVersion flutter\.minSdkVersion/minSdk = 23/' android/app/build.gradle.kts
+        echo "  - Fixed minSdkVersion flutter.minSdkVersion -> minSdk = 23"
+    fi
+    
+    # Fix targetSdkVersion syntax if present
+    if grep -q "targetSdkVersion flutter.targetSdkVersion" android/app/build.gradle.kts; then
+        sed -i 's/targetSdkVersion flutter\.targetSdkVersion/targetSdk = 34/' android/app/build.gradle.kts
+        echo "  - Fixed targetSdkVersion flutter.targetSdkVersion -> targetSdk = 34"
+    fi
+    
+    # Fix compileSdkVersion syntax if present  
+    if grep -q "compileSdkVersion flutter.compileSdkVersion" android/app/build.gradle.kts; then
+        sed -i 's/compileSdkVersion flutter\.compileSdkVersion/compileSdk = 35/' android/app/build.gradle.kts
+        echo "  - Fixed compileSdkVersion flutter.compileSdkVersion -> compileSdk = 35"
+    fi
+    
+    echo "✓ build.gradle.kts syntax fixed"
 else
     echo "✓ build.gradle.kts uses correct Kotlin DSL syntax"
 fi

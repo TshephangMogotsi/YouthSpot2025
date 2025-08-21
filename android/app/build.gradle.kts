@@ -16,7 +16,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.example.youthspot"
-    compileSdk = 35 // Replace with actual version if needed
+    compileSdk = 36 // Replace with actual version if needed
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -30,7 +30,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.youthspot"
-        minSdk = 23
+        minSdk = (project.findProperty("flutter.minSdkVersion") as? String)?.toInt() ?: 24
         targetSdk = 34
         versionCode = 1 // Replace with actual versionCode if needed
         versionName = "1.0" // Replace with actual versionName if needed

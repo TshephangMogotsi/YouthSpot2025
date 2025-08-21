@@ -1,3 +1,4 @@
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';

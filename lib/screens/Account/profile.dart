@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -5,13 +6,15 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/config/constants.dart';
-import 'package:youthspot/global_widgets/custom_textfield.dart';
-import 'package:youthspot/global_widgets/full_width_dropdown.dart';
-import 'package:youthspot/global_widgets/initials_avatar.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
 import 'package:youthspot/global_widgets/primary_container.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
-import 'package:youthspot/screens/homepage/my_spot/goals/widgets/date_picker.dart';
+import 'package:youthspot/global_widgets/primary_padding.dart';
+import 'package:youthspot/global_widgets/field_with_live_validation.dart';
+import 'package:youthspot/global_widgets/initials_avatar.dart';
+import 'package:youthspot/screens/homepage/my_spot/goals/widgets/date_picker_2.dart';
+import 'package:youthspot/auth/widget/custom_phone_field2.dart';
+import 'package:youthspot/config/font_constants.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -23,20 +26,23 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
-  final _dobController = TextEditingController();
+  final _userNameController = TextEditingController();
   final _mobileController = TextEditingController();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
 
   bool _loading = true;
+  bool _isSaving = false;
   String? selectedGender;
-  DateTime? dateOfBirth;
-  bool? isGenderSelected;
+  DateTime dateOfBirth = DateTime.now();
 
-  final List<String> genderList = [
-    'Male',
-    'Female',
-    'Non-binary',
-  ];
+  // Validation errors
+  String? _fullNameError;
+  String? _usernameError;
+  String? _emailError;
+  String? _mobileError;
+  String? _genderError;
+
+  final List<String> genderList = ['Male', 'Female', 'Non-binary'];
 
   @override
   void initState() {
@@ -47,9 +53,9 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void dispose() {
     _fullNameController.dispose();
-    _dobController.dispose();
+    _userNameController.dispose();
     _mobileController.dispose();
-    _usernameController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -68,24 +74,21 @@ class _ProfilePageState extends State<ProfilePage> {
           .single();
 
       _fullNameController.text = response['full_name'] ?? '';
+      _userNameController.text = response['username'] ?? '';
+      _mobileController.text = response['mobile_number'] ?? '';
+      _emailController.text = response['email'] ?? '';
       selectedGender = response['gender'] ?? '';
+
       String dobString = response['date_of_birth'] ?? '';
       if (dobString.isNotEmpty) {
         try {
-          // Try to parse the date from DD/MM/YYYY format
           dateOfBirth = DateFormat('dd/MM/yyyy').parse(dobString);
-          _dobController.text = dobString;
         } catch (e) {
-          // If parsing fails, try other formats or set to current date
           dateOfBirth = DateTime.now();
-          _dobController.text = DateFormat('dd/MM/yyyy').format(dateOfBirth!);
         }
       } else {
         dateOfBirth = DateTime.now();
-        _dobController.text = DateFormat('dd/MM/yyyy').format(dateOfBirth!);
       }
-      _mobileController.text = response['mobile_number'] ?? '';
-      _usernameController.text = response['username'] ?? '';
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -101,53 +104,115 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _updateProfile() async {
-    if (_formKey.currentState!.validate()) {
-      if (selectedGender == null) {
+    if (_isSaving) return;
+    // Run all validators
+    final fullNameError = _validateFullName(_fullNameController.text);
+    final usernameError = _validateUsername(_userNameController.text);
+    final emailError = _validateEmail(_emailController.text);
+    final mobileError = _validateMobileNumber(_mobileController.text);
+
+    setState(() {
+      _fullNameError = fullNameError;
+      _usernameError = usernameError;
+      _emailError = emailError;
+      _mobileError = mobileError;
+      _genderError = selectedGender == null ? 'Please select gender' : null;
+    });
+
+    if (fullNameError != null ||
+        usernameError != null ||
+        emailError != null ||
+        mobileError != null ||
+        selectedGender == null) {
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    final auth = Provider.of<AuthService>(context, listen: false);
+
+    try {
+      final userId = auth.currentUser?.id;
+      if (userId == null) throw Exception("User not logged in");
+
+      await Supabase.instance.client.from('profiles').update({
+        'full_name': _fullNameController.text,
+        'username': _userNameController.text,
+        'email': _emailController.text,
+        'gender': selectedGender,
+        'date_of_birth': DateFormat('dd/MM/yyyy').format(dateOfBirth),
+        'mobile_number': _mobileController.text,
+      }).eq('id', userId);
+
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Please select gender'),
+            content: Text('Profile updated successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating profile: $e'),
             backgroundColor: Colors.red,
           ),
         );
-        return;
       }
-
-      setState(() => _loading = true);
-      final auth = Provider.of<AuthService>(context, listen: false);
-
-      try {
-        final userId = auth.currentUser?.id;
-        if (userId == null) throw Exception("User not logged in");
-
-        await Supabase.instance.client.from('profiles').update({
-          'full_name': _fullNameController.text,
-          'gender': selectedGender,
-          'date_of_birth': dateOfBirth != null ? DateFormat('dd/MM/yyyy').format(dateOfBirth!) : '',
-          'mobile_number': _mobileController.text,
-          'username': _usernameController.text,
-        }).eq('id', userId);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profile updated successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error updating profile: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } finally {
-        if (mounted) setState(() => _loading = false);
-      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  // -- Validators (identical to RegisterPage) --
+  String? _validateFullName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your full name';
+    }
+    if (!RegExp(r'^[A-Za-z ]+$').hasMatch(value.trim())) {
+      return 'Full name can only contain letters and spaces';
+    }
+    if (value.trim().length < 2) {
+      return 'Full name must be at least 2 characters';
+    }
+    return null;
+  }
+
+  String? _validateUsername(String? username) {
+    if (username == null || username.trim().isEmpty) {
+      return 'Please enter username';
+    }
+    if (username.trim().length < 3) {
+      return 'Username must be at least 3 characters';
+    }
+    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username.trim())) {
+      return 'Username can only contain letters, numbers, and underscores';
+    }
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Please enter your email";
+    }
+    if (!EmailValidator.validate(value.trim())) {
+      return "Please enter valid email";
+    }
+    return null;
+  }
+
+  String? _validateMobileNumber(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Please enter your phone number";
+    }
+    if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
+      return "Please enter a valid phone number";
+    }
+    if (value.trim().length < 7) {
+      return "Phone number too short";
+    }
+    return null;
   }
 
   @override
@@ -156,102 +221,133 @@ class _ProfilePageState extends State<ProfilePage> {
       child: _loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(0),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Profile Avatar at the top
+                    const SizedBox(height: 10),
                     Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: InitialsAvatar(
-                          fullName: _fullNameController.text,
-                          radius: 50,
-                        ),
+                      child: InitialsAvatar(
+                        fullName: _fullNameController.text,
+                        radius: 50,
                       ),
                     ),
-                    CustomTextField(
-                      controller: _usernameController,
-                      hintText: 'Username',
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Please enter your username' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _fullNameController,
-                      hintText: 'Full Name',
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Please enter your full name' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    Text('Gender', style: inputTitle),
-                    const Height10(),
-                    FullWidthDropdownButton(
-                      hintText: 'Select gender',
-                      showError: isGenderSelected != null,
-                      initialValue: selectedGender,
-                      options: genderList,
-                      onOptionSelect: (option) {
-                        if (kDebugMode) {
-                          print(option);
-                        }
-                        setState(() {
-                          selectedGender = option;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Text('Date of Birth', style: inputTitle),
-                    const Height10(),
-                    Row(
-                      children: [
-                        const Expanded(
-                          flex: 1,
-                          child: PrimaryContainer(
-                            child: Icon(Icons.calendar_month),
-                          ),
-                        ),
-                        const Width20(),
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              PrimaryContainer(
-                                child: CustomDatePicker(
-                                  initialDate: dateOfBirth ?? DateTime.now(),
-                                  showIcon: false,
-                                  isDoBField: true,
-                                  labelText: 'Date of Birth',
-                                  onDateSelected: (date) {
-                                    setState(() {
-                                      dateOfBirth = date;
-                                      _dobController.text = DateFormat('dd/MM/yyyy').format(date);
-                                      if (kDebugMode) {
-                                        print(dateOfBirth);
-                                      }
-                                    });
-                                  },
+                    const SizedBox(height: 24),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: PrimaryPadding(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 16),
+                            Text(
+                              "Profile Information",
+                              style: AppTextStyles.primaryBigBold.copyWith(fontSize: 26),
+                            ),
+                            const SizedBox(height: 8),
+                            FieldWithLiveValidation(
+                              title: "Username",
+                              hintText: "Username",
+                              controller: _userNameController,
+                              errorText: _usernameError,
+                              onChanged: (value) => setState(() {
+                                _usernameError = _validateUsername(value);
+                              }),
+                              validator: _validateUsername,
+                            ),
+                            const SizedBox(height: 20),
+                            FieldWithLiveValidation(
+                              title: "Full Name",
+                              hintText: "Full Name",
+                              controller: _fullNameController,
+                              errorText: _fullNameError,
+                              onChanged: (value) => setState(() {
+                                _fullNameError = _validateFullName(value);
+                              }),
+                              validator: _validateFullName,
+                            ),
+                            const SizedBox(height: 20),
+                            FieldWithLiveValidation(
+                              title: "Email",
+                              hintText: "johndoe@mail.com",
+                              controller: _emailController,
+                              errorText: _emailError,
+                              onChanged: (value) => setState(() {
+                                _emailError = _validateEmail(value);
+                              }),
+                              validator: _validateEmail,
+                            ),
+                            const SizedBox(height: 20),
+                            RegisterPhoneField(
+                              title: 'Mobile Number',
+                              controller: _mobileController,
+                              errorText: _mobileError,
+                              onChanged: (val) => setState(() {
+                                _mobileError = _validateMobileNumber(val);
+                              }),
+                              initialCountryCode: "BW",
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: DropdownWithLiveValidation(
+                                    title: "Gender",
+                                    hintText: "Select Gender",
+                                    value: selectedGender,
+                                    items: genderList,
+                                    errorText: _genderError,
+                                    onChanged: (val) {
+                                      setState(() {
+                                        selectedGender = val;
+                                        _genderError = null;
+                                      });
+                                    },
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Date of Birth",
+                                        style: AppTextStyles.primaryBold,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      CustomDatePicker2(
+                                        labelText: "Date of Birth",
+                                        initialDate: dateOfBirth,
+                                        isDoBField: true,
+                                        onDateSelected: (date) {
+                                          setState(() {
+                                            dateOfBirth = date;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 32),
+                            _isSaving
+                                ? const Center(
+                                    child: CircularProgressIndicator(color: kSSIorange),
+                                  )
+                                : PrimaryButton(
+                                    label: 'Update Profile',
+                                    onTap: _updateProfile,
+                                  ),
+                            const SizedBox(height: 36),
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _mobileController,
-                      hintText: 'Mobile Number',
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Please enter your mobile number' : null,
-                    ),
-                    const SizedBox(height: 32),
-                    PrimaryButton(
-                      label: 'Update Profile',
-                      onTap: _updateProfile,
+                      ),
                     ),
                   ],
                 ),

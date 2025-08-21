@@ -76,7 +76,8 @@ class _ProfilePageState extends State<ProfilePage> {
       _fullNameController.text = response['full_name'] ?? '';
       _userNameController.text = response['username'] ?? '';
       _mobileController.text = response['mobile_number'] ?? '';
-      _emailController.text = response['email'] ?? '';
+      // Get email from authenticated user, not from profiles table
+      _emailController.text = auth.currentUser?.email ?? '';
       selectedGender = response['gender'] ?? '';
 
       String dobString = response['date_of_birth'] ?? '';
@@ -134,10 +135,10 @@ class _ProfilePageState extends State<ProfilePage> {
       final userId = auth.currentUser?.id;
       if (userId == null) throw Exception("User not logged in");
 
+      // Update profile data (email is not stored in profiles table)
       await Supabase.instance.client.from('profiles').update({
         'full_name': _fullNameController.text,
         'username': _userNameController.text,
-        'email': _emailController.text,
         'gender': selectedGender,
         'date_of_birth': DateFormat('dd/MM/yyyy').format(dateOfBirth),
         'mobile_number': _mobileController.text,
@@ -277,6 +278,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               hintText: "johndoe@mail.com",
                               controller: _emailController,
                               errorText: _emailError,
+                              readOnly: true, // Email is read-only since it's from auth system
                               onChanged: (value) => setState(() {
                                 _emailError = _validateEmail(value);
                               }),

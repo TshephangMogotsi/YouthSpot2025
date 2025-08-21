@@ -17,6 +17,7 @@ class FieldWithLiveValidation extends StatefulWidget {
   final VoidCallback? onTrailingPressed;
   final Function(String)? onChanged;
   final String? leadingAsset; // <-- NEW
+  final bool readOnly; // <-- NEW
 
   const FieldWithLiveValidation({
     super.key,
@@ -30,6 +31,7 @@ class FieldWithLiveValidation extends StatefulWidget {
     this.onTrailingPressed,
     this.onChanged,
     this.leadingAsset, // <-- NEW
+    this.readOnly = false, // <-- NEW
   });
 
   @override
@@ -54,7 +56,7 @@ class _FieldWithLiveValidationState extends State<FieldWithLiveValidation> {
           height: 48,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFEEF0F2),
+            color: widget.readOnly ? const Color(0xFFF5F5F5) : const Color(0xFFEEF0F2),
             borderRadius: BorderRadius.circular(11),
             border: Border.all(
               color: widget.errorText != null ? Colors.red : Colors.transparent,
@@ -77,7 +79,11 @@ class _FieldWithLiveValidationState extends State<FieldWithLiveValidation> {
                 child: TextFormField(
                   controller: widget.controller,
                   obscureText: widget.isPassword,
-                  style: const TextStyle(fontSize: 18),
+                  readOnly: widget.readOnly,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: widget.readOnly ? Colors.grey[600] : null,
+                  ),
                   decoration: InputDecoration(
                     hintText: widget.hintText,
                     hintStyle: const TextStyle(
@@ -87,7 +93,7 @@ class _FieldWithLiveValidationState extends State<FieldWithLiveValidation> {
                     border: InputBorder.none,
                     errorText: null,
                   ),
-                  onChanged: widget.onChanged,
+                  onChanged: widget.readOnly ? null : widget.onChanged,
                 ),
               ),
               if (widget.trailingIcon != null)

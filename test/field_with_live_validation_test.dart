@@ -120,6 +120,38 @@ void main() {
       expect(changedValue, 'test input');
       expect(controller.text, 'test input');
     });
+
+    testWidgets('should be read-only when readOnly is true', (WidgetTester tester) async {
+      final controller = TextEditingController(text: 'initial value');
+      String? changedValue;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: FieldWithLiveValidation(
+              title: "Read-only Field",
+              hintText: "Cannot edit",
+              controller: controller,
+              readOnly: true,
+              onChanged: (value) {
+                changedValue = value;
+              },
+              validator: (value) => null,
+            ),
+          ),
+        ),
+      );
+
+      // Verify initial value is displayed
+      expect(find.text('initial value'), findsOneWidget);
+      
+      // Try to enter text in the field (should not work since it's read-only)
+      await tester.enterText(find.byType(TextFormField), 'new text');
+      
+      // Verify the text hasn't changed and onChanged wasn't called
+      expect(controller.text, 'initial value');
+      expect(changedValue, isNull);
+    });
   });
 
   group('DropdownWithLiveValidation Widget Tests', () {

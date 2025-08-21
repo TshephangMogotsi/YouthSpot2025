@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
+import '../services/release_logger.dart';
+import '../services/network_connectivity_service.dart';
 
 class AuthService extends ChangeNotifier {
   final GoTrueClient supabaseAuth = Supabase.instance.client.auth;
@@ -201,21 +203,46 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> resetPassword({required String email}) async {
+    // Log the start of password reset process
+    await ReleaseLogger.logInfo('Starting password reset for email: ${email.replaceRange(3, email.indexOf('@'), '***')}');
+    
     // Check if Supabase is properly initialized
     if (!_isSupabaseInitialized) {
-      throw AuthException('Authentication service is not available. Please restart the app.');
+      const errorMsg = 'Authentication service is not available. Please restart the app.';
+      await ReleaseLogger.logError('Supabase not initialized during password reset');
+      throw AuthException(errorMsg);
     }
 
+    // Check network connectivity before making API call
+    await ReleaseLogger.logInfo('Checking network connectivity...');
+    final networkStatus = await NetworkConnectivityService.checkNetworkStatus();
+    
+    if (!networkStatus.isFullyConnected) {
+      await ReleaseLogger.logError('Network connectivity failed: ${networkStatus.errorMessage}');
+      throw AuthException(networkStatus.errorMessage ?? 'Network error. Please check your internet connection and try again.');
+    }
+    
+    await ReleaseLogger.logInfo('Network connectivity confirmed, proceeding with password reset...');
+
     try {
+      // Log before making the API call
+      await ReleaseLogger.logInfo('Calling Supabase resetPasswordForEmail...');
+      
       await supabaseAuth.resetPasswordForEmail(email).timeout(
         const Duration(seconds: 30),
         onTimeout: () {
           throw AuthException('Request timed out. Please check your internet connection and try again.');
         },
       );
+      
+      // Log successful completion
+      await ReleaseLogger.logInfo('Password reset email sent successfully');
+      
     } on AuthException catch (e) {
       // Handle specific Supabase auth errors
       String errorMessage;
+      await ReleaseLogger.logError('Supabase AuthException during password reset', error: e);
+      
       switch (e.message) {
         case 'Email address not found':
           errorMessage = 'No account found with this email address.';
@@ -226,13 +253,22 @@ class AuthService extends ChangeNotifier {
         default:
           errorMessage = e.message;
       }
+      
+      await ReleaseLogger.logError('Password reset failed with auth error: $errorMessage');
       throw AuthException(errorMessage);
     } catch (e) {
       // Handle network and other errors
+      await ReleaseLogger.logError('Unexpected error during password reset', error: e);
+      
       if (e.toString().contains('timeout') || e.toString().contains('SocketException')) {
-        throw AuthException('Network timeout. Please check your internet connection and try again.');
+        const errorMsg = 'Network timeout. Please check your internet connection and try again.';
+        await ReleaseLogger.logError('Network timeout during password reset');
+        throw AuthException(errorMsg);
       }
-      throw AuthException('Network error. Please check your internet connection and try again.');
+      
+      const errorMsg = 'Network error. Please check your internet connection and try again.';
+      await ReleaseLogger.logError('General network error during password reset');
+      throw AuthException(errorMsg);
     }
   }
 
@@ -268,12 +304,25 @@ class AuthService extends ChangeNotifier {
     required String email,
     required String token,
   }) async {
+    await ReleaseLogger.logInfo('Starting token verification for email: ${email.replaceRange(3, email.indexOf('@'), '***')}');
+    
     // Check if Supabase is properly initialized
     if (!_isSupabaseInitialized) {
-      throw AuthException('Authentication service is not available. Please restart the app.');
+      const errorMsg = 'Authentication service is not available. Please restart the app.';
+      await ReleaseLogger.logError('Supabase not initialized during token verification');
+      throw AuthException(errorMsg);
+    }
+
+    // Check network connectivity
+    final networkStatus = await NetworkConnectivityService.checkNetworkStatus();
+    if (!networkStatus.isFullyConnected) {
+      await ReleaseLogger.logError('Network connectivity failed during token verification: ${networkStatus.errorMessage}');
+      throw AuthException(networkStatus.errorMessage ?? 'Network error. Please check your internet connection and try again.');
     }
 
     try {
+      await ReleaseLogger.logInfo('Calling Supabase verifyOTP for token verification...');
+      
       await supabaseAuth.verifyOTP(
         email: email,
         token: token,
@@ -284,9 +333,14 @@ class AuthService extends ChangeNotifier {
           throw AuthException('Request timed out. Please check your internet connection and try again.');
         },
       );
+      
+      await ReleaseLogger.logInfo('Token verification successful');
+      
     } on AuthException catch (e) {
       // Handle specific Supabase auth errors
       String errorMessage;
+      await ReleaseLogger.logError('Supabase AuthException during token verification', error: e);
+      
       switch (e.message) {
         case 'Invalid token':
         case 'Token has expired':
@@ -298,13 +352,22 @@ class AuthService extends ChangeNotifier {
         default:
           errorMessage = e.message;
       }
+      
+      await ReleaseLogger.logError('Token verification failed: $errorMessage');
       throw AuthException(errorMessage);
     } catch (e) {
       // Handle network and other errors
+      await ReleaseLogger.logError('Unexpected error during token verification', error: e);
+      
       if (e.toString().contains('timeout') || e.toString().contains('SocketException')) {
-        throw AuthException('Network timeout. Please check your internet connection and try again.');
+        const errorMsg = 'Network timeout. Please check your internet connection and try again.';
+        await ReleaseLogger.logError('Network timeout during token verification');
+        throw AuthException(errorMsg);
       }
-      throw AuthException('Network error. Please check your internet connection and try again.');
+      
+      const errorMsg = 'Network error. Please check your internet connection and try again.';
+      await ReleaseLogger.logError('General network error during token verification');
+      throw AuthException(errorMsg);
     }
   }
 
@@ -314,12 +377,25 @@ class AuthService extends ChangeNotifier {
     required String token,
     required String newPassword,
   }) async {
+    await ReleaseLogger.logInfo('Starting password update with token for email: ${email.replaceRange(3, email.indexOf('@'), '***')}');
+    
     // Check if Supabase is properly initialized
     if (!_isSupabaseInitialized) {
-      throw AuthException('Authentication service is not available. Please restart the app.');
+      const errorMsg = 'Authentication service is not available. Please restart the app.';
+      await ReleaseLogger.logError('Supabase not initialized during password update');
+      throw AuthException(errorMsg);
+    }
+
+    // Check network connectivity
+    final networkStatus = await NetworkConnectivityService.checkNetworkStatus();
+    if (!networkStatus.isFullyConnected) {
+      await ReleaseLogger.logError('Network connectivity failed during password update: ${networkStatus.errorMessage}');
+      throw AuthException(networkStatus.errorMessage ?? 'Network error. Please check your internet connection and try again.');
     }
 
     try {
+      await ReleaseLogger.logInfo('Calling Supabase verifyOTP for password update...');
+      
       await supabaseAuth.verifyOTP(
         email: email,
         token: token,
@@ -331,6 +407,8 @@ class AuthService extends ChangeNotifier {
         },
       );
 
+      await ReleaseLogger.logInfo('Token verified, updating password...');
+      
       // If token verification succeeds, update the password
       await supabaseAuth.updateUser(UserAttributes(password: newPassword)).timeout(
         const Duration(seconds: 30),
@@ -338,9 +416,14 @@ class AuthService extends ChangeNotifier {
           throw AuthException('Password update timed out. Please try again.');
         },
       );
+      
+      await ReleaseLogger.logInfo('Password updated successfully');
+      
     } on AuthException catch (e) {
       // Handle specific Supabase auth errors
       String errorMessage;
+      await ReleaseLogger.logError('Supabase AuthException during password update', error: e);
+      
       switch (e.message) {
         case 'Invalid token':
         case 'Token has expired':
@@ -355,13 +438,25 @@ class AuthService extends ChangeNotifier {
         default:
           errorMessage = e.message;
       }
+      
+      await ReleaseLogger.logError('Password update failed: $errorMessage');
       throw AuthException(errorMessage);
     } catch (e) {
       // Handle network and other errors
+      await ReleaseLogger.logError('Unexpected error during password update', error: e);
+      
       if (e.toString().contains('timeout') || e.toString().contains('SocketException')) {
-        throw AuthException('Network timeout. Please check your internet connection and try again.');
+        const errorMsg = 'Network timeout. Please check your internet connection and try again.';
+        await ReleaseLogger.logError('Network timeout during password update');
+        throw AuthException(errorMsg);
       }
-      throw AuthException('Network error. Please check your internet connection and try again.');
+      
+      const errorMsg = 'Network error. Please check your internet connection and try again.';
+      await ReleaseLogger.logError('General network error during password update');
+      throw AuthException(errorMsg);
     }
+
+    // Notify listeners that authentication state has changed
+    notifyListeners();
   }
 }

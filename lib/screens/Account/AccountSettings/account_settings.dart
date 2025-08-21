@@ -2,6 +2,7 @@ import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/config/font_constants.dart';
 import 'package:youthspot/global_widgets/primary_padding.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
+import 'package:youthspot/screens/debug_logs_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../../global_widgets/primary_container.dart';
@@ -69,17 +70,26 @@ class AccountSettings extends StatelessWidget {
               },
             ),
             const Height10(),
-            AccountSettingsListTile(
-              title: 'Biometric Authentication',
-              assetImage:
-                  'assets/icon/Settings/AccountSettings/BiometricAuth.png',
-              description: 'Manage biometric authentication',
-              ontap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => const BiometricAuthDialog(),
+            GestureDetector(
+              onLongPress: () {
+                // Secret debug access via long press
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DebugLogsScreen()),
                 );
               },
+              child: AccountSettingsListTile(
+                title: 'Biometric Authentication',
+                assetImage:
+                    'assets/icon/Settings/AccountSettings/BiometricAuth.png',
+                description: 'Manage biometric authentication',
+                ontap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => const BiometricAuthDialog(),
+                  );
+                },
+              ),
             ),
           ],
         ),

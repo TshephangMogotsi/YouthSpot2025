@@ -19,14 +19,24 @@ class CommunityEventsProvider extends ChangeNotifier {
       ..sort((a, b) => a.eventDate.compareTo(b.eventDate));
   }
 
-  Future<void> loadCommunityEvents() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+  CommunityEventsProvider() {
+    _isLoading = true; // Start with loading state
+    loadCommunityEvents();
+  }
 
-    try {
-      // Get current user ID
-      final currentUserId = supabase.auth.currentUser?.id;
+  Future<void> loadCommunityEvents() async {
+    // Only load if events are empty (implement caching like ArticlesProvider)
+    if (_events.isEmpty) {
+      // Only set loading if not already loading
+      if (!_isLoading) {
+        _isLoading = true;
+        _error = null;
+        notifyListeners();
+      }
+
+      try {
+        // Get current user ID
+        final currentUserId = supabase.auth.currentUser?.id;
 
       // First, test database connectivity
       if (kDebugMode) {
@@ -142,6 +152,17 @@ class CommunityEventsProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+    } // Close the if (_events.isEmpty) block
+  }
+
+  Future<void> refreshEvents() async {
+    _events = [];
+    await loadCommunityEvents();
+  }
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
   }
 
   Future<bool> joinEvent(String eventId, EventProvider eventProvider) async {

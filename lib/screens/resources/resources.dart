@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:provider/provider.dart';
 import 'package:youthspot/config/font_constants.dart';
 import 'package:youthspot/db/models/resource_model.dart';
-import 'package:youthspot/services/resource_service.dart';
+import 'package:youthspot/providers/resource_provider.dart';
 
 import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
@@ -22,92 +23,35 @@ class DocumentPage extends StatefulWidget {
 }
 
 class _DocumentPageState extends State<DocumentPage> {
-  final ResourceService _resourceService = ResourceService();
-
-  List<ResourceCategory> _categories = [];
-  List<ResourceSubcategory> _subcategories = [];
-  List<Resource> _allResources = [];
-  List<Resource> _filteredResources = [];
-
   ResourceCategory? _selectedCategory;
   ResourceSubcategory? _selectedSubcategory;
-
-  bool _isLoading = true;
   Map<String, double> _downloadProgressMap = {};
 
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
-  }
-
-  Future<void> _loadInitialData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final categories = await _resourceService.fetchCategories();
-      final resources = await _resourceService.fetchResources();
-      setState(() {
-        _categories = categories;
-        _allResources = resources;
-        _filteredResources = resources;
-        _isLoading = false;
-      });
-    } catch (e) {
-      // Handle error
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _fetchSubcategories(String categoryId) async {
-    try {
-      final subcategories = await _resourceService.fetchSubcategories(categoryId);
-      setState(() {
-        _subcategories = subcategories;
-      });
-    } catch (e) {
-      // Handle error
-    }
-  }
-
-  void _filterResources() {
-    List<Resource> resources = _allResources;
-
-    if (_selectedCategory != null) {
-      resources = resources.where((r) => r.categoryId == _selectedCategory!.id).toList();
-    }
-
-    if (_selectedSubcategory != null) {
-      resources = resources.where((r) => r.subcategoryId == _selectedSubcategory!.id).toList();
-    }
-
-    setState(() {
-      _filteredResources = resources;
-    });
+    // No need to load data here - ResourceProvider handles it
   }
 
   void _onCategorySelected(ResourceCategory? category) {
+    final resourceProvider = context.read<ResourceProvider>();
     setState(() {
       _selectedCategory = category;
       _selectedSubcategory = null;
-      _subcategories = [];
     });
 
+    // Clear subcategories first
+    resourceProvider.clearSubcategories();
+
     if (category != null) {
-      _fetchSubcategories(category.id);
+      resourceProvider.fetchSubcategories(category.id);
     }
-    _filterResources();
   }
 
   void _onSubcategorySelected(ResourceSubcategory? subcategory) {
     setState(() {
       _selectedSubcategory = subcategory;
     });
-    _filterResources();
   }
 
   void showFileInfoDialog(Resource doc) {
@@ -210,51 +154,63 @@ class _DocumentPageState extends State<DocumentPage> {
   Widget build(BuildContext context) {
     return PrimaryScaffold(
       isHomePage: true,
-      child: _isLoading
-          ? PrimaryPadding(child: _buildShimmerEffect())
-          : Column(
-              children: [
+      child: Consumer<ResourceProvider>(
+        builder: (context, resourceProvider, child) {
+          if (resourceProvider.isLoading) {
+            return PrimaryPadding(child: _buildShimmerEffect());
+          }
+
+          // Update filtered resources based on current selections
+          final filteredResources = resourceProvider.getFilteredResources(
+            selectedCategory: _selectedCategory,
+            selectedSubcategory: _selectedSubcategory,
+          );
+
+          return Column(
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.only(bottom: 0, left: 8, right: 8),
+                child: Row(
+                  children: [
+                    _buildPillButton(null, 'All'),
+                    ...resourceProvider.categories.map((category) => _buildPillButton(category, category.name)),
+                  ],
+                ),
+              ),
+              if (resourceProvider.subcategories.isNotEmpty)
+                Height10(),
+              if (resourceProvider.subcategories.isNotEmpty)
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.only(bottom: 0, left: 8, right: 8),
+                  padding: const EdgeInsets.only(left: 8, right: 8),
                   child: Row(
-                    children: [
-                      _buildPillButton(null, 'All'),
-                      ..._categories.map((category) => _buildPillButton(category, category.name)),
-                    ],
+                    children: resourceProvider.subcategories
+                        .map((subcategory) => _buildPillButton(subcategory, subcategory.name, isSubcategory: true))
+                        .toList(),
                   ),
                 ),
-                 if (_subcategories.isNotEmpty)
-                Height10(),
-                if (_subcategories.isNotEmpty)
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.only(left: 8, right: 8),
-                    child: Row(
-                      children: _subcategories
-                          .map((subcategory) => _buildPillButton(subcategory, subcategory.name, isSubcategory: true))
-                          .toList(),
-                    ),
-                  ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: PrimaryPadding(
-                    child: PrimaryContainer(
-                      padding: const EdgeInsets.fromLTRB(25,10, 10,10),
-                      child: ListView.builder(
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: _filteredResources.length,
-                        itemBuilder: (context, index) {
-                          Resource doc = _filteredResources[index];
-                          return _buildPDFContainer(doc);
-                        },
-                      ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: PrimaryPadding(
+                  child: PrimaryContainer(
+                    padding: const EdgeInsets.fromLTRB(25,10, 10,10),
+                    child: ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: filteredResources.length,
+                      itemBuilder: (context, index) {
+                        Resource doc = filteredResources[index];
+                        return _buildPDFContainer(doc);
+                      },
                     ),
                   ),
                 ),
-                const Height20(),
-              ],
-            ),
+              ),
+              const Height20(),
+            ],
+          );
+        },
+      ),
     );
   }
 

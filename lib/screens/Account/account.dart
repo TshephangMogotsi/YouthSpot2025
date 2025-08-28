@@ -8,6 +8,7 @@ import 'package:youthspot/config/theme_manager.dart';
 import 'package:youthspot/global_widgets/initials_avatar.dart';
 import 'package:youthspot/global_widgets/primary_padding.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
+import 'package:youthspot/providers/account_provider.dart';
 import 'package:youthspot/screens/Account/AccountSettings/account_settings.dart';
 import 'package:youthspot/services/services_locator.dart';
 import 'package:flutter/material.dart';
@@ -25,37 +26,11 @@ class Account extends StatefulWidget {
 }
 
 class _AccountState extends State<Account> {
-  String _userFullName = '';
-
   @override
   void initState() {
     super.initState();
-    _getUserProfile();
+    // No need to load data here - AccountProvider handles it
   }
-
-  Future<void> _getUserProfile() async {
-    final auth = Provider.of<AuthService>(context, listen: false);
-
-    try {
-      final userId = auth.currentUser?.id;
-      if (userId == null) return;
-
-      final response = await Supabase.instance.client
-          .from('profiles')
-          .select('full_name')
-          .eq('id', userId)
-          .single();
-
-      if (mounted) {
-        setState(() {
-          _userFullName = response['full_name'] ?? '';
-        });
-      }
-    } catch (e) {
-      // Handle error silently for now
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return PrimaryScaffold(
@@ -70,12 +45,16 @@ class _AccountState extends State<Account> {
               child: Text('Account', style: AppTextStyles.title),
             ),
             const SizedBox(height: 20),
-            ProfileListTile(
-              title: 'My Profile',
-              fullName: _userFullName,
-              ontap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+            Consumer<AccountProvider>(
+              builder: (context, accountProvider, child) {
+                return ProfileListTile(
+                  title: 'My Profile',
+                  fullName: accountProvider.userFullName,
+                  ontap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => const ProfilePage()),
+                    );
+                  },
                 );
               },
             ),

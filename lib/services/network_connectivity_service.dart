@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import '../services/release_logger.dart';
 
 /// Network connectivity service for checking internet connection
@@ -8,15 +7,22 @@ class NetworkConnectivityService {
   static Future<bool> hasInternetConnection() async {
     try {
       // Try to lookup Google's DNS - fast and reliable
-      final result = await InternetAddress.lookup('google.com')
-          .timeout(const Duration(seconds: 5));
-      
-      final hasConnection = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-      
-      await ReleaseLogger.logInfo('Internet connectivity check: $hasConnection');
+      final result = await InternetAddress.lookup(
+        'google.com',
+      ).timeout(const Duration(seconds: 5));
+
+      final hasConnection =
+          result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+
+      await ReleaseLogger.logInfo(
+        'Internet connectivity check: $hasConnection',
+      );
       return hasConnection;
     } catch (e) {
-      await ReleaseLogger.logError('Internet connectivity check failed', error: e);
+      await ReleaseLogger.logError(
+        'Internet connectivity check failed',
+        error: e,
+      );
       return false;
     }
   }
@@ -27,16 +33,20 @@ class NetworkConnectivityService {
       // Extract domain from Supabase URL
       const supabaseUrl = "https://xcznelduagrrfzwkcrrs.supabase.co";
       final uri = Uri.parse(supabaseUrl);
-      
-      final result = await InternetAddress.lookup(uri.host)
-          .timeout(const Duration(seconds: 10));
-      
+
+      final result = await InternetAddress.lookup(
+        uri.host,
+      ).timeout(const Duration(seconds: 10));
+
       final canReach = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-      
+
       await ReleaseLogger.logInfo('Supabase reachability check: $canReach');
       return canReach;
     } catch (e) {
-      await ReleaseLogger.logError('Supabase reachability check failed', error: e);
+      await ReleaseLogger.logError(
+        'Supabase reachability check failed',
+        error: e,
+      );
       return false;
     }
   }
@@ -44,22 +54,24 @@ class NetworkConnectivityService {
   /// Comprehensive network check before API calls
   static Future<NetworkStatus> checkNetworkStatus() async {
     final hasInternet = await hasInternetConnection();
-    
+
     if (!hasInternet) {
       return NetworkStatus(
         isConnected: false,
         canReachSupabase: false,
-        errorMessage: 'No internet connection detected. Please check your network settings and try again.',
+        errorMessage:
+            'No internet connection detected. Please check your network settings and try again.',
       );
     }
 
-    final canReachSupabase = await canReachSupabase();
-    
-    if (!canReachSupabase) {
+    final supabaseReachable = await canReachSupabase();
+
+    if (!supabaseReachable) {
       return NetworkStatus(
         isConnected: true,
         canReachSupabase: false,
-        errorMessage: 'Cannot reach authentication servers. Please check your internet connection and try again.',
+        errorMessage:
+            'Cannot reach authentication servers. Please check your internet connection and try again.',
       );
     }
 

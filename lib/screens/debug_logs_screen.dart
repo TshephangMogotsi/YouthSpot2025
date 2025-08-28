@@ -42,9 +42,9 @@ class _DebugLogsScreenState extends State<DebugLogsScreen> {
       final logsString = await ReleaseLogger.getLogsAsString();
       await Share.share(logsString, subject: 'YouthSpot App Logs');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to share logs: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to share logs: $e')));
     }
   }
 
@@ -56,9 +56,9 @@ class _DebugLogsScreenState extends State<DebugLogsScreen> {
         const SnackBar(content: Text('Logs cleared successfully')),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to clear logs: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to clear logs: $e')));
     }
   }
 
@@ -102,66 +102,72 @@ class _DebugLogsScreenState extends State<DebugLogsScreen> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : logs.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.info_outline, size: 64, color: Colors.grey),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No logs available',
-                              style: AppTextStyles.primaryBold.copyWith(
-                                color: Colors.grey,
-                                fontSize: 18,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Try triggering some actions like password reset',
-                              style: AppTextStyles.primaryRegular.copyWith(
-                                color: Colors.grey,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          size: 64,
+                          color: Colors.grey,
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(8),
-                        itemCount: logs.length,
-                        itemBuilder: (context, index) {
-                          final log = logs[index];
-                          final isError = log.contains('ERROR:');
-                          final isInfo = log.contains('INFO:');
-                          
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 2),
-                            elevation: 1,
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.left(
-                                  width: 4,
-                                  color: isError
-                                      ? Colors.red
-                                      : isInfo
-                                          ? Colors.blue
-                                          : Colors.grey,
-                                ),
-                              ),
-                              child: Text(
-                                log,
-                                style: TextStyle(
-                                  fontFamily: 'monospace',
-                                  fontSize: 12,
-                                  color: isError ? Colors.red[800] : Colors.black87,
-                                ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No logs available',
+                          style: AppTextStyles.primaryBold.copyWith(
+                            color: Colors.grey,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Try triggering some actions like password reset',
+                          style: AppTextStyles.primaryRegular.copyWith(
+                            color: Colors.grey,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(8),
+                    itemCount: logs.length,
+                    itemBuilder: (context, index) {
+                      final log = logs[index];
+                      final isError = log.contains('ERROR:');
+                      final isInfo = log.contains('INFO:');
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 2),
+                        elevation: 1,
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border(
+                              left: BorderSide(
+                                width: 4,
+                                color: isError
+                                    ? Colors.red
+                                    : isInfo
+                                    ? Colors.blue
+                                    : Colors.grey,
                               ),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                          child: Text(
+                            log,
+                            style: TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 12,
+                              color: isError ? Colors.red[800] : Colors.black87,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),

@@ -23,7 +23,6 @@ class DocumentPage extends StatefulWidget {
 }
 
 class _DocumentPageState extends State<DocumentPage> {
-  List<Resource> _filteredResources = [];
   ResourceCategory? _selectedCategory;
   ResourceSubcategory? _selectedSubcategory;
   Map<String, double> _downloadProgressMap = {};
@@ -32,20 +31,6 @@ class _DocumentPageState extends State<DocumentPage> {
   void initState() {
     super.initState();
     // No need to load data here - ResourceProvider handles it
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateFilteredResources();
-    });
-  }
-
-  void _updateFilteredResources() {
-    final resourceProvider = context.read<ResourceProvider>();
-    final filteredResources = resourceProvider.getFilteredResources(
-      selectedCategory: _selectedCategory,
-      selectedSubcategory: _selectedSubcategory,
-    );
-    setState(() {
-      _filteredResources = filteredResources;
-    });
   }
 
   void _onCategorySelected(ResourceCategory? category) {
@@ -61,14 +46,12 @@ class _DocumentPageState extends State<DocumentPage> {
     if (category != null) {
       resourceProvider.fetchSubcategories(category.id);
     }
-    _updateFilteredResources();
   }
 
   void _onSubcategorySelected(ResourceSubcategory? subcategory) {
     setState(() {
       _selectedSubcategory = subcategory;
     });
-    _updateFilteredResources();
   }
 
   void showFileInfoDialog(Resource doc) {
@@ -177,6 +160,12 @@ class _DocumentPageState extends State<DocumentPage> {
             return PrimaryPadding(child: _buildShimmerEffect());
           }
 
+          // Update filtered resources based on current selections
+          final filteredResources = resourceProvider.getFilteredResources(
+            selectedCategory: _selectedCategory,
+            selectedSubcategory: _selectedSubcategory,
+          );
+
           return Column(
             children: [
               SingleChildScrollView(
@@ -208,9 +197,9 @@ class _DocumentPageState extends State<DocumentPage> {
                     padding: const EdgeInsets.fromLTRB(25,10, 10,10),
                     child: ListView.builder(
                       physics: const BouncingScrollPhysics(),
-                      itemCount: _filteredResources.length,
+                      itemCount: filteredResources.length,
                       itemBuilder: (context, index) {
-                        Resource doc = _filteredResources[index];
+                        Resource doc = filteredResources[index];
                         return _buildPDFContainer(doc);
                       },
                     ),

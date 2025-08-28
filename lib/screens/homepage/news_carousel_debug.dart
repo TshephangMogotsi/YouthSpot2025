@@ -10,8 +10,10 @@ import 'article_view.dart';
 import 'news_article.dart';
 import 'news_article_shimmer.dart';
 
-class NewsCarousel extends StatelessWidget {
-  const NewsCarousel({super.key});
+class NewsCarouselDebug extends StatelessWidget {
+  const NewsCarouselDebug({super.key, this.forceShimmer = false});
+  
+  final bool forceShimmer;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +25,7 @@ class NewsCarousel extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-               SectionHeader(title: 'Articles',),
+               SectionHeader(title: forceShimmer ? 'Articles (Loading)' : 'Articles',),
               InkWell(
                 onTap: () {
                   Navigator.push(
@@ -38,11 +40,6 @@ class NewsCarousel extends StatelessWidget {
                     style: AppTextStyles.secondarySemiBold.copyWith(
                               color: Color(0xFFFF9600),
                             ),
-                  // style: TextStyle(
-                  //   color: kSSIorange,
-                  //   fontSize: 12,
-                  //   fontWeight: FontWeight.bold,
-                  // ),
                 ),
               ),
             ],
@@ -50,7 +47,7 @@ class NewsCarousel extends StatelessWidget {
         ),
         Container(
           height: 375.0,
-          child: articlesProvider.isLoading
+          child: (articlesProvider.isLoading || forceShimmer)
               ? ListView.builder(
                   physics: const BouncingScrollPhysics(),
                   scrollDirection: Axis.horizontal,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:maps_launcher/maps_launcher.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
@@ -12,6 +13,7 @@ class ExpandingContainer extends StatelessWidget {
     required this.location,
     required this.latitude,
     required this.longitude,
+    this.locationUrl,
     required this.contact,
     this.onCall
   });
@@ -21,7 +23,30 @@ class ExpandingContainer extends StatelessWidget {
   final String contact;
   final double latitude;
   final double longitude;
+  final String? locationUrl;
   final Function()? onCall;
+
+  bool get hasLocationData => 
+      (locationUrl != null && locationUrl!.isNotEmpty) || 
+      (latitude != 0.0 && longitude != 0.0);
+
+  Future<void> _launchLocation() async {
+    if (locationUrl != null && locationUrl!.isNotEmpty) {
+      // Use URL if available
+      final uri = Uri.parse(locationUrl!);
+      try {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } catch (e) {
+        // Fallback to coordinates if URL fails
+        if (latitude != 0.0 && longitude != 0.0) {
+          MapsLauncher.launchCoordinates(latitude, longitude);
+        }
+      }
+    } else if (latitude != 0.0 && longitude != 0.0) {
+      // Use coordinates if URL not available
+      MapsLauncher.launchCoordinates(latitude, longitude);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,38 +129,25 @@ class ExpandingContainer extends StatelessWidget {
                           Row(
                             children: [
                               GestureDetector(
-                                onTap: () {
-                                  if (latitude != 0.0 && longitude != 0.0) {
-                                    MapsLauncher.launchCoordinates(
-                                        latitude, longitude);
-                                  }
-                                },
-                              child: GestureDetector(
-                                onTap: () {
-                                  if (latitude != 0.0 && longitude != 0.0) {
-                                    MapsLauncher.launchCoordinates(
-                                        latitude, longitude);
-                                  }
-                                },
+                                onTap: hasLocationData ? _launchLocation : null,
                                 child: Container(
                                   //add light blue rounded shape decoration
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 15),
                                   decoration: BoxDecoration(
-                                    color: (latitude != 0.0 && longitude != 0.0) 
+                                    color: hasLocationData 
                                         ? Colors.blue[400] 
                                         : Colors.grey[400],
                                     borderRadius: BorderRadius.circular(10),
                                   ),
 
                                   child: Text(
-                                    (latitude != 0.0 && longitude != 0.0) 
+                                    hasLocationData 
                                         ? 'Open Maps' 
                                         : 'No Location',
                                     style: const TextStyle(color: Colors.white)
                                   ),
                                 ),
-                              ),
                               ),
                             ],
                           ),

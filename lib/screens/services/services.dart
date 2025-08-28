@@ -83,6 +83,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
                         location: service.location ?? 'Location not available',
                         latitude: service.latitude ?? 0.0,
                         longitude: service.longitude ?? 0.0,
+                        locationUrl: service.locationUrl,
                         contact: service.contacts?.isNotEmpty == true ? service.contacts!.first : 'No contact available',
                         onCall: () {
                           if (service.contacts?.isNotEmpty == true) {

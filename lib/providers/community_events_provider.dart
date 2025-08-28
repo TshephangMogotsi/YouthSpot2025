@@ -286,10 +286,6 @@ class CommunityEventsProvider extends ChangeNotifier {
     }
   }
 
-  void clearError() {
-    _error = null;
-    notifyListeners();
-  }
 
   /// Synchronizes user's attended events to personal calendar
   /// This should be called on app initialization to ensure calendar is up-to-date

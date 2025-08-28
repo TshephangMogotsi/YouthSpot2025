@@ -15,9 +15,10 @@ import 'providers/event_provider.dart';
 import 'providers/goal_provider.dart';
 import 'providers/leaderboard_provider.dart';
 import 'providers/medication_provider.dart';
-
 import 'providers/quotes_provider.dart';
 import 'providers/services_provider.dart';
+import 'providers/resource_provider.dart';
+import 'providers/account_provider.dart';
 import 'providers/user_provider.dart';
 import 'screens/homepage/lifestyleQuiz/quiz_logic.dart';
 
@@ -109,6 +110,12 @@ class MyApp extends StatelessWidget {
 
             ChangeNotifierProvider(
               create: (_) => ServiceProvider(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => ResourceProvider(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => AccountProvider(),
             ),
             ChangeNotifierProvider(
               create: (_) => LeaderboardProvider(),

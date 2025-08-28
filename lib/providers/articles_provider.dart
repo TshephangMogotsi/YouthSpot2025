@@ -14,24 +14,42 @@ class ArticlesProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   ArticlesProvider() {
+    _isLoading = true; // Start with loading state
     loadInitialArticles();
   }
 
   Future<void> loadInitialArticles() async {
     if (_articles.isEmpty) {
-      _isLoading = true;
-      notifyListeners();
+      // Only set loading if not already loading
+      if (!_isLoading) {
+        _isLoading = true;
+        notifyListeners();
+      }
       
-      final response = await supabase
-          .from('articles')
-          .select('*, authors(*), categories(*)')
-          .limit(10);
-      _articles = (response as List)
-          .map((article) => Article.fromMap(article))
-          .toList();
-      
-      _isLoading = false;
-      notifyListeners();
+      try {
+        // Add minimum loading time to ensure shimmer is visible
+        final loadingFuture = supabase
+            .from('articles')
+            .select('*, authors(*), categories(*)')
+            .limit(10);
+        
+        final minLoadingTime = Future.delayed(const Duration(milliseconds: 800));
+        
+        final results = await Future.wait([loadingFuture, minLoadingTime]);
+        final response = results[0];
+        
+        _articles = (response as List)
+            .map((article) => Article.fromMap(article))
+            .toList();
+      } catch (e) {
+        // Handle error - for now just log it
+        print('Error loading articles: $e');
+        // Still set empty articles list to prevent infinite loading
+        _articles = [];
+      } finally {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 

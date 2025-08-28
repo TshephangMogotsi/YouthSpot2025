@@ -1,24 +1,52 @@
 import 'package:flutter/material.dart';
-// Firebase import removed
-// import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../db/models/service_model.dart';
 
 class ServiceProvider with ChangeNotifier {
-  List<dynamic> _services = []; // Changed from DocumentSnapshot to dynamic
-  // final FirebaseFirestore firestore = FirebaseFirestore.instance; // Firebase removed
+  List<Service> _services = [];
+  bool _isLoading = false;
+  final SupabaseClient supabase = Supabase.instance.client;
 
-  List<dynamic> get services => _services;
+  List<Service> get services => _services;
+  bool get isLoading => _isLoading;
 
   ServiceProvider() {
-    _fetchServices();
+    _isLoading = true; // Start with loading state
+    loadInitialServices();
   }
 
-  void _fetchServices() {
-    // Firebase functionality removed - implement with Supabase or other backend
-    print('Firebase Firestore removed - _fetchServices method needs reimplementation');
-    // firestore.collection('clinicalServices').snapshots().listen((snapshot) {
-    //   _services = snapshot.docs;
-    //   notifyListeners();
-    // });
+  Future<void> loadInitialServices() async {
+    if (_services.isEmpty) {
+      // Only set loading if not already loading
+      if (!_isLoading) {
+        _isLoading = true;
+        notifyListeners();
+      }
+      
+      try {
+        // Add minimum loading time to ensure shimmer is visible
+        final loadingFuture = supabase
+            .from('services')
+            .select();
+        
+        final minLoadingTime = Future.delayed(const Duration(milliseconds: 800));
+        
+        final results = await Future.wait([loadingFuture, minLoadingTime]);
+        final response = results[0];
+        
+        _services = (response as List)
+            .map((service) => Service.fromMap(service))
+            .toList();
+      } catch (e) {
+        // Handle error - for now just log it
+        print('Error loading services: $e');
+        // Still set empty services list to prevent infinite loading
+        _services = [];
+      } finally {
+        _isLoading = false;
+        notifyListeners();
+      }
+    }
   }
 
   Future<bool> loadImages() async {

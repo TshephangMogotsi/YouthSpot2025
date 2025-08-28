@@ -8,6 +8,7 @@ import '../../providers/articles_provider.dart';
 import 'all_articles_view.dart';
 import 'article_view.dart';
 import 'news_article.dart';
+import 'news_article_shimmer.dart';
 
 class NewsCarousel extends StatelessWidget {
   const NewsCarousel({super.key});
@@ -49,31 +50,40 @@ class NewsCarousel extends StatelessWidget {
         ),
         Container(
           height: 375.0,
-          child: ListView.builder(
-            physics: const BouncingScrollPhysics(),
-            scrollDirection: Axis.horizontal,
-            itemCount: articlesProvider.articles.length,
-            itemBuilder: (BuildContext context, int index) {
-              final article = articlesProvider.articles[index];
+          child: articlesProvider.isLoading
+              ? ListView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 3, // Show 3 shimmer cards while loading
+                  itemBuilder: (BuildContext context, int index) {
+                    return const NewsArticleShimmer();
+                  },
+                )
+              : ListView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: articlesProvider.articles.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final article = articlesProvider.articles[index];
 
-              return NewsArticle(
-                imgURL: article.imageUrl,
-                title: article.title,
-                duration: '10 min read',
-                author: article.author,
-                articleId: article.id, // Pass the article ID here
-                onTap: () {
-                  // Navigate to the article view
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ArticleView(article: article),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+                    return NewsArticle(
+                      imgURL: article.imageUrl,
+                      title: article.title,
+                      duration: '10 min read',
+                      author: article.author,
+                      articleId: article.id, // Pass the article ID here
+                      onTap: () {
+                        // Navigate to the article view
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ArticleView(article: article),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
         ),
       ],
     );

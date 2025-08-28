@@ -6,10 +6,12 @@ import '../db/models/articles_model.dart';
 class ArticlesProvider with ChangeNotifier {
   List<Article> _articles = [];
   List<Article> _allArticles = [];
+  bool _isLoading = false;
   final SupabaseClient supabase = Supabase.instance.client;
 
   List<Article> get articles => _articles;
   List<Article> get allArticles => _allArticles;
+  bool get isLoading => _isLoading;
 
   ArticlesProvider() {
     loadInitialArticles();
@@ -17,6 +19,9 @@ class ArticlesProvider with ChangeNotifier {
 
   Future<void> loadInitialArticles() async {
     if (_articles.isEmpty) {
+      _isLoading = true;
+      notifyListeners();
+      
       final response = await supabase
           .from('articles')
           .select('*, authors(*), categories(*)')
@@ -24,6 +29,8 @@ class ArticlesProvider with ChangeNotifier {
       _articles = (response as List)
           .map((article) => Article.fromMap(article))
           .toList();
+      
+      _isLoading = false;
       notifyListeners();
     }
   }

@@ -66,10 +66,10 @@ class ExpandingContainer extends StatelessWidget {
                 ? const Color(0xFF191919)
                 : Colors.white,
                   borderRadius: BorderRadius.circular(30),
-                  border: Border.all(
-                    // color: Colors.grey[300]!.withOpacity(0.4),
-                    width: 0.5,
-                  ),
+                  // border: Border.all(
+                  //   // color: Colors.grey[300]!.withOpacity(0.4),
+                  //   width: 0.5,
+                  // ),
                 ),
                 duration: const Duration(milliseconds: 100),
                 height: value ? 122 : 0,

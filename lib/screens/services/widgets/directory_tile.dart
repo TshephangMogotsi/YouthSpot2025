@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:youthspot/config/constants.dart';
 
 import '../../../global_widgets/primary_divider.dart';
 import '../expanding_container.dart';
@@ -38,9 +39,6 @@ class CustomDirectoryTile extends StatelessWidget {
     final isExpanded = ValueNotifier<bool>(false);
     return Column(
       children: [
-        const SizedBox(
-          height: 20,
-        ),
         GestureDetector(
           onTap: () {
             isExpanded.value = !isExpanded.value;
@@ -52,13 +50,8 @@ class CustomDirectoryTile extends StatelessWidget {
             isExpanded: isExpanded,
           ),
         ),
-        const SizedBox(
-          height: 20,
-        ),
-        Visibility(
-          visible: borderVisible,
-          child: const PrimaryDivider(),
-        ),
+        Height10(),
+
         ExpandingContainer(
           isExpanded: isExpanded,
           location: location,
@@ -68,6 +61,8 @@ class CustomDirectoryTile extends StatelessWidget {
           contact: contact,
           onCall: onCall,
         ),
+        const SizedBox(height: 5),
+        Height10(),
       ],
     );
   }

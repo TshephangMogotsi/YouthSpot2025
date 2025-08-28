@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:youthspot/db/models/service_model.dart';
-import 'package:youthspot/services/service_service.dart';
+import 'package:youthspot/providers/services_provider.dart';
 import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
 import '../../services/services_locator.dart';
@@ -18,37 +18,6 @@ class ServicesScreen extends StatefulWidget {
 }
 
 class _ServicesScreenState extends State<ServicesScreen> {
-  final ServiceService _serviceService = ServiceService();
-  List<Service> _services = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchServices();
-  }
-
-  Future<void> _fetchServices() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final services = await _serviceService.fetchServices();
-      setState(() {
-        _services = services;
-        _isLoading = false;
-      });
-    } catch (e) {
-      // Handle error
-      setState(() {
-        _isLoading = false;
-      });
-      // You could show an error snackbar here if needed
-      print('Error fetching services: $e');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final themeManager = getIt<ThemeManager>();
@@ -67,38 +36,44 @@ class _ServicesScreenState extends State<ServicesScreen> {
               isHomePage: true,
             ),
           ),
-          body: _isLoading
-              ? const LoadingShimmer()  // Show shimmer while loading
-              : ListView.builder(
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: _services.length,
-                  itemBuilder: (context, index) {
-                    final service = _services[index];
-                    return PrimaryPadding(
-                      child: CustomDirectoryTile(
-                        title: service.name,
-                        trailing: Icons.expand_more,
-                        imageURL: service.imageUrl ?? '',  // Use imageUrl from Service model
-                        borderVisible: false,
-                        location: service.location ?? 'Location not available',
-                        latitude: service.latitude ?? 0.0,
-                        longitude: service.longitude ?? 0.0,
-                        locationUrl: service.locationUrl,
-                        contact: service.contacts?.isNotEmpty == true ? service.contacts!.first : 'No contact available',
-                        onCall: () {
-                          if (service.contacts?.isNotEmpty == true) {
-                            final contact = service.contacts!.first;
-                            // Basic phone number validation
-                            if (contact.isNotEmpty && contact != 'No contact available') {
-                              Uri dialNumber = Uri(scheme: 'tel', path: contact);
-                              launchUrl(dialNumber);
-                            }
+          body: Consumer<ServiceProvider>(
+            builder: (context, serviceProvider, child) {
+              if (serviceProvider.isLoading) {
+                return const LoadingShimmer();
+              }
+              
+              return ListView.builder(
+                physics: const BouncingScrollPhysics(),
+                itemCount: serviceProvider.services.length,
+                itemBuilder: (context, index) {
+                  final service = serviceProvider.services[index];
+                  return PrimaryPadding(
+                    child: CustomDirectoryTile(
+                      title: service.name,
+                      trailing: Icons.expand_more,
+                      imageURL: service.imageUrl ?? '',
+                      borderVisible: false,
+                      location: service.location ?? 'Location not available',
+                      latitude: service.latitude ?? 0.0,
+                      longitude: service.longitude ?? 0.0,
+                      locationUrl: service.locationUrl,
+                      contact: service.contacts?.isNotEmpty == true ? service.contacts!.first : 'No contact available',
+                      onCall: () {
+                        if (service.contacts?.isNotEmpty == true) {
+                          final contact = service.contacts!.first;
+                          // Basic phone number validation
+                          if (contact.isNotEmpty && contact != 'No contact available') {
+                            Uri dialNumber = Uri(scheme: 'tel', path: contact);
+                            launchUrl(dialNumber);
                           }
-                        },
-                      ),
-                    );
-                  },
-                ),
+                        }
+                      },
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         );
       },
     );

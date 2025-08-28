@@ -4,6 +4,7 @@ class Service {
   final String? location;
   final double? latitude;
   final double? longitude;
+  final String? locationUrl;
   final String? imageUrl;
   final List<String>? contacts;
   final String? type;
@@ -15,6 +16,7 @@ class Service {
     this.location,
     this.latitude,
     this.longitude,
+    this.locationUrl,
     this.imageUrl,
     this.contacts,
     this.type,
@@ -28,6 +30,7 @@ class Service {
       location: map['location'],
       latitude: map['latitude']?.toDouble(),
       longitude: map['longitude']?.toDouble(),
+      locationUrl: map['location_url'],
       imageUrl: map['image_url'],
       contacts: map['contacts'] != null ? List<String>.from(map['contacts']) : null,
       type: map['type'],

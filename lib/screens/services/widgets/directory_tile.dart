@@ -16,6 +16,7 @@ class CustomDirectoryTile extends StatelessWidget {
     required this.location,
     required this.latitude,
     required this.longitude,
+    this.locationUrl,
     required this.contact,
   });
 
@@ -26,6 +27,7 @@ class CustomDirectoryTile extends StatelessWidget {
   final bool borderVisible;
   final double latitude;
   final double longitude;
+  final String? locationUrl;
   final String contact;
 
   final Function()? onTap;
@@ -62,6 +64,7 @@ class CustomDirectoryTile extends StatelessWidget {
           location: location,
           latitude: latitude,
           longitude: longitude,
+          locationUrl: locationUrl,
           contact: contact,
           onCall: onCall,
         ),

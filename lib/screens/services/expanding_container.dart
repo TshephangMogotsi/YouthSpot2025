@@ -24,7 +24,6 @@ class ExpandingContainer extends StatelessWidget {
   final double latitude;
   final double longitude;
   final String? locationUrl;
-  final String? locationUrl;
   final Function()? onCall;
 
   bool get hasLocationData => 

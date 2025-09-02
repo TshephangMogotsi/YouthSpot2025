@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:youthspot/providers/services_provider.dart';
 import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
@@ -59,14 +58,8 @@ class _ServicesScreenState extends State<ServicesScreen> {
                       locationUrl: service.locationUrl,
                       contact: service.contacts?.isNotEmpty == true ? service.contacts!.first : 'No contact available',
                       onCall: () {
-                        if (service.contacts?.isNotEmpty == true) {
-                          final contact = service.contacts!.first;
-                          // Basic phone number validation
-                          if (contact.isNotEmpty && contact != 'No contact available') {
-                            Uri dialNumber = Uri(scheme: 'tel', path: contact);
-                            launchUrl(dialNumber);
-                          }
-                        }
+                        // Phone number copying is now handled directly in the expanding container
+                        // No action needed here since the expanding container handles clipboard copying
                       },
                     ),
                   );

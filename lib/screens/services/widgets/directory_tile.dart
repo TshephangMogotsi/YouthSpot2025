@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:youthspot/config/constants.dart';
 
 import '../expanding_container.dart';
 import '../info_tile.dart';

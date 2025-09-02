@@ -6,6 +6,7 @@ import 'package:youthspot/config/font_constants.dart';
 
 import '../../config/theme_manager.dart';
 import '../../services/services_locator.dart';
+import '../../utils/phone_number_formatter.dart';
 
 // Utility widgets for spacing
 class Height10 extends StatelessWidget {
@@ -51,7 +52,9 @@ class ExpandingContainer extends StatelessWidget {
       (latitude != 0.0 && longitude != 0.0);
 
   Future<void> _copyToClipboard(String phoneNumber) async {
-    await Clipboard.setData(ClipboardData(text: phoneNumber));
+    // Use dialable format for copying (includes +267 for 7-digit numbers)
+    final dialableNumber = PhoneNumberFormatter.getDialableNumber(phoneNumber);
+    await Clipboard.setData(ClipboardData(text: dialableNumber));
     // Optionally show a snackbar or toast here
   }
 
@@ -71,8 +74,9 @@ class ExpandingContainer extends StatelessWidget {
   }
 
   Future<void> _callNumber(String number) async {
-    // Prepend 'tel:' and launch the dialer with the number
-    final Uri telUri = Uri(scheme: 'tel', path: number);
+    // Use dialable format for phone calls (includes +267 for 7-digit numbers)
+    final dialableNumber = PhoneNumberFormatter.getDialableNumber(number);
+    final Uri telUri = Uri(scheme: 'tel', path: dialableNumber);
     if (await canLaunchUrl(telUri)) {
       await launchUrl(telUri);
     } else {
@@ -143,7 +147,7 @@ class ExpandingContainer extends StatelessWidget {
                                     width: 22,
                                   ),
                                   Text(
-                                    contact,
+                                    PhoneNumberFormatter.formatPhoneNumber(contact),
                                     textAlign: TextAlign.center,
                                     style: AppTextStyles.primarySemiBold
                                         .copyWith(color: const Color(0xFF372727)),

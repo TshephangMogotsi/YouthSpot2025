@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:youthspot/config/constants.dart';
 
-import '../../../global_widgets/primary_divider.dart';
 import '../expanding_container.dart';
 import '../info_tile.dart';
 

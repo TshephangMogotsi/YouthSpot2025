@@ -7,7 +7,6 @@ import 'package:youthspot/config/font_constants.dart';
 import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
 import '../../services/services_locator.dart';
-import '../../utils/phone_number_formatter.dart';
 
 class ExpandingContainer extends StatelessWidget {
   const ExpandingContainer({
@@ -34,11 +33,10 @@ class ExpandingContainer extends StatelessWidget {
       (latitude != 0.0 && longitude != 0.0);
 
   Future<void> _copyToClipboard(String phoneNumber) async {
-    // Use dialable format for clipboard (with +267 if needed)
-    final dialableNumber = PhoneNumberFormatter.getDialableNumber(phoneNumber);
-    await Clipboard.setData(ClipboardData(text: dialableNumber));
+    await Clipboard.setData(ClipboardData(text: phoneNumber));
     // Note: In a real app, you might want to show a snackbar or toast here
     // to inform the user that the number was copied
+    // ScaffoldMessenger.of(context).showSnackBar(
   }
 
   Future<void> _launchLocation() async {
@@ -79,21 +77,20 @@ class ExpandingContainer extends StatelessWidget {
                 borderRadius: BorderRadius.circular(30),
               ),
               duration: const Duration(milliseconds: 100),
-              height: value ? null : 0, // Allow dynamic height when expanded
-              child: value ? Padding(
+              height: value ? 170 : 0,
+              child: Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 20.0,
                   horizontal: 20,
                 ),
-                child: IntrinsicHeight( // Use IntrinsicHeight for proper sizing
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     // InkWell(
-                    //   onTap: contact.toLowerCase().contains('no contact')
-                    //       ? null
-                    //       : onCall,
+                    // onTap: contact.toLowerCase().contains('no contact')
+                    //     ? null
+                    //     : onCall,
                     //   child: Row(
                     //     children: [
                     //       Container(
@@ -126,14 +123,16 @@ class ExpandingContainer extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(
+                      height: 10,
+                    ), // onTap: contact.toLowerCase().contains('no contact')
+                    //     ? null
+                    //     : onCall,
                     Row(
                       children: [
                         Expanded(
                           child: GestureDetector(
-                            onTap: contact.toLowerCase().contains('no contact')
-                                ? null
-                                : () => _copyToClipboard(contact),
+                            onTap: () => _copyToClipboard(contact),
                             child: Container(
                               //add light blue rounded shape decoration
                               padding: const EdgeInsets.symmetric(
@@ -153,24 +152,15 @@ class ExpandingContainer extends StatelessWidget {
                                     image: AssetImage('assets/icons/Call.png'),
                                     width: 22,
                                   ),
-                                  Expanded(
-                                    child: Text(
-                                      PhoneNumberFormatter.formatPhoneNumber(contact),
-                                      textAlign: TextAlign.center,
-                                      style: AppTextStyles.primarySemiBold
-                                          .copyWith(color: Color(0xFF372727)),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
+                                  Text(
+                                    contact,
+                                    textAlign: TextAlign.center,
+                                    style: AppTextStyles.primarySemiBold
+                                        .copyWith(color: Color(0xFF372727)),
                                   ),
-                                  GestureDetector(
-                                    onTap: contact.toLowerCase().contains('no contact')
-                                        ? null
-                                        : () => _copyToClipboard(contact),
-                                    child: Image(
-                                      image: AssetImage('assets/icons/Copy.png'),
-                                      width: 22,
-                                    ),
+                                  Image(
+                                    image: AssetImage('assets/icons/Copy.png'),
+                                    width: 22,
                                   ),
                                 ],
                               ),
@@ -181,11 +171,7 @@ class ExpandingContainer extends StatelessWidget {
                         GestureDetector(
                           onTap: contact.toLowerCase().contains('no contact')
                               ? null
-                              : () {
-                                  // Use dialable format for calling
-                                  final dialableNumber = PhoneNumberFormatter.getDialableNumber(contact);
-                                  onCall?.call();
-                                },
+                              : onCall,
                           child: Container(
                             //add light blue rounded shape decoration
                             padding: const EdgeInsets.symmetric(
@@ -263,7 +249,7 @@ class ExpandingContainer extends StatelessWidget {
                     ),
                   ],
                 ),
-              ) : const SizedBox.shrink(), // Show nothing when collapsed
+              ),
             );
           },
         );

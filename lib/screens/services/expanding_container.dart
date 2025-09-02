@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:youthspot/config/font_constants.dart';
 
 import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
@@ -16,7 +17,7 @@ class ExpandingContainer extends StatelessWidget {
     required this.longitude,
     this.locationUrl,
     required this.contact,
-    this.onCall
+    this.onCall,
   });
 
   final ValueNotifier<bool> isExpanded;
@@ -27,8 +28,8 @@ class ExpandingContainer extends StatelessWidget {
   final String? locationUrl;
   final Function()? onCall;
 
-  bool get hasLocationData => 
-      (locationUrl != null && locationUrl!.isNotEmpty) || 
+  bool get hasLocationData =>
+      (locationUrl != null && locationUrl!.isNotEmpty) ||
       (latitude != 0.0 && longitude != 0.0);
 
   Future<void> _copyToClipboard(String phoneNumber) async {
@@ -63,110 +64,192 @@ class ExpandingContainer extends StatelessWidget {
       valueListenable: isExpanded,
       builder: (context, value, child) {
         return ValueListenableBuilder<ThemeMode>(
-            valueListenable: themeManager.themeMode,
-            builder: (context, theme, snapshot) {
-              return AnimatedContainer(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: theme == ThemeMode.dark
-                ? const Color(0xFF191919)
-                : Colors.white,
-                  borderRadius: BorderRadius.circular(30),
+          valueListenable: themeManager.themeMode,
+          builder: (context, theme, snapshot) {
+            return AnimatedContainer(
+              alignment: Alignment.center,
+              constraints: const BoxConstraints(maxHeight: 300),
+              decoration: BoxDecoration(
+                color: theme == ThemeMode.dark
+                    ? const Color(0xFF191919)
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              duration: const Duration(milliseconds: 100),
+              height: value ? 170 : 0,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20.0,
+                  horizontal: 20,
                 ),
-                duration: const Duration(milliseconds: 100),
-                height: value ? null : 0,
-                child: value ? Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20),
-                  child: IntrinsicHeight(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // InkWell(
+                    //   onTap: contact.toLowerCase().contains('no contact')
+                    //       ? null
+                    //       : onCall,
+                    //   child: Row(
+                    //     children: [
+                    //       Container(
+                    //         width: 30,
+                    //         height: 30,
+                    //         decoration: BoxDecoration(
+                    //           color:
+                    //               contact.toLowerCase().contains('no contact')
+                    //               ? Colors.grey[400]
+                    //               : kSSIorange,
+                    //           shape: BoxShape.circle,
+                    //         ),
+                    //         child: const Icon(
+                    //           Icons.phone,
+                    //           color: Colors.white,
+                    //           size: 20,
+                    //         ),
+                    //       ),
+                    //       const SizedBox(width: 10),
+                    //       Text(contact),
+                    //     ],
+                    //   ),
+                    // ),
+                    Row(
                       children: [
-                        InkWell(
-                          onTap: contact.toLowerCase().contains('no contact') 
-                              ? null 
-                              : () => _copyToClipboard(contact),
-                          child: Row(children: [
-                            Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: contact.toLowerCase().contains('no contact') 
-                                    ? Colors.grey[400] 
-                                    : kSSIorange,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                contact.toLowerCase().contains('no contact') 
-                                    ? Icons.phone_disabled
-                                    : Icons.content_copy,
-                                color: Colors.white, 
-                                size: 20
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(child: Text(contact)),
-                          ]),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        //row with 2 rows of inside it
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 30,
-                                    height: 30,
-                                    decoration: const BoxDecoration(
-                                      color: kSSIorange,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.location_on,
-                                        color: Colors.white, size: 20),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Expanded(child: Text(location)),
-                                ],
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: hasLocationData ? _launchLocation : null,
-                              child: Container(
-                                //add light blue rounded shape decoration
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 15),
-                                decoration: BoxDecoration(
-                                  color: hasLocationData 
-                                      ? Colors.blue[400] 
-                                      : Colors.grey[400],
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-
-                                child: Text(
-                                  hasLocationData 
-                                      ? 'Open Maps' 
-                                      : 'No Location',
-                                  style: const TextStyle(color: Colors.white)
-                                ),
-                              ),
-                            ),
-                          ],
+                        Width20(),
+                        Text(
+                          'Contact Details',
+                          style: AppTextStyles.primaryBold,
                         ),
                       ],
                     ),
-                  ),
-                ) : null,
-              );
-            });
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: contact.toLowerCase().contains('no contact')
+                                ? null
+                                : onCall,
+                            child: Container(
+                              //add light blue rounded shape decoration
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 15,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFEEEEEE),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Image(
+                                    image: AssetImage('assets/icons/Call.png'),
+                                    width: 22,
+                                  ),
+                                  Text(
+                                    contact,
+                                    textAlign: TextAlign.center,
+                                    style: AppTextStyles.primarySemiBold
+                                        .copyWith(color: Color(0xFF372727)),
+                                  ),
+                                  Image(
+                                    image: AssetImage('assets/icons/Copy.png'),
+                                    width: 22,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Width10(),
+                        GestureDetector(
+                          onTap: contact.toLowerCase().contains('no contact')
+                              ? null
+                              : onCall,
+                          child: Container(
+                            //add light blue rounded shape decoration
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 40,
+                            ),
+                            decoration: BoxDecoration(
+                              color: hasLocationData
+                                  ? Color(0xFF00FF4D)
+                                  : Colors.grey[400],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+
+                            child: Text(
+                              'Call',
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.primaryBold.copyWith(
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Height10(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Row(
+                        //   children: [
+                        //     Container(
+                        //       width: 30,
+                        //       height: 30,
+                        //       decoration: const BoxDecoration(
+                        //         color: kSSIorange,
+                        //         shape: BoxShape.circle,
+                        //       ),
+                        //       child: const Icon(Icons.location_on,
+                        //           color: Colors.white, size: 20),
+                        //     ),
+                        //     const SizedBox(
+                        //       width: 10,
+                        //     ),
+                        //     Text(location),
+                        //   ],
+                        // ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: hasLocationData ? _launchLocation : null,
+                            child: Container(
+                              //add light blue rounded shape decoration
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 15,
+                              ),
+                              decoration: BoxDecoration(
+                                color: hasLocationData
+                                    ? Color(0xFFE8F5FF)
+                                    : Colors.grey[400],
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+
+                              child: Text(
+                                hasLocationData ? 'Open Maps' : 'No Location',
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.primaryBold.copyWith(
+                                  color: Color(0xFF426FFF),
+                                ),
+                                // style: const TextStyle(color: Color(0xFF426FFF)),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
       },
     );
   }

@@ -176,7 +176,8 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, (call) async {
         if (call.method == 'Clipboard.setData') {
-          expect(call.arguments['text'], '1234567890');
+          // Expect the dialable format (+267 prefix added for 7-digit numbers)
+          expect(call.arguments['text'], '+2671234567');
           return;
         }
         return null;
@@ -192,19 +193,62 @@ void main() {
               location: 'Test Location',
               latitude: 0.0,
               longitude: 0.0,
-              contact: '1234567890',
+              contact: '1234567',
             ),
           ),
         ),
       );
 
-      // Tap the phone number to copy it
-      await tester.tap(find.byIcon(Icons.content_copy));
+      // Tap the copy icon to copy the number
+      await tester.tap(find.byType(Image).last); // Copy icon is the last Image widget
       await tester.pump();
 
       // Cleanup
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    testWidgets('displays formatted phone number correctly', (WidgetTester tester) async {
+      final isExpanded = ValueNotifier<bool>(true);
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExpandingContainer(
+              isExpanded: isExpanded,
+              location: 'Test Location',
+              latitude: 0.0,
+              longitude: 0.0,
+              contact: '6843242', // 7-digit number should be formatted as "684 3242"
+            ),
+          ),
+        ),
+      );
+
+      // Check that the formatted number is displayed
+      expect(find.text('684 3242'), findsOneWidget);
+    });
+
+    testWidgets('removes +267 prefix from displayed number', (WidgetTester tester) async {
+      final isExpanded = ValueNotifier<bool>(true);
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExpandingContainer(
+              isExpanded: isExpanded,
+              location: 'Test Location',
+              latitude: 0.0,
+              longitude: 0.0,
+              contact: '+2676843242', // Should display as "684 3242"
+            ),
+          ),
+        ),
+      );
+
+      // Check that the formatted number is displayed without +267
+      expect(find.text('684 3242'), findsOneWidget);
+      expect(find.text('+2676843242'), findsNothing);
     });
   });
 }

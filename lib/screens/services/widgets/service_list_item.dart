@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:youthspot/db/models/service_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:maps_launcher/maps_launcher.dart';
+import '../../../utils/phone_number_formatter.dart';
 
 class ServiceListItem extends StatelessWidget {
   final Service service;
@@ -31,7 +32,9 @@ class ServiceListItem extends StatelessWidget {
       (service.latitude != null && service.longitude != null);
 
   Future<void> _launchDialer(String phoneNumber) async {
-    final uri = Uri.parse('tel:$phoneNumber');
+    // Use dialable format for phone calls
+    final dialableNumber = PhoneNumberFormatter.getDialableNumber(phoneNumber);
+    final uri = Uri.parse('tel:$dialableNumber');
     try {
       await launchUrl(uri);
     } catch (e) {
@@ -58,7 +61,10 @@ class ServiceListItem extends StatelessWidget {
                     runSpacing: 4.0,
                     children: service.contacts!
                         .map((contact) => ActionChip(
-                              label: Text(contact),
+                              label: Text(
+                                PhoneNumberFormatter.formatPhoneNumber(contact),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                               onPressed: () => _launchDialer(contact),
                             ))
                         .toList(),

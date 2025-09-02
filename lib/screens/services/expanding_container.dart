@@ -142,15 +142,21 @@ class ExpandingContainer extends StatelessWidget {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Image(
+                                
+                                  Row(
+                                    children: [
+                                        const Image(
                                     image: AssetImage('assets/icons/Call.png'),
                                     width: 22,
                                   ),
-                                  Text(
-                                    PhoneNumberFormatter.formatPhoneNumber(contact),
-                                    textAlign: TextAlign.center,
-                                    style: AppTextStyles.primarySemiBold
-                                        .copyWith(color: const Color(0xFF372727)),
+                                  Width10(),
+                                      Text(
+                                        PhoneNumberFormatter.formatPhoneNumber(contact),
+                                        textAlign: TextAlign.center,
+                                        style: AppTextStyles.primarySemiBold
+                                            .copyWith(color: const Color(0xFF372727)),
+                                      ),
+                                    ],
                                   ),
                                   const Image(
                                     image: AssetImage('assets/icons/Copy.png'),

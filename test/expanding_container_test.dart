@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:youthspot/screens/services/expanding_container.dart';
 import 'package:youthspot/services/services_locator.dart';
@@ -128,6 +129,82 @@ void main() {
       );
 
       expect(find.text('No Location'), findsOneWidget);
+    });
+
+    testWidgets('shows copy icon for valid phone numbers', (WidgetTester tester) async {
+      final isExpanded = ValueNotifier<bool>(true);
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExpandingContainer(
+              isExpanded: isExpanded,
+              location: 'Test Location',
+              latitude: 0.0,
+              longitude: 0.0,
+              contact: '1234567890',
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.content_copy), findsOneWidget);
+    });
+
+    testWidgets('shows disabled phone icon for "no contact" cases', (WidgetTester tester) async {
+      final isExpanded = ValueNotifier<bool>(true);
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExpandingContainer(
+              isExpanded: isExpanded,
+              location: 'Test Location',
+              latitude: 0.0,
+              longitude: 0.0,
+              contact: 'No contact available',
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.phone_disabled), findsOneWidget);
+    });
+
+    testWidgets('clipboard functionality works correctly', (WidgetTester tester) async {
+      // Mock the clipboard
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') {
+          expect(call.arguments['text'], '1234567890');
+          return;
+        }
+        return null;
+      });
+
+      final isExpanded = ValueNotifier<bool>(true);
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExpandingContainer(
+              isExpanded: isExpanded,
+              location: 'Test Location',
+              latitude: 0.0,
+              longitude: 0.0,
+              contact: '1234567890',
+            ),
+          ),
+        ),
+      );
+
+      // Tap the phone number to copy it
+      await tester.tap(find.byIcon(Icons.content_copy));
+      await tester.pump();
+
+      // Cleanup
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
     });
   });
 }

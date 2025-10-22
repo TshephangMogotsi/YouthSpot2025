@@ -129,7 +129,7 @@ class _AccountState extends State<Account> {
                       vertical: 18,
                     ),
                     decoration: BoxDecoration(
-                      color:   const Color(0xFFE0E0E0),
+                      color: const Color(0xFFE0E0E0),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     width: double.infinity,

@@ -5,6 +5,7 @@ import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
 import '../../services/services_locator.dart';
 import '../../global_widgets/custom_app_bar.dart';
+import '../../global_widgets/empty_state_widget.dart';
 import '../../global_widgets/primary_padding.dart';
 import 'widgets/directory_tile.dart';
 import 'loading_shimmer.dart';
@@ -39,6 +40,17 @@ class _ServicesScreenState extends State<ServicesScreen> {
             builder: (context, serviceProvider, child) {
               if (serviceProvider.isLoading) {
                 return const LoadingShimmer();
+              }
+              
+              if (serviceProvider.hasError || serviceProvider.services.isEmpty) {
+                return EmptyStateWidget(
+                  message: serviceProvider.hasError
+                      ? 'Content will load when connected'
+                      : 'No services available',
+                  icon: Icons.business_outlined,
+                  onRetry: serviceProvider.hasError ? serviceProvider.retry : null,
+                  showRetryButton: serviceProvider.hasError,
+                );
               }
               
               return ListView.builder(

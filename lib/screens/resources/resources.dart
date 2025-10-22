@@ -8,6 +8,7 @@ import 'package:youthspot/providers/resource_provider.dart';
 
 import '../../config/constants.dart';
 import '../../config/theme_manager.dart';
+import '../../global_widgets/empty_state_widget.dart';
 import '../../global_widgets/primary_container.dart';
 import '../../global_widgets/primary_padding.dart';
 import '../../global_widgets/primary_scaffold.dart';
@@ -192,19 +193,28 @@ class _DocumentPageState extends State<DocumentPage> {
                 ),
               const SizedBox(height: 20),
               Expanded(
-                child: PrimaryPadding(
-                  child: PrimaryContainer(
-                    padding: const EdgeInsets.fromLTRB(25,10, 10,10),
-                    child: ListView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: filteredResources.length,
-                      itemBuilder: (context, index) {
-                        Resource doc = filteredResources[index];
-                        return _buildPDFContainer(doc);
-                      },
-                    ),
-                  ),
-                ),
+                child: resourceProvider.hasError || filteredResources.isEmpty
+                    ? EmptyStateWidget(
+                        message: resourceProvider.hasError
+                            ? 'Content will load when connected'
+                            : 'No resources available',
+                        icon: Icons.folder_outlined,
+                        onRetry: resourceProvider.hasError ? resourceProvider.retry : null,
+                        showRetryButton: resourceProvider.hasError,
+                      )
+                    : PrimaryPadding(
+                        child: PrimaryContainer(
+                          padding: const EdgeInsets.fromLTRB(25,10, 10,10),
+                          child: ListView.builder(
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: filteredResources.length,
+                            itemBuilder: (context, index) {
+                              Resource doc = filteredResources[index];
+                              return _buildPDFContainer(doc);
+                            },
+                          ),
+                        ),
+                      ),
               ),
               const Height20(),
             ],

@@ -7,11 +7,14 @@ class ArticlesProvider with ChangeNotifier {
   List<Article> _articles = [];
   List<Article> _allArticles = [];
   bool _isLoading = false;
+  String? _error;
   final SupabaseClient supabase = Supabase.instance.client;
 
   List<Article> get articles => _articles;
   List<Article> get allArticles => _allArticles;
   bool get isLoading => _isLoading;
+  String? get error => _error;
+  bool get hasError => _error != null;
 
   ArticlesProvider() {
     _isLoading = true; // Start with loading state
@@ -23,6 +26,7 @@ class ArticlesProvider with ChangeNotifier {
       // Only set loading if not already loading
       if (!_isLoading) {
         _isLoading = true;
+        _error = null;
         notifyListeners();
       }
       
@@ -41,10 +45,11 @@ class ArticlesProvider with ChangeNotifier {
         _articles = (response as List)
             .map((article) => Article.fromMap(article))
             .toList();
+        _error = null;
       } catch (e) {
-        // Handle error - for now just log it
+        // Handle error - set error message for user
         print('Error loading articles: $e');
-        // Still set empty articles list to prevent infinite loading
+        _error = 'Unable to load articles';
         _articles = [];
       } finally {
         _isLoading = false;
@@ -62,5 +67,11 @@ class ArticlesProvider with ChangeNotifier {
           .toList();
       notifyListeners();
     }
+  }
+
+  Future<void> retry() async {
+    _articles = [];
+    _error = null;
+    await loadInitialArticles();
   }
 }

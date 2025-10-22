@@ -60,7 +60,7 @@ class HomePageListTile extends StatelessWidget {
                           style: AppTextStyles.primaryBigBold
                         ),
                         Text(subtitle,    style: AppTextStyles.secondaryRegular.copyWith(
-                         color:  const Color.fromARGB(255, 63, 63, 63)
+                         color: theme == ThemeMode.dark ? const Color.fromARGB(202, 255, 255, 255) : const Color.fromARGB(255, 63, 63, 63)
                         )),
                       ],
                     ),

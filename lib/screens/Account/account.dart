@@ -1,5 +1,4 @@
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/auth/auth_switcher.dart';
 import 'package:youthspot/config/constants.dart';
@@ -31,28 +30,51 @@ class _AccountState extends State<Account> {
     super.initState();
     // No need to load data here - AccountProvider handles it
   }
+
   @override
   Widget build(BuildContext context) {
-    return PrimaryScaffold(
-      isHomePage: true,
-      child: PrimaryPadding(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(left: 20),
-              child: Text('Account', style: AppTextStyles.title),
-            ),
-            const SizedBox(height: 20),
-            Consumer<AccountProvider>(
-              builder: (context, accountProvider, child) {
-                return ProfileListTile(
-                  title: 'My Profile',
-                  fullName: accountProvider.userFullName,
+    final themeManager = getIt<ThemeManager>();
+
+    return ValueListenableBuilder(
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, snapshot) {
+        return PrimaryScaffold(
+          isHomePage: true,
+          child: PrimaryPadding(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(left: 20),
+                  child: Text('Account', style: AppTextStyles.title),
+                ),
+                const SizedBox(height: 20),
+                Consumer<AccountProvider>(
+                  builder: (context, accountProvider, child) {
+                    return ProfileListTile(
+                      title: 'My Profile',
+                      fullName: accountProvider.userFullName,
+                      ontap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const ProfilePage(),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+                const Height10(),
+                SettingsListTile(
+                  title: 'Account Settings',
+                  assetImage: 'assets/icon/Settings/SettingsIcon.png',
                   ontap: () {
+                    //push not using pushname
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => const ProfilePage()),
+                      MaterialPageRoute(
+                        builder: (context) => const AccountSettings(),
+                      ),
                     );
                   },
                 );
@@ -116,20 +138,77 @@ class _AccountState extends State<Account> {
                   horizontal: 20,
                   vertical: 18,
                 ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0E0E0),
-                  borderRadius: BorderRadius.circular(10),
+                const Height10(),
+                SettingsListTile(
+                  title: 'Terms and Conditions',
+                  assetImage: 'assets/icon/Settings/TermsAndConditionsIcon.png',
+                  ontap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const TermsPrivacyScreen(),
+                      ),
+                    );
+                  },
                 ),
-                width: double.infinity,
-                child: const Text(
-                  "Logout",
-                  style: AppTextStyles.primaryBigSemiBold,
+                const Height10(),
+                SettingsListTile(
+                  title: 'Description',
+                  assetImage: 'assets/icon/Settings/DescriptionIcon.png',
+                  ontap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const DescriptionPage(),
+                      ),
+                    );
+                  },
                 ),
-              ),
+                const Height10(),
+                const ThemeModeListTile(title: 'Day Mode'),
+                const Height20(),
+                const Height20(),
+                const Height20(),
+                GestureDetector(
+                  onTap: () async {
+                    final auth = Provider.of<AuthService>(
+                      context,
+                      listen: false,
+                    );
+                    await auth.signOut();
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => const AuthSwitcher(),
+                      ),
+                      (route) => false,
+                    );
+                  },
+
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 18,
+                    ),
+                    decoration: BoxDecoration(
+                      color:   const Color(0xFFE0E0E0),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    width: double.infinity,
+                    child: Text(
+                      "Logout",
+
+                      style: AppTextStyles.primaryBigSemiBold.copyWith(
+                        color: theme == ThemeMode.dark
+                            ? Colors.black
+                            : Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -37,7 +37,8 @@ class PrimaryContainer extends StatelessWidget {
           onTap: onTap,
           child: Container(
             width: span == true ? double.infinity : null,
-            padding: padding ??
+            padding:
+                padding ??
                 const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             decoration: BoxDecoration(
               boxShadow: hasShadow
@@ -50,17 +51,16 @@ class PrimaryContainer extends StatelessWidget {
                       ),
                     ]
                   : [],
-              color: bgColor ??
+              color:
+                  bgColor ??
                   (theme == ThemeMode.dark
                       ? const Color(0xFF23232B)
                       : Colors.white),
               borderRadius: borderRadius ?? BorderRadius.circular(34.0),
-              border: activeBorder ??
+              border:
+                  activeBorder ??
                   (theme == ThemeMode.dark
-                      ? Border.all(
-                          color: Colors.transparent,
-                          width: 0.8,
-                        )
+                      ? Border.all(color: Colors.transparent, width: 0.8)
                       : Border.all(
                           color: Colors.grey[300]!.withValues(alpha: 0.4),
                           width: 0.5,

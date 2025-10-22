@@ -1,5 +1,4 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +6,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
-import 'package:youthspot/global_widgets/primary_container.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
 import 'package:youthspot/global_widgets/primary_padding.dart';
 import 'package:youthspot/global_widgets/field_with_live_validation.dart';

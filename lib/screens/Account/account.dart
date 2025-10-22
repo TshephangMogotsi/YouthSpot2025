@@ -103,7 +103,7 @@ class _AccountState extends State<Account> {
                   },
                 ),
                 const Height10(),
-                const ThemeModeListTile(title: 'Day Mode'),
+                const ThemePreferenceListTile(),
                 const Height20(),
                 const Height20(),
                 const Height20(),
@@ -214,6 +214,119 @@ class ProfileListTile extends StatelessWidget {
 
           Text(title, style: AppTextStyles.primaryBigSemiBold),
         ],
+      ),
+    );
+  }
+}
+
+class ThemePreferenceListTile extends StatelessWidget {
+  const ThemePreferenceListTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeManager = getIt<ThemeManager>();
+
+    return ListenableBuilder(
+      listenable: themeManager,
+      builder: (context, child) {
+        return PrimaryContainer(
+          borderRadius: BorderRadius.circular(25),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with icon
+              Row(
+                children: [
+                  Image.asset(
+                    'assets/icon/Settings/DayIcon.png',
+                    width: 40,
+                    height: 40,
+                  ),
+                  const SizedBox(width: 20),
+                  const Text(
+                    'Theme',
+                    style: TextStyle(
+                      fontFamily: 'Onest',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Theme options
+              _ThemeOption(
+                title: 'Light',
+                value: ThemePreference.light,
+                themeManager: themeManager,
+              ),
+              const SizedBox(height: 8),
+              _ThemeOption(
+                title: 'Dark',
+                value: ThemePreference.dark,
+                themeManager: themeManager,
+              ),
+              const SizedBox(height: 8),
+              _ThemeOption(
+                title: 'Device Preferences',
+                value: ThemePreference.system,
+                themeManager: themeManager,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ThemeOption extends StatelessWidget {
+  const _ThemeOption({
+    required this.title,
+    required this.value,
+    required this.themeManager,
+  });
+
+  final String title;
+  final ThemePreference value;
+  final ThemeManager themeManager;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        themeManager.setThemePreference(value);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        decoration: BoxDecoration(
+          color: themeManager.themePreference == value
+              ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              themeManager.themePreference == value
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: TextStyle(
+                fontFamily: 'Onest',
+                fontSize: 16,
+                fontWeight: themeManager.themePreference == value
+                    ? FontWeight.w600
+                    : FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

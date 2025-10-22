@@ -35,14 +35,12 @@ class _CalendarPageState extends State<CalendarPage> {
       valueListenable: themeManager.themeMode,
       builder: (context, theme, snapshot) {
         return Scaffold(
-          backgroundColor:
-              theme == ThemeMode.dark ? darkmodeLight : backgroundColorLight,
+          backgroundColor: theme == ThemeMode.dark
+              ? darkmodeLight
+              : backgroundColorLight,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(60),
-            child: CustomAppBar(
-              context: context,
-              isHomePage: false,
-            ),
+            child: CustomAppBar(context: context, isHomePage: false),
           ),
           body: Column(
             children: [
@@ -50,21 +48,16 @@ class _CalendarPageState extends State<CalendarPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Schedule',
-                      style: headingStyle,
-                    ),
+                    Text('Schedule', style: headingStyle),
                     PillButton2(
                       title: 'Add',
-                      icon: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                      ),
+                      icon: const Icon(Icons.add, color: Colors.white),
                       onTap: () async {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const EventEditingPage()),
+                            builder: (context) => const EventEditingPage(),
+                          ),
                         );
                       },
                     ),
@@ -74,8 +67,10 @@ class _CalendarPageState extends State<CalendarPage> {
               const Height20(),
               const PrimaryDivider(),
               const Height10(),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                SnackPill(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  SnackPill(
                     pillColor: _calendarView == CalendarView.month
                         ? kSSIorange
                         : Colors.transparent,
@@ -84,22 +79,23 @@ class _CalendarPageState extends State<CalendarPage> {
                     titleColor: theme == ThemeMode.dark
                         ? Colors.white
                         : _calendarView == CalendarView.month
-                            ? Colors.white
-                            : properBlack,
+                        ? Colors.white
+                        : properBlack,
                     borderColor: theme == ThemeMode.dark
                         ? _calendarView == CalendarView.month
-                            ? kSSIorange
-                            : Colors.white
+                              ? kSSIorange
+                              : Colors.white
                         : _calendarView == CalendarView.month
-                            ? kSSIorange
-                            : properBlack,
+                        ? kSSIorange
+                        : properBlack,
                     onTap: () {
                       setState(() {
                         _calendarView = CalendarView.month;
                         _calendarController.view = _calendarView;
                       });
-                    }),
-                SnackPill(
+                    },
+                  ),
+                  SnackPill(
                     pillColor: _calendarView == CalendarView.week
                         ? kSSIorange
                         : Colors.transparent,
@@ -108,22 +104,23 @@ class _CalendarPageState extends State<CalendarPage> {
                     titleColor: theme == ThemeMode.dark
                         ? Colors.white
                         : _calendarView == CalendarView.week
-                            ? Colors.white
-                            : properBlack,
+                        ? Colors.white
+                        : properBlack,
                     borderColor: theme == ThemeMode.dark
                         ? _calendarView == CalendarView.week
-                            ? kSSIorange
-                            : Colors.white
+                              ? kSSIorange
+                              : Colors.white
                         : _calendarView == CalendarView.week
-                            ? kSSIorange
-                            : properBlack,
+                        ? kSSIorange
+                        : properBlack,
                     onTap: () {
                       setState(() {
                         _calendarView = CalendarView.week;
                         _calendarController.view = _calendarView;
                       });
-                    }),
-                SnackPill(
+                    },
+                  ),
+                  SnackPill(
                     pillColor: _calendarView == CalendarView.day
                         ? kSSIorange
                         : Colors.transparent,
@@ -131,65 +128,67 @@ class _CalendarPageState extends State<CalendarPage> {
                     titleColor: theme == ThemeMode.dark
                         ? Colors.white
                         : _calendarView == CalendarView.day
-                            ? Colors.white
-                            : properBlack,
+                        ? Colors.white
+                        : properBlack,
                     hasBorder: true,
                     borderColor: theme == ThemeMode.dark
                         ? _calendarView == CalendarView.day
-                            ? kSSIorange
-                            : Colors.white
+                              ? kSSIorange
+                              : Colors.white
                         : _calendarView == CalendarView.day
-                            ? kSSIorange
-                            : properBlack,
+                        ? kSSIorange
+                        : properBlack,
                     onTap: () {
                       setState(() {
                         _calendarView = CalendarView.day;
                         _calendarController.view = _calendarView;
                       });
-                    }),
-              ]),
+                    },
+                  ),
+                ],
+              ),
               const Height10(),
               const PrimaryDivider(),
               Expanded(
-                  child: SfCalendar(
-                view: _calendarView,
-                dataSource: EventDataSource(events),
-                initialSelectedDate: DateTime.now(),
-                todayHighlightColor: kSSIorange,
-                selectionDecoration: BoxDecoration(
-                  border: Border.all(
-                    color: kSSIorange,
-                    width: 2,
+                child: SfCalendar(
+                  view: _calendarView,
+                  dataSource: EventDataSource(events),
+                  initialSelectedDate: DateTime.now(),
+                  todayHighlightColor: kSSIorange,
+                  selectionDecoration: BoxDecoration(
+                    border: Border.all(color: kSSIorange, width: 2),
                   ),
-                ),
-                monthViewSettings: const MonthViewSettings(
-                  appointmentDisplayMode:
-                      MonthAppointmentDisplayMode.appointment,
-                  // showAgenda: true,
-                ),
-                controller: _calendarController,
-                 headerStyle: const CalendarHeaderStyle(
-                            textAlign: TextAlign.center,
-                            textStyle: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            backgroundColor: backgroundColorLight,
-                          ),
-                onTap: (details) {
-                  if (details.appointments == null ||
-                      details.appointments!.isEmpty) {
-                    return;
-                  }
+                  monthViewSettings: const MonthViewSettings(
+                    appointmentDisplayMode:
+                        MonthAppointmentDisplayMode.appointment,
+                    // showAgenda: true,
+                  ),
+                  controller: _calendarController,
+                  headerStyle: CalendarHeaderStyle(
+                    textAlign: TextAlign.center,
+                    textStyle: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    backgroundColor: theme == ThemeMode.dark
+                        ? darkmodeLight
+                        : backgroundColorLight,
+                  ),
+                  onTap: (details) {
+                    if (details.appointments == null ||
+                        details.appointments!.isEmpty) {
+                      return;
+                    }
 
-                  final event = details.appointments!.first as Event;
+                    final event = details.appointments!.first as Event;
 
-                  showDialog(
-                    context: context,
-                    builder: (context) => EventDetailsDialog(event: event),
-                  );
-                },
-              )),
+                    showDialog(
+                      context: context,
+                      builder: (context) => EventDetailsDialog(event: event),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         );

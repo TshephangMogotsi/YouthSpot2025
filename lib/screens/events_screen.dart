@@ -118,36 +118,47 @@ class _ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Text(
-            'Error loading events',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: theme == ThemeMode.dark ? Colors.white : Colors.black,
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.cloud_off_outlined,
+              size: 64,
+              color: theme == ThemeMode.dark
+                  ? Colors.grey[600]
+                  : Colors.grey[400],
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            provider.error ?? '',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: theme == ThemeMode.dark ? Colors.white70 : Colors.black54,
+            const SizedBox(height: 16),
+            Text(
+              'Content will load when connected',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: theme == ThemeMode.dark
+                    ? Colors.grey[400]
+                    : Colors.grey[600],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              provider.clearError();
-              provider.loadCommunityEvents();
-            },
-            child: const Text('Retry'),
-          ),
-        ],
+            const SizedBox(height: 24),
+            OutlinedButton.icon(
+              onPressed: () {
+                provider.clearError();
+                provider.loadCommunityEvents();
+              },
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Retry'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: kSSIorange,
+                side: const BorderSide(color: kSSIorange),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

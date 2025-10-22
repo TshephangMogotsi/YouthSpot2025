@@ -7,12 +7,15 @@ class ResourceProvider with ChangeNotifier {
   List<Resource> _allResources = [];
   List<ResourceSubcategory> _subcategories = [];
   bool _isLoading = false;
+  String? _error;
   final ResourceService _resourceService = ResourceService();
 
   List<ResourceCategory> get categories => _categories;
   List<Resource> get allResources => _allResources;
   List<ResourceSubcategory> get subcategories => _subcategories;
   bool get isLoading => _isLoading;
+  String? get error => _error;
+  bool get hasError => _error != null;
 
   ResourceProvider() {
     _isLoading = true; // Start with loading state
@@ -24,6 +27,7 @@ class ResourceProvider with ChangeNotifier {
       // Only set loading if not already loading
       if (!_isLoading) {
         _isLoading = true;
+        _error = null;
         notifyListeners();
       }
       
@@ -41,10 +45,11 @@ class ResourceProvider with ChangeNotifier {
         
         _categories = dataResults[0] as List<ResourceCategory>;
         _allResources = dataResults[1] as List<Resource>;
+        _error = null;
       } catch (e) {
-        // Handle error - for now just log it
+        // Handle error - set error message for user
         print('Error loading resources: $e');
-        // Still set empty lists to prevent infinite loading
+        _error = 'Unable to load resources';
         _categories = [];
         _allResources = [];
       } finally {
@@ -91,6 +96,11 @@ class ResourceProvider with ChangeNotifier {
     _categories = [];
     _allResources = [];
     _subcategories = [];
+    _error = null;
     await loadInitialData();
+  }
+
+  Future<void> retry() async {
+    await refreshData();
   }
 }

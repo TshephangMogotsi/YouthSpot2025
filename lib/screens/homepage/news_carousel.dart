@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/font_constants.dart';
+import '../../global_widgets/empty_state_widget.dart';
 import '../../global_widgets/primary_padding.dart';
 import '../../global_widgets/section_header.dart';
 import '../../providers/articles_provider.dart';
@@ -59,31 +60,39 @@ class NewsCarousel extends StatelessWidget {
                     return const NewsArticleShimmer();
                   },
                 )
-              : ListView.builder(
-                  physics: const BouncingScrollPhysics(),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: articlesProvider.articles.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final article = articlesProvider.articles[index];
+              : articlesProvider.hasError || articlesProvider.articles.isEmpty
+                  ? EmptyStateWidget(
+                      message: articlesProvider.hasError 
+                          ? 'Content will load when connected'
+                          : 'No articles available',
+                      icon: Icons.article_outlined,
+                      onRetry: articlesProvider.retry,
+                    )
+                  : ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: articlesProvider.articles.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final article = articlesProvider.articles[index];
 
-                    return NewsArticle(
-                      imgURL: article.imageUrl,
-                      title: article.title,
-                      duration: '10 min read',
-                      author: article.author,
-                      articleId: article.id, // Pass the article ID here
-                      onTap: () {
-                        // Navigate to the article view
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ArticleView(article: article),
-                          ),
+                        return NewsArticle(
+                          imgURL: article.imageUrl,
+                          title: article.title,
+                          duration: '10 min read',
+                          author: article.author,
+                          articleId: article.id, // Pass the article ID here
+                          onTap: () {
+                            // Navigate to the article view
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ArticleView(article: article),
+                              ),
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                ),
+                    ),
         ),
       ],
     );

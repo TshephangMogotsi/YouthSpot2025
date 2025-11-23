@@ -128,9 +128,11 @@ class _SignInPageState extends State<SignInPage> {
                     Container(height: 250),
                     Expanded(
                       child: Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
+                        decoration: BoxDecoration(
+                          color: theme == ThemeMode.dark
+                              ? darkmodeLight
+                              : Colors.white,
+                          borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(34),
                             topRight: Radius.circular(34),
                           ),

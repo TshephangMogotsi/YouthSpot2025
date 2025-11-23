@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../config/constants.dart';
 import '../config/font_constants.dart';
+import '../config/theme_manager.dart';
+import '../services/services_locator.dart';
 
 ///
 /// Reusable text field with live validation and password visibility toggle.
@@ -42,26 +44,36 @@ class FieldWithLiveValidation extends StatefulWidget {
 class _FieldWithLiveValidationState extends State<FieldWithLiveValidation> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    final themeManager = getIt<ThemeManager>();
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, snapshot) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Width20(), // Built-in 20px left spacing
-            Text(widget.title, style: AppTextStyles.primaryBold),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: widget.readOnly ? const Color(0xFFF5F5F5) : const Color(0xFFEEF0F2),
-            borderRadius: BorderRadius.circular(11),
-            border: Border.all(
-              color: widget.errorText != null ? Colors.red : Colors.transparent,
-              width: 1.2,
+            Row(
+              children: [
+                const Width20(), // Built-in 20px left spacing
+                Text(widget.title, style: AppTextStyles.primaryBold),
+              ],
             ),
+            const SizedBox(height: 6),
+            Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: widget.readOnly
+                    ? (theme == ThemeMode.dark
+                        ? const Color(0xFF1C1C24)
+                        : const Color(0xFFF5F5F5))
+                    : (theme == ThemeMode.dark
+                        ? darkmodeFore
+                        : const Color(0xFFEEF0F2)),
+                borderRadius: BorderRadius.circular(11),
+                border: Border.all(
+                  color: widget.errorText != null ? Colors.red : Colors.transparent,
+                  width: 1.2,
+                ),
           ),
           child: Row(
             children: [
@@ -114,6 +126,8 @@ class _FieldWithLiveValidationState extends State<FieldWithLiveValidation> {
           ),
       ],
     );
+      },
+    );
   }
 }
 ///
@@ -140,27 +154,33 @@ class DropdownWithLiveValidation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    final themeManager = getIt<ThemeManager>();
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, snapshot) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Width20(), // Built-in 20px left spacing
-            Text(title, style: AppTextStyles.primaryBold),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFEEF0F2),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: errorText != null ? Colors.red : Colors.transparent,
-              width: 1.2,
+            Row(
+              children: [
+                const Width20(), // Built-in 20px left spacing
+                Text(title, style: AppTextStyles.primaryBold),
+              ],
             ),
-          ),
+            const SizedBox(height: 6),
+            Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: theme == ThemeMode.dark
+                    ? darkmodeFore
+                    : const Color(0xFFEEF0F2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: errorText != null ? Colors.red : Colors.transparent,
+                  width: 1.2,
+                ),
+              ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: value,
@@ -190,6 +210,8 @@ class DropdownWithLiveValidation extends StatelessWidget {
             ),
           ),
       ],
+    );
+      },
     );
   }
 }

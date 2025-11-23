@@ -64,7 +64,7 @@ class _FieldWithLiveValidationState extends State<FieldWithLiveValidation> {
               decoration: BoxDecoration(
                 color: widget.readOnly
                     ? (theme == ThemeMode.dark
-                        ? const Color(0xFF1C1C24)
+                        ? darkmodeFore
                         : const Color(0xFFF5F5F5))
                     : (theme == ThemeMode.dark
                         ? darkmodeFore
@@ -86,7 +86,7 @@ class _FieldWithLiveValidationState extends State<FieldWithLiveValidation> {
                     width: 24,
                   ),
                 ),
-                SizedBox(width: 5,),
+                const SizedBox(width: 5),
               Expanded(
                 child: TextFormField(
                   controller: widget.controller,
@@ -124,8 +124,8 @@ class _FieldWithLiveValidationState extends State<FieldWithLiveValidation> {
               style: const TextStyle(color: Colors.red, fontSize: 12),
             ),
           ),
-      ],
-    );
+        ],
+      );
       },
     );
   }
@@ -209,8 +209,8 @@ class DropdownWithLiveValidation extends StatelessWidget {
               style: const TextStyle(color: Colors.red, fontSize: 12),
             ),
           ),
-      ],
-    );
+        ],
+      );
       },
     );
   }

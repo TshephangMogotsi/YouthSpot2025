@@ -237,9 +237,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       : null,
                   height: panelHeight.clamp(0.0, size.height),
                   width: double.infinity,
-                  color: theme == ThemeMode.dark
-                      ? darkmodeLight
-                      : Colors.white,
+                  color: theme == ThemeMode.dark ? darkmodeLight : Colors.white,
                   child: SafeArea(
                     top: false, // allow panel to cover the top when expanded
                     child: PrimaryPadding(
@@ -378,7 +376,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             const Height10(),
             PrimaryButton(
               label: 'Reset Password',
-              customBackgroundColor: Colors.black,
+              customBackgroundColor: Colors.blue,
               onTap: () async {
                 final isValid = _formKey.currentState?.validate() ?? false;
                 if (isValid) {
@@ -447,7 +445,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           const Height10(),
           PrimaryButton(
             label: 'Proceed',
-            customBackgroundColor: Colors.black,
+            customBackgroundColor: Colors.blue,
             onTap: () {
               setState(() {
                 currentState = ResetPasswordState.tokenEntry;
@@ -542,8 +540,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               controller: tokenController,
               validator: (value) {
                 if (value == null || value.isEmpty) return 'Token is required';
-                if (value.trim().length < 6)
+                if (value.trim().length < 6) {
                   return 'Token must be at least 6 characters';
+                }
                 return null;
               },
             ),
@@ -563,10 +562,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 });
               },
               validator: (value) {
-                if (value == null || value.isEmpty)
+                if (value == null || value.isEmpty) {
                   return 'Password is required';
-                if (value.length < 6)
+                }
+                if (value.length < 6) {
                   return 'Password must be at least 6 characters';
+                }
                 return null;
               },
             ),
@@ -586,10 +587,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 });
               },
               validator: (value) {
-                if (value == null || value.isEmpty)
+                if (value == null || value.isEmpty) {
                   return 'Password confirmation is required';
-                if (value != newPasswordController.text)
+                }
+                if (value != newPasswordController.text) {
                   return 'Passwords do not match';
+                }
                 return null;
               },
             ),
@@ -605,7 +608,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 Expanded(
                   child: PrimaryButton(
                     label: 'Back',
-                    customBackgroundColor: Colors.black,
+                    customBackgroundColor: Colors.grey,
                     customTextColor: Colors.white,
                     onTap: () {
                       setState(() {
@@ -619,7 +622,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 Expanded(
                   child: PrimaryButton(
                     label: 'Reset Password',
-                    customBackgroundColor: Colors.black,
+                    customBackgroundColor: Colors.blue,
                     onTap: () async {
                       final isValid =
                           _tokenFormKey.currentState?.validate() ?? false;
@@ -693,10 +696,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 });
               },
               validator: (value) {
-                if (value == null || value.isEmpty)
+                if (value == null || value.isEmpty) {
                   return 'Password is required';
-                if (value.length < 6)
+                }
+                if (value.length < 6) {
                   return 'Password must be at least 6 characters';
+                }
                 return null;
               },
             ),
@@ -716,10 +721,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 });
               },
               validator: (value) {
-                if (value == null || value.isEmpty)
+                if (value == null || value.isEmpty) {
                   return 'Password confirmation is required';
-                if (value != newPasswordController.text)
+                }
+                if (value != newPasswordController.text) {
                   return 'Passwords do not match';
+                }
                 return null;
               },
             ),
@@ -777,7 +784,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           const Height20(),
           const Height20(),
           const SizedBox(height: 50), // Extra spacing instead of animation
-          
           // Centered title without Row wrapper
           Text(
             'Password Reset\nSuccessful',
@@ -788,7 +794,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             ),
           ),
           const Height20(),
-          
+
           // Centered description without Row wrapper
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),

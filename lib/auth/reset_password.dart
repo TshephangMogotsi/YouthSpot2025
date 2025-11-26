@@ -225,7 +225,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 ),
               ),
 
-              // White panel that grows upward to full screen on success
+              // Panel that grows upward to full screen on success - supports dark mode
               Align(
                 alignment: Alignment.bottomCenter,
                 child: AnimatedContainer(
@@ -237,13 +237,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       : null,
                   height: panelHeight.clamp(0.0, size.height),
                   width: double.infinity,
-                  color: Colors.white,
+                  color: theme == ThemeMode.dark
+                      ? darkmodeLight
+                      : Colors.white,
                   child: SafeArea(
                     top: false, // allow panel to cover the top when expanded
                     child: PrimaryPadding(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
-                        child: _buildCurrentContent(),
+                        child: _buildCurrentContent(theme),
                       ),
                     ),
                   ),
@@ -298,24 +300,24 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     );
   }
 
-  Widget _buildCurrentContent() {
+  Widget _buildCurrentContent(ThemeMode theme) {
     switch (currentState) {
       case ResetPasswordState.emailEntry:
-        return _buildFormContent();
+        return _buildFormContent(theme);
       case ResetPasswordState.emailSent:
-        return _buildEmailSentContent();
+        return _buildEmailSentContent(theme);
       case ResetPasswordState.tokenEntry:
-        return _buildTokenEntryContent();
+        return _buildTokenEntryContent(theme);
       case ResetPasswordState.newPasswordForm:
         // This state is now handled by tokenEntry, but keep for backward compatibility
-        return _buildTokenEntryContent();
+        return _buildTokenEntryContent(theme);
       case ResetPasswordState.resetComplete:
-        return _buildResetCompleteContent();
+        return _buildResetCompleteContent(theme);
     }
   }
 
   // Form content wrapped in a Form with the key
-  Widget _buildFormContent() {
+  Widget _buildFormContent(ThemeMode theme) {
     // Keep a small spacer so content sits ~20–30px from the top of the sheet.
     return Form(
       key: _formKey,
@@ -346,7 +348,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     'Enter the email address with your account and we`ll send a reset token to your email',
                     style: AppTextStyles.primarySemiBold.copyWith(
                       height: 1.2,
-                      color: const Color(0xFF454545),
+                      color: theme == ThemeMode.dark
+                          ? Colors.grey[400]
+                          : const Color(0xFF454545),
                     ),
                   ),
                 ),
@@ -389,7 +393,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     );
   }
 
-  Widget _buildEmailSentContent() {
+  Widget _buildEmailSentContent(ThemeMode theme) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
@@ -429,7 +433,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   textAlign: TextAlign.center,
                   style: AppTextStyles.primaryBigSemiBold.copyWith(
                     height: 1.2,
-                    color: const Color(0x95454545),
+                    color: theme == ThemeMode.dark
+                        ? Colors.grey[400]
+                        : const Color(0x95454545),
                   ),
                 ),
               ),
@@ -490,7 +496,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     );
   }
 
-  Widget _buildTokenEntryContent() {
+  Widget _buildTokenEntryContent(ThemeMode theme) {
     return Form(
       key: _tokenFormKey,
       child: SingleChildScrollView(
@@ -520,7 +526,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     'Enter the reset token and your new password',
                     style: AppTextStyles.primarySemiBold.copyWith(
                       height: 1.2,
-                      color: const Color(0xFF454545),
+                      color: theme == ThemeMode.dark
+                          ? Colors.grey[400]
+                          : const Color(0xFF454545),
                     ),
                   ),
                 ),
@@ -631,7 +639,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     );
   }
 
-  Widget _buildNewPasswordContent() {
+  Widget _buildNewPasswordContent(ThemeMode theme) {
     return Form(
       key: _passwordFormKey,
       child: SingleChildScrollView(
@@ -661,7 +669,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     'Enter your new password',
                     style: AppTextStyles.primarySemiBold.copyWith(
                       height: 1.2,
-                      color: const Color(0xFF454545),
+                      color: theme == ThemeMode.dark
+                          ? Colors.grey[400]
+                          : const Color(0xFF454545),
                     ),
                   ),
                 ),
@@ -758,7 +768,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     );
   }
 
-  Widget _buildResetCompleteContent() {
+  Widget _buildResetCompleteContent(ThemeMode theme) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
@@ -787,7 +797,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               textAlign: TextAlign.center,
               style: AppTextStyles.primaryBigSemiBold.copyWith(
                 height: 1.2,
-                color: const Color(0x95454545),
+                color: theme == ThemeMode.dark
+                    ? Colors.grey[400]
+                    : const Color(0x95454545),
               ),
             ),
           ),

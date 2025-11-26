@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:youthspot/config/constants.dart';
+import 'package:youthspot/config/theme_manager.dart';
+import 'package:youthspot/services/services_locator.dart';
 
 class CustomDatePicker2 extends StatefulWidget {
   final String labelText;
@@ -76,50 +78,63 @@ class _CustomDatePicker2State extends State<CustomDatePicker2> {
   Widget build(BuildContext context) {
     final DateFormat formatter = DateFormat('dd/MM/yyyy');
     final bool showError = widget.showError && (widget.errorText != null && widget.errorText!.isNotEmpty);
+    final themeManager = getIt<ThemeManager>();
 
-    return GestureDetector(
-      onTap: () => _selectDate(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-         
-          Container(
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEEF0F2),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: showError ? Colors.red : Colors.transparent,
-                width: 1.2,
-              ),
-            ),
-            alignment: Alignment.centerLeft,
-            child: Row(
-              
-              children: [
-                Expanded(
-                  child: Text(
-                    formatter.format(selectedDate),
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black,
-                    ),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, snapshot) {
+        final Color fieldBackgroundColor = theme == ThemeMode.dark
+            ? darkmodeFore
+            : const Color(0xFFEEF0F2);
+        final Color textColor = theme == ThemeMode.dark
+            ? Colors.white
+            : Colors.black;
+
+        return GestureDetector(
+          onTap: () => _selectDate(context),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+             
+              Container(
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: fieldBackgroundColor,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: showError ? Colors.red : Colors.transparent,
+                    width: 1.2,
                   ),
                 ),
-              ],
-            ),
-          ),
-          if (showError)
-            Padding(
-              padding: const EdgeInsets.only(top: 4.0, left: 4.0),
-              child: Text(
-                widget.errorText ?? '',
-                style: TextStyle(color: Colors.red, fontSize: 12),
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  
+                  children: [
+                    Expanded(
+                      child: Text(
+                        formatter.format(selectedDate),
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-        ],
-      ),
+              if (showError)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0, left: 4.0),
+                  child: Text(
+                    widget.errorText ?? '',
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

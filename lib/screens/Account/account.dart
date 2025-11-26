@@ -109,17 +109,73 @@ class _AccountState extends State<Account> {
                 const Height20(),
                 GestureDetector(
                   onTap: () async {
-                    final auth = Provider.of<AuthService>(
-                      context,
-                      listen: false,
+                    final colorScheme = Theme.of(context).colorScheme;
+
+                    final shouldLogout = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: colorScheme.surface,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          title: Text(
+                            'Confirm Logout',
+                            style: TextStyle(
+                              fontFamily: 'Onest',
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          content: Text(
+                            'Are you sure you want to log out?',
+                            style: TextStyle(
+                              fontFamily: 'Onest',
+                              color: colorScheme.onSurface.withValues(alpha: 0.7),
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  fontFamily: 'Onest',
+                                  color: colorScheme.onSurface.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                              child: const Text(
+                                'Logout',
+                                style: TextStyle(
+                                  fontFamily: 'Onest',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     );
-                    await auth.signOut();
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (context) => const AuthSwitcher(),
-                      ),
-                      (route) => false,
-                    );
+
+                    if (shouldLogout == true) {
+                      final auth = Provider.of<AuthService>(
+                        context,
+                        listen: false,
+                      );
+                      await auth.signOut();
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const AuthSwitcher(),
+                        ),
+                        (route) => false,
+                      );
+                    }
                   },
 
                   child: Container(
@@ -222,9 +278,21 @@ class ProfileListTile extends StatelessWidget {
 class ThemePreferenceListTile extends StatelessWidget {
   const ThemePreferenceListTile({super.key});
 
+  String _getThemeLabel(ThemePreference preference) {
+    switch (preference) {
+      case ThemePreference.light:
+        return 'Light';
+      case ThemePreference.dark:
+        return 'Dark';
+      case ThemePreference.system:
+        return 'Device Preferences';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeManager = getIt<ThemeManager>();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return ListenableBuilder(
       listenable: themeManager,
@@ -232,102 +300,64 @@ class ThemePreferenceListTile extends StatelessWidget {
         return PrimaryContainer(
           borderRadius: BorderRadius.circular(25),
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              // Header with icon
-              Row(
-                children: [
-                  Image.asset(
-                    'assets/icon/Settings/DayIcon.png',
-                    width: 40,
-                    height: 40,
+              Image.asset(
+                'assets/icon/Settings/DayIcon.png',
+                width: 40,
+                height: 40,
+              ),
+              const SizedBox(width: 20),
+              const Expanded(
+                child: Text(
+                  'Theme',
+                  style: TextStyle(
+                    fontFamily: 'Onest',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(width: 20),
-                  const Text(
-                    'Theme',
-                    style: TextStyle(
-                      fontFamily: 'Onest',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: colorScheme.surfaceContainerHighest,
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<ThemePreference>(
+                    value: themeManager.themePreference,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: colorScheme.onSurface,
                     ),
+                    dropdownColor: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    items: ThemePreference.values.map((ThemePreference preference) {
+                      return DropdownMenuItem<ThemePreference>(
+                        value: preference,
+                        child: Text(
+                          _getThemeLabel(preference),
+                          style: TextStyle(
+                            fontFamily: 'Onest',
+                            fontSize: 14,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (ThemePreference? newValue) {
+                      if (newValue != null) {
+                        themeManager.setThemePreference(newValue);
+                      }
+                    },
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Theme options
-              _ThemeOption(
-                title: 'Light',
-                value: ThemePreference.light,
-                themeManager: themeManager,
-              ),
-              const SizedBox(height: 8),
-              _ThemeOption(
-                title: 'Dark',
-                value: ThemePreference.dark,
-                themeManager: themeManager,
-              ),
-              const SizedBox(height: 8),
-              _ThemeOption(
-                title: 'Device Preferences',
-                value: ThemePreference.system,
-                themeManager: themeManager,
+                ),
               ),
             ],
           ),
         );
       },
-    );
-  }
-}
-
-class _ThemeOption extends StatelessWidget {
-  const _ThemeOption({
-    required this.title,
-    required this.value,
-    required this.themeManager,
-  });
-
-  final String title;
-  final ThemePreference value;
-  final ThemeManager themeManager;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        themeManager.setThemePreference(value);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        decoration: BoxDecoration(
-          color: themeManager.themePreference == value
-              ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              themeManager.themePreference == value
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: TextStyle(
-                fontFamily: 'Onest',
-                fontSize: 16,
-                fontWeight: themeManager.themePreference == value
-                    ? FontWeight.w600
-                    : FontWeight.w400,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

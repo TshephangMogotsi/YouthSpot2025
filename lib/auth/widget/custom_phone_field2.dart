@@ -42,6 +42,10 @@ class RegisterPhoneField extends StatelessWidget {
         final Color fieldBackgroundColor = theme == ThemeMode.dark
             ? darkmodeFore
             : const Color(0xFFEEF0F2);
+        
+        final Color textColor = theme == ThemeMode.dark
+            ? Colors.white
+            : Colors.black;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,11 +84,11 @@ class RegisterPhoneField extends StatelessWidget {
               ),
               style: TextStyle(
                 fontSize: 18,
-                color: theme == ThemeMode.dark ? Colors.white : Colors.black,
+                color: textColor,
               ),
               dropdownTextStyle: TextStyle(
                 fontSize: 16,
-                color: theme == ThemeMode.dark ? Colors.white : Colors.black,
+                color: textColor,
               ),
               languageCode: "en",
               autovalidateMode: AutovalidateMode.disabled,

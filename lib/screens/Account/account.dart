@@ -109,18 +109,13 @@ class _AccountState extends State<Account> {
                 const Height20(),
                 GestureDetector(
                   onTap: () async {
-                    final themeManager = getIt<ThemeManager>();
-                    final isDarkMode = themeManager.themeMode.value == ThemeMode.dark ||
-                        (themeManager.themeMode.value == ThemeMode.system &&
-                            MediaQuery.of(context).platformBrightness == Brightness.dark);
+                    final colorScheme = Theme.of(context).colorScheme;
 
                     final shouldLogout = await showDialog<bool>(
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          backgroundColor: isDarkMode
-                              ? Colors.grey.shade900
-                              : Colors.white,
+                          backgroundColor: colorScheme.surface,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -129,14 +124,14 @@ class _AccountState extends State<Account> {
                             style: TextStyle(
                               fontFamily: 'Onest',
                               fontWeight: FontWeight.w600,
-                              color: isDarkMode ? Colors.white : Colors.black,
+                              color: colorScheme.onSurface,
                             ),
                           ),
                           content: Text(
                             'Are you sure you want to log out?',
                             style: TextStyle(
                               fontFamily: 'Onest',
-                              color: isDarkMode ? Colors.white70 : Colors.black87,
+                              color: colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                           actions: [
@@ -146,7 +141,7 @@ class _AccountState extends State<Account> {
                                 'Cancel',
                                 style: TextStyle(
                                   fontFamily: 'Onest',
-                                  color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
+                                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                                 ),
                               ),
                             ),
@@ -297,14 +292,11 @@ class ThemePreferenceListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeManager = getIt<ThemeManager>();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return ListenableBuilder(
       listenable: themeManager,
       builder: (context, child) {
-        final isDarkMode = themeManager.themeMode.value == ThemeMode.dark ||
-            (themeManager.themeMode.value == ThemeMode.system &&
-                MediaQuery.of(context).platformBrightness == Brightness.dark);
-
         return PrimaryContainer(
           borderRadius: BorderRadius.circular(25),
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
@@ -330,20 +322,16 @@ class ThemePreferenceListTile extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: isDarkMode
-                      ? Colors.grey.shade800
-                      : Colors.grey.shade200,
+                  color: colorScheme.surfaceContainerHighest,
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<ThemePreference>(
                     value: themeManager.themePreference,
                     icon: Icon(
                       Icons.arrow_drop_down,
-                      color: isDarkMode ? Colors.white : Colors.black,
+                      color: colorScheme.onSurface,
                     ),
-                    dropdownColor: isDarkMode
-                        ? Colors.grey.shade800
-                        : Colors.white,
+                    dropdownColor: colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     items: ThemePreference.values.map((ThemePreference preference) {
                       return DropdownMenuItem<ThemePreference>(
@@ -353,7 +341,7 @@ class ThemePreferenceListTile extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: 'Onest',
                             fontSize: 14,
-                            color: isDarkMode ? Colors.white : Colors.black,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       );

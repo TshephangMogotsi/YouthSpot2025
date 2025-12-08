@@ -251,7 +251,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                           );
                         }
                       },
-                      child: _getStepWidget(context),
+                      child: _getStepWidget(context, theme),
                     ),
                   ),
                 ),
@@ -278,12 +278,12 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     );
   }
 
-  Widget _getStepWidget(BuildContext context) {
+  Widget _getStepWidget(BuildContext context, ThemeMode theme) {
     switch (step) {
       case 0:
-        return _buildCurrentPasswordStep(context, key: const ValueKey(0));
+        return _buildCurrentPasswordStep(context, theme, key: const ValueKey(0));
       case 1:
-        return _buildNewPasswordStep(context, key: const ValueKey(1));
+        return _buildNewPasswordStep(context, theme, key: const ValueKey(1));
       case 2:
         return _buildCongratulationsStep(context, key: const ValueKey(2));
       default:
@@ -292,59 +292,55 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
   }
 
   /// --- Step 1 UI: Current Password ---
-  Widget _buildCurrentPasswordStep(BuildContext context, {Key? key}) {
-    final themeManager = getIt<ThemeManager>();
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeManager.themeMode,
-      builder: (context, theme, _) {
-        return Column(
-          key: key,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Reset password',
-              style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600),
+  Widget _buildCurrentPasswordStep(BuildContext context, ThemeMode theme, {Key? key}) {
+    return Column(
+      key: key,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Reset password',
+          style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          'Your password will be replaced with a new one. Once set, you will be automatically logged out and asked to log in again.',
+          style: AppTextStyles.primaryRegular,
+        ),
+        const SizedBox(height: 20),
+        const Text('Enter Current Password', style: AppTextStyles.primaryBold),
+        const SizedBox(height: 8),
+        TextField(
+          controller: currentPasswordController,
+          obscureText: !_currentPasswordVisible,
+          decoration: InputDecoration(
+            hintText: 'Current password',
+            hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
+            filled: true,
+            fillColor: theme == ThemeMode.dark
+                ? darkmodeLight
+                : Colors.grey.shade200,
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 12,
             ),
-            const SizedBox(height: 10),
-            const Text(
-              'Your password will be replaced with a new one. Once set, you will be automatically logged out and asked to log in again.',
-              style: AppTextStyles.primaryRegular,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
             ),
-            const SizedBox(height: 20),
-            const Text('Enter Current Password', style: AppTextStyles.primaryBold),
-            const SizedBox(height: 8),
-            TextField(
-              controller: currentPasswordController,
-              obscureText: !_currentPasswordVisible,
-              decoration: InputDecoration(
-                hintText: 'Current password',
-                hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
-                filled: true,
-                fillColor: theme == ThemeMode.dark
-                    ? darkmodeLight
-                    : Colors.grey.shade200,
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 14,
-                  horizontal: 12,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _currentPasswordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                    color: Colors.grey,
-                  ),
-                  onPressed: () => setState(
-                    () => _currentPasswordVisible = !_currentPasswordVisible,
-                  ),
-                ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _currentPasswordVisible
+                    ? Icons.visibility
+                    : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () => setState(
+                () => _currentPasswordVisible = !_currentPasswordVisible,
               ),
             ),
+          ),
+        ),
         if (_errorMessage != null) _buildErrorBox(),
         const SizedBox(height: 20),
         Row(
@@ -394,90 +390,86 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
   }
 
   /// --- Step 2 UI: New Password ---
-  Widget _buildNewPasswordStep(BuildContext context, {Key? key}) {
-    final themeManager = getIt<ThemeManager>();
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeManager.themeMode,
-      builder: (context, theme, _) {
-        return Column(
-          key: key,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Set New Password',
-              style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600),
+  Widget _buildNewPasswordStep(BuildContext context, ThemeMode theme, {Key? key}) {
+    return Column(
+      key: key,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Set New Password',
+          style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          'Enter and confirm your new password below.',
+          style: AppTextStyles.primaryRegular,
+        ),
+        const SizedBox(height: 20),
+        const Text('New Password', style: AppTextStyles.primaryBold),
+        const SizedBox(height: 8),
+        TextField(
+          controller: newPasswordController,
+          obscureText: !_newPasswordVisible,
+          decoration: InputDecoration(
+            hintText: 'New password',
+            hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
+            filled: true,
+            fillColor: theme == ThemeMode.dark
+                ? darkmodeLight
+                : Colors.grey.shade200,
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 12,
             ),
-            const SizedBox(height: 10),
-            const Text(
-              'Enter and confirm your new password below.',
-              style: AppTextStyles.primaryRegular,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
             ),
-            const SizedBox(height: 20),
-            const Text('New Password', style: AppTextStyles.primaryBold),
-            const SizedBox(height: 8),
-            TextField(
-              controller: newPasswordController,
-              obscureText: !_newPasswordVisible,
-              decoration: InputDecoration(
-                hintText: 'New password',
-                hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
-                filled: true,
-                fillColor: theme == ThemeMode.dark
-                    ? darkmodeLight
-                    : Colors.grey.shade200,
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 14,
-                  horizontal: 12,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _newPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                    color: Colors.grey,
-                  ),
-                  onPressed: () =>
-                      setState(() => _newPasswordVisible = !_newPasswordVisible),
-                ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _newPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () =>
+                  setState(() => _newPasswordVisible = !_newPasswordVisible),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Text('Confirm Password', style: AppTextStyles.primaryBold),
+        const SizedBox(height: 8),
+        TextField(
+          controller: confirmPasswordController,
+          obscureText: !_confirmPasswordVisible,
+          decoration: InputDecoration(
+            hintText: 'Re-enter new password',
+            hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
+            filled: true,
+            fillColor: theme == ThemeMode.dark
+                ? darkmodeLight
+                : Colors.grey.shade200,
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 12,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _confirmPasswordVisible
+                    ? Icons.visibility
+                    : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () => setState(
+                () => _confirmPasswordVisible = !_confirmPasswordVisible,
               ),
             ),
-            const SizedBox(height: 12),
-            const Text('Confirm Password', style: AppTextStyles.primaryBold),
-            const SizedBox(height: 8),
-            TextField(
-              controller: confirmPasswordController,
-              obscureText: !_confirmPasswordVisible,
-              decoration: InputDecoration(
-                hintText: 'Re-enter new password',
-                hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
-                filled: true,
-                fillColor: theme == ThemeMode.dark
-                    ? darkmodeLight
-                    : Colors.grey.shade200,
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 14,
-                  horizontal: 12,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _confirmPasswordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                    color: Colors.grey,
-                  ),
-                  onPressed: () => setState(
-                    () => _confirmPasswordVisible = !_confirmPasswordVisible,
-                  ),
-                ),
-              ),
-            ),
+          ),
+        ),
         if (_errorMessage != null) _buildErrorBox(),
         const SizedBox(height: 20),
         Row(

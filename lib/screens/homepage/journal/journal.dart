@@ -31,11 +31,6 @@ class _JournalState extends State<Journal> {
     super.initState();
     refreshJournals();
     _searchController.addListener(_filterJournals);
-    _searchController.addListener(() {
-      setState(() {
-        _hasText = _searchController.text.isNotEmpty;
-      });
-    });
   }
 
   Future refreshJournals() async {
@@ -54,6 +49,7 @@ class _JournalState extends State<Journal> {
   void _filterJournals() {
     final query = _searchController.text.toLowerCase();
     setState(() {
+      _hasText = _searchController.text.isNotEmpty;
       if (query.isEmpty) {
         filteredJournals = journals;
       } else {
@@ -122,6 +118,7 @@ class _JournalState extends State<Journal> {
                       suffixIcon: _hasText
                           ? IconButton(
                               icon: const Icon(Icons.clear),
+                              tooltip: 'Clear search',
                               onPressed: () {
                                 _searchController.clear();
                               },

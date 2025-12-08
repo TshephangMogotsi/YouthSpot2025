@@ -43,24 +43,25 @@ void main() {
       ];
     });
 
-    test('Search should return all journals when query is empty', () {
-      const query = '';
-      final filteredJournals = sampleJournals.where((journal) {
+    // Helper method to filter journals based on search query
+    List<JournalEntry> filterJournals(List<JournalEntry> journals, String query) {
+      return journals.where((journal) {
         final titleMatches = journal.title.toLowerCase().contains(query.toLowerCase());
         final descriptionMatches = journal.description.toLowerCase().contains(query.toLowerCase());
         return titleMatches || descriptionMatches;
       }).toList();
+    }
+
+    test('Search should return all journals when query is empty', () {
+      const query = '';
+      final filteredJournals = filterJournals(sampleJournals, query);
 
       expect(filteredJournals.length, equals(4));
     });
 
     test('Search should match journals by title', () {
       const query = 'work';
-      final filteredJournals = sampleJournals.where((journal) {
-        final titleMatches = journal.title.toLowerCase().contains(query.toLowerCase());
-        final descriptionMatches = journal.description.toLowerCase().contains(query.toLowerCase());
-        return titleMatches || descriptionMatches;
-      }).toList();
+      final filteredJournals = filterJournals(sampleJournals, query);
 
       expect(filteredJournals.length, equals(2));
       expect(filteredJournals.any((j) => j.title.contains('Work')), true);
@@ -68,11 +69,7 @@ void main() {
 
     test('Search should match journals by description', () {
       const query = 'beach';
-      final filteredJournals = sampleJournals.where((journal) {
-        final titleMatches = journal.title.toLowerCase().contains(query.toLowerCase());
-        final descriptionMatches = journal.description.toLowerCase().contains(query.toLowerCase());
-        return titleMatches || descriptionMatches;
-      }).toList();
+      final filteredJournals = filterJournals(sampleJournals, query);
 
       expect(filteredJournals.length, equals(1));
       expect(filteredJournals.first.title, equals('Vacation Plans'));
@@ -80,11 +77,7 @@ void main() {
 
     test('Search should match journals by both title and description', () {
       const query = 'project';
-      final filteredJournals = sampleJournals.where((journal) {
-        final titleMatches = journal.title.toLowerCase().contains(query.toLowerCase());
-        final descriptionMatches = journal.description.toLowerCase().contains(query.toLowerCase());
-        return titleMatches || descriptionMatches;
-      }).toList();
+      final filteredJournals = filterJournals(sampleJournals, query);
 
       expect(filteredJournals.length, equals(1));
       expect(filteredJournals.first.description.contains('project'), true);
@@ -92,11 +85,7 @@ void main() {
 
     test('Search should be case-insensitive', () {
       const query = 'VACATION';
-      final filteredJournals = sampleJournals.where((journal) {
-        final titleMatches = journal.title.toLowerCase().contains(query.toLowerCase());
-        final descriptionMatches = journal.description.toLowerCase().contains(query.toLowerCase());
-        return titleMatches || descriptionMatches;
-      }).toList();
+      final filteredJournals = filterJournals(sampleJournals, query);
 
       expect(filteredJournals.length, equals(1));
       expect(filteredJournals.first.title, equals('Vacation Plans'));
@@ -104,22 +93,14 @@ void main() {
 
     test('Search should return empty list when no matches found', () {
       const query = 'nonexistent';
-      final filteredJournals = sampleJournals.where((journal) {
-        final titleMatches = journal.title.toLowerCase().contains(query.toLowerCase());
-        final descriptionMatches = journal.description.toLowerCase().contains(query.toLowerCase());
-        return titleMatches || descriptionMatches;
-      }).toList();
+      final filteredJournals = filterJournals(sampleJournals, query);
 
       expect(filteredJournals.isEmpty, true);
     });
 
     test('Search should handle partial word matches', () {
       const query = 'vaca';
-      final filteredJournals = sampleJournals.where((journal) {
-        final titleMatches = journal.title.toLowerCase().contains(query.toLowerCase());
-        final descriptionMatches = journal.description.toLowerCase().contains(query.toLowerCase());
-        return titleMatches || descriptionMatches;
-      }).toList();
+      final filteredJournals = filterJournals(sampleJournals, query);
 
       expect(filteredJournals.length, equals(1));
       expect(filteredJournals.first.title, equals('Vacation Plans'));
@@ -127,11 +108,7 @@ void main() {
 
     test('Search should handle special characters', () {
       const query = 'fruits, vegetables';
-      final filteredJournals = sampleJournals.where((journal) {
-        final titleMatches = journal.title.toLowerCase().contains(query.toLowerCase());
-        final descriptionMatches = journal.description.toLowerCase().contains(query.toLowerCase());
-        return titleMatches || descriptionMatches;
-      }).toList();
+      final filteredJournals = filterJournals(sampleJournals, query);
 
       expect(filteredJournals.length, equals(1));
       expect(filteredJournals.first.title, equals('Grocery Shopping'));

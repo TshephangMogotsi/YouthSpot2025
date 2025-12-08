@@ -38,7 +38,7 @@ class _JournalState extends State<Journal> {
     });
 
     journals = await SSIDatabase.instance.readAllJournalEntries();
-    filteredJournals = journals;
+    filteredJournals = List.from(journals);
 
     setState(() {
       isLoading = false;

@@ -19,7 +19,9 @@ class Journal extends StatefulWidget {
 
 class _JournalState extends State<Journal> {
   late List<JournalEntry> journals;
+  List<JournalEntry> filteredJournals = [];
   bool isLoading = false;
+  final TextEditingController _searchController = TextEditingController();
 
   final ScrollController _scrollController = ScrollController();
 
@@ -27,6 +29,7 @@ class _JournalState extends State<Journal> {
   void initState() {
     super.initState();
     refreshJournals();
+    _searchController.addListener(_filterJournals);
   }
 
   Future refreshJournals() async {
@@ -35,15 +38,32 @@ class _JournalState extends State<Journal> {
     });
 
     journals = await SSIDatabase.instance.readAllJournalEntries();
+    filteredJournals = journals;
 
     setState(() {
       isLoading = false;
     });
   }
 
+  void _filterJournals() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        filteredJournals = journals;
+      } else {
+        filteredJournals = journals.where((journal) {
+          final titleMatches = journal.title.toLowerCase().contains(query);
+          final descriptionMatches = journal.description.toLowerCase().contains(query);
+          return titleMatches || descriptionMatches;
+        }).toList();
+      }
+    });
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -89,6 +109,7 @@ class _JournalState extends State<Journal> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextField(
+                    controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Search your notes',
                       prefixIcon: const Icon(Icons.search),
@@ -108,12 +129,12 @@ class _JournalState extends State<Journal> {
                   child: Center(
                     child: isLoading
                       ? const CircularProgressIndicator()
-                      : journals.isEmpty
+                      : filteredJournals.isEmpty
                         ? ValueListenableBuilder<ThemeMode>(
                             valueListenable: themeManager.themeMode,
                             builder: (context, theme, snapshot) {
                               return Text(
-                                'No Journals',
+                                _searchController.text.isEmpty ? 'No Journals' : 'No journal found',
                                 style: TextStyle(
                                   color: theme == ThemeMode.dark
                                     ? Colors.white
@@ -154,12 +175,12 @@ class _JournalState extends State<Journal> {
 
   Widget buildJournalEntries() => MasonryGridView.count(
   padding: const EdgeInsets.all(8),
-  itemCount: journals.length,
+  itemCount: filteredJournals.length,
   crossAxisCount: 2, // 2 columns for fit-like behavior (adjust as needed)
   mainAxisSpacing: 4,
   crossAxisSpacing: 4,
   itemBuilder: (context, index) {
-    final journalEntry = journals[index];
+    final journalEntry = filteredJournals[index];
     return GestureDetector(
       onTap: () async {
         await Navigator.push(

@@ -6,6 +6,10 @@ import 'package:youthspot/global_widgets/primary_button.dart';
 import 'package:youthspot/global_widgets/primary_container.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
 
+import '../config/constants.dart';
+import '../config/theme_manager.dart';
+import '../services/services_locator.dart';
+
 class SOSScreen extends StatefulWidget {
   const SOSScreen({super.key});
 
@@ -72,52 +76,60 @@ class _SOSScreenState extends State<SOSScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PrimaryScaffold(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Center(
-            child: PrimaryContainer(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const Text(
-                    'Describe your situation below. Your name and contact number will be sent to our support team automatically.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _messageController,
-                    decoration:  InputDecoration(
-                      fillColor: Colors.grey[200],
-                      filled: true,
-                      hintText: 'How are you in distress?',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+    final themeManager = getIt<ThemeManager>();
 
-                    ),
-                    maxLines: 5,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please describe your situation';
-                      }
-                      return null;
-                    },
+    return ValueListenableBuilder(
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, child) {
+        return PrimaryScaffold(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Center(
+                child: PrimaryContainer(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const Text(
+                        'Describe your situation below. Your name and contact number will be sent to our support team automatically.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        controller: _messageController,
+                        decoration: InputDecoration(
+                          fillColor: theme == ThemeMode.dark
+                              ? darkmodeLight
+                              : Colors.grey.shade200,
+                          filled: true,
+                          hintText: 'How are you in distress?',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        maxLines: 5,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please describe your situation';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 40),
+                      _isLoading
+                          ? const CircularProgressIndicator()
+                          : PrimaryButton(label: 'Send SOS', onTap: _submitSOS),
+                    ],
                   ),
-                  const SizedBox(height: 40),
-                  _isLoading
-                      ? const CircularProgressIndicator()
-                      : PrimaryButton(label: 'Send SOS', onTap: _submitSOS),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

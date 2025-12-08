@@ -106,10 +106,12 @@ class _MoodTrackerState extends State<MoodTracker> {
                                   child: Column(
                                     children: [
                                       const Height10(),
-                                      const Text(
+                                      Text(
                                         'How are you feeling today?',
                                         style: TextStyle(
-                                          color: properBlack,
+                                          color: theme == ThemeMode.dark
+                                              ? Colors.white
+                                              : properBlack,
                                           fontSize: 20,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -147,7 +149,6 @@ class _MoodTrackerState extends State<MoodTracker> {
                                       ),
                                       const Height10(),
                                       CustomTextField(
-                                        fillColor: Colors.grey[200],
                                         hintText: 'Why do you feel like that...',
                                         controller: moodDescriptionController,
                                         isOnWhiteBackground: true,

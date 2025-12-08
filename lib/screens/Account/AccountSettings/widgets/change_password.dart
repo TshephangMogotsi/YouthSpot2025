@@ -8,6 +8,9 @@ import '../../../../auth/auth_switcher.dart';
 import '../../../../config/font_constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../config/theme_manager.dart';
+import '../../../../services/services_locator.dart';
+
 class ResetPasswordDialog extends StatefulWidget {
   const ResetPasswordDialog({super.key});
 
@@ -197,62 +200,83 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     }
   }
 
- @override
-Widget build(BuildContext context) {
-  return AlertDialog(
-    alignment: Alignment.bottomCenter,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-    insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-  
-    backgroundColor: Colors.white,
-    content: SizedBox(
-      width: double.maxFinite,
-      child: Stack(
-        children: [
-          // Main content with padding
-          ClipRRect(
-            child: AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (child, animation) {
-                  final isNewChild = child.key == ValueKey(step);
-                  if (isNewChild) {
-                    final offsetAnimation = Tween<Offset>(
-                      begin: isForward ? const Offset(1, 0) : const Offset(-1, 0),
-                      end: Offset.zero,
-                    ).animate(animation);
-                    return SlideTransition(position: offsetAnimation, child: child);
-                  } else {
-                    return FadeTransition(opacity: animation, child: child);
-                  }
-                },
-                child: _getStepWidget(context),
-              ),
-            ),
+  @override
+  Widget build(BuildContext context) {
+    final themeManager = getIt<ThemeManager>();
+
+    return ValueListenableBuilder(
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, child) {
+        return AlertDialog(
+          alignment: Alignment.bottomCenter,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 20,
           ),
 
-          // Full overlay (no padding)
-          if (_isLoading)
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .4),
-                ),
-                child: const Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+          backgroundColor: theme == ThemeMode.dark
+              ? backgroundColorDark
+              : Colors.white,
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Stack(
+              children: [
+                // Main content with padding
+                ClipRRect(
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder: (child, animation) {
+                        final isNewChild = child.key == ValueKey(step);
+                        if (isNewChild) {
+                          final offsetAnimation = Tween<Offset>(
+                            begin: isForward
+                                ? const Offset(1, 0)
+                                : const Offset(-1, 0),
+                            end: Offset.zero,
+                          ).animate(animation);
+                          return SlideTransition(
+                            position: offsetAnimation,
+                            child: child,
+                          );
+                        } else {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        }
+                      },
+                      child: _getStepWidget(context),
+                    ),
                   ),
                 ),
-              ),
-            ),
-        ],
-      ),
-    ),
-  );
-}
 
+                // Full overlay (no padding)
+                if (_isLoading)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: .4),
+                      ),
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Widget _getStepWidget(BuildContext context) {
     switch (step) {
@@ -349,13 +373,12 @@ Widget build(BuildContext context) {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: 
-                     Text(
-                        'Next',
-                        style: AppTextStyles.primaryBold.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
+                child: Text(
+                  'Next',
+                  style: AppTextStyles.primaryBold.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ],
@@ -475,13 +498,12 @@ Widget build(BuildContext context) {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: 
-                     Text(
-                        'Save',
-                        style: AppTextStyles.primaryBold.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
+                child: Text(
+                  'Save',
+                  style: AppTextStyles.primaryBold.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ],

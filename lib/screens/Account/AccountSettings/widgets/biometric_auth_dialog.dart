@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:lottie/lottie.dart';
+import 'package:youthspot/config/constants.dart';
 
 import '../../../../config/font_constants.dart';
+import '../../../../config/theme_manager.dart';
+import '../../../../services/services_locator.dart';
 
 class BiometricAuthDialog extends StatefulWidget {
   const BiometricAuthDialog({super.key});
@@ -60,98 +63,106 @@ class _BiometricAuthDialogState extends State<BiometricAuthDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      alignment: Alignment.bottomCenter,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      backgroundColor: Colors.white,
-      contentPadding: const EdgeInsets.all(20),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Biometric Authentication',
-            style: AppTextStyles.title.copyWith(fontSize: 20),
-          ),
-          const SizedBox(height: 10),
-          
-          if (_isChecking)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(20.0),
-                child: CircularProgressIndicator(),
+    final themeManager = getIt<ThemeManager>();
+    return ValueListenableBuilder(
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, child) {
+        return AlertDialog(
+          alignment: Alignment.bottomCenter,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          backgroundColor: theme == ThemeMode.dark
+                  ? backgroundColorDark
+                  : Colors.white,
+          contentPadding: const EdgeInsets.all(20),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Biometric Authentication',
+                style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w600),
               ),
-            )
-          else if (!_isBiometricAvailable)
-            Column(
-              children: [
-                const Text(
-                  'Biometric authentication is not available on this device. This could be because:',
-                  style: AppTextStyles.secondaryRegular,
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  '• No biometric sensors are available\n'
-                  '• Biometric authentication is not set up\n'
-                  '• Device security requirements are not met',
-                  style: AppTextStyles.secondaryRegular,
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.orange.shade200),
+              const SizedBox(height: 10),
+              
+              if (_isChecking)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: CircularProgressIndicator(),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.orange.shade700),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Please set up biometric authentication in your device settings to use this feature.',
-                          style: AppTextStyles.secondaryRegular.copyWith(
-                            color: Colors.orange.shade700,
-                          ),
-                        ),
+                )
+              else if (!_isBiometricAvailable)
+                Column(
+                  children: [
+                    const Text(
+                      'Biometric authentication is not available on this device. This could be because:',
+                      style: AppTextStyles.primaryRegular,
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      '• No biometric sensors are available\n'
+                      '• Biometric authentication is not set up\n'
+                      '• Device security requirements are not met',
+                      style: AppTextStyles.primaryRegular,
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.orange.shade200),
                       ),
-                    ],
-                  ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, color: Colors.orange.shade700),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Please set up biometric authentication in your device settings to use this feature.',
+                              style: AppTextStyles.secondaryRegular.copyWith(
+                                color: Colors.orange.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Column(
+                  children: [
+                    Text(
+                      'To further enhance security of your account you can use your device\'s ${_getBiometricTypeText().toLowerCase()} security feature. You will be prompted for biometric authentication everytime you open the app.',
+                      style: AppTextStyles.secondaryRegular,
+                    ),
+                    
+                    Center(
+                      child: Lottie.asset(
+                        'assets/icon/Settings/AccountSettings/fingerprint.json',
+                        height: 160,
+                        frameRate: FrameRate.max,
+                        repeat: true,
+                        reverse: false,
+                        animate: true,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    BiometricAuthToggle(
+                      title: 'Enable ${_getBiometricTypeText()}',
+                      initialValue: false,
+                      onChanged: (value) {
+                        // Handle toggle change
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            )
-          else
-            Column(
-              children: [
-                Text(
-                  'To further enhance security of your account you can use your device\'s ${_getBiometricTypeText().toLowerCase()} security feature. You will be prompted for biometric authentication everytime you open the app.',
-                  style: AppTextStyles.secondaryRegular,
-                ),
-                
-                Center(
-                  child: Lottie.asset(
-                    'assets/icon/Settings/AccountSettings/fingerprint.json',
-                    height: 160,
-                    frameRate: FrameRate.max,
-                    repeat: true,
-                    reverse: false,
-                    animate: true,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                BiometricAuthToggle(
-                  title: 'Enable ${_getBiometricTypeText()}',
-                  initialValue: false,
-                  onChanged: (value) {
-                    // Handle toggle change
-                  },
-                ),
-              ],
-            ),
-        ],
-      ),
+            ],
+          ),
+        );
+      }
     );
   }
 }

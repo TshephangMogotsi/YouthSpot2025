@@ -4,6 +4,8 @@ import 'package:slide_to_act/slide_to_act.dart';
 import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/db/app_db.dart';
 import '../../../../config/font_constants.dart';
+import '../../../../config/theme_manager.dart';
+import '../../../../services/services_locator.dart';
 
 class DeleteAccountDataDialog extends StatefulWidget {
   const DeleteAccountDataDialog({super.key});
@@ -26,34 +28,42 @@ class _DeleteAccountDataDialogState extends State<DeleteAccountDataDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      alignment: Alignment.bottomCenter,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      contentPadding: const EdgeInsets.all(20),
-      backgroundColor: Colors.white,
-      content: ClipRRect(
-        child: AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) {
-              final isNewChild = child.key == ValueKey(step);
-              if (isNewChild) {
-                final offsetAnimation = Tween<Offset>(
-                  begin: isForward ? const Offset(1, 0) : const Offset(-1, 0),
-                  end: Offset.zero,
-                ).animate(animation);
-                return SlideTransition(position: offsetAnimation, child: child);
-              } else {
-                return FadeTransition(opacity: animation, child: child);
-              }
-            },
-            child: _getStepWidget(context),
+    final themeManager = getIt<ThemeManager>();
+    return ValueListenableBuilder(
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, child) {
+        return AlertDialog(
+          alignment: Alignment.bottomCenter,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          contentPadding: const EdgeInsets.all(20),
+          backgroundColor: theme == ThemeMode.dark
+                  ? backgroundColorDark
+                  : Colors.white,
+          content: ClipRRect(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) {
+                  final isNewChild = child.key == ValueKey(step);
+                  if (isNewChild) {
+                    final offsetAnimation = Tween<Offset>(
+                      begin: isForward ? const Offset(1, 0) : const Offset(-1, 0),
+                      end: Offset.zero,
+                    ).animate(animation);
+                    return SlideTransition(position: offsetAnimation, child: child);
+                  } else {
+                    return FadeTransition(opacity: animation, child: child);
+                  }
+                },
+                child: _getStepWidget(context),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 

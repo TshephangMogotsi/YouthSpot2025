@@ -5,6 +5,8 @@ import 'package:youthspot/config/constants.dart';
 import 'package:youthspot/main.dart';
 
 import '../../../../config/font_constants.dart';
+import '../../../../config/theme_manager.dart';
+import '../../../../services/services_locator.dart';
 
 class DeleteAccountDialog extends StatefulWidget {
   const DeleteAccountDialog({super.key});
@@ -26,34 +28,42 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      alignment: Alignment.bottomCenter,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      contentPadding: const EdgeInsets.all(20),
-      backgroundColor: Colors.white,
-      content: ClipRRect(
-        child: AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) {
-              final isNewChild = child.key == ValueKey(step);
-              if (isNewChild) {
-                final offsetAnimation = Tween<Offset>(
-                  begin: isForward ? const Offset(1, 0) : const Offset(-1, 0),
-                  end: Offset.zero,
-                ).animate(animation);
-                return SlideTransition(position: offsetAnimation, child: child);
-              } else {
-                return FadeTransition(opacity: animation, child: child);
-              }
-            },
-            child: _getStepWidget(context),
+    final themeManager = getIt<ThemeManager>();
+    return ValueListenableBuilder(
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, child) {
+        return AlertDialog(
+          alignment: Alignment.bottomCenter,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          contentPadding: const EdgeInsets.all(20),
+          backgroundColor: theme == ThemeMode.dark
+                  ? backgroundColorDark
+                  : Colors.white,
+          content: ClipRRect(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) {
+                  final isNewChild = child.key == ValueKey(step);
+                  if (isNewChild) {
+                    final offsetAnimation = Tween<Offset>(
+                      begin: isForward ? const Offset(1, 0) : const Offset(-1, 0),
+                      end: Offset.zero,
+                    ).animate(animation);
+                    return SlideTransition(position: offsetAnimation, child: child);
+                  } else {
+                    return FadeTransition(opacity: animation, child: child);
+                  }
+                },
+                child: _getStepWidget(context),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 
@@ -135,7 +145,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
 
   /// Step 2: Slide-to-delete confirmation
   Widget _buildConfirmStep(BuildContext context, {Key? key}) {
-    final GlobalKey<SlideActionState> _sliderKey = GlobalKey();
+    final GlobalKey<SlideActionState> sliderKey = GlobalKey();
     return Column(
       key: key,
       mainAxisSize: MainAxisSize.min,
@@ -157,7 +167,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
         Builder(
           builder: (context) {
             return SlideAction(
-              key: _sliderKey,
+              key: sliderKey,
               onSubmit: () async {
                 final userId = supabase.auth.currentUser?.id;
                 if (userId != null) {

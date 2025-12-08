@@ -251,7 +251,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
                           );
                         }
                       },
-                      child: _getStepWidget(context),
+                      child: _getStepWidget(context, theme),
                     ),
                   ),
                 ),
@@ -278,12 +278,12 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
     );
   }
 
-  Widget _getStepWidget(BuildContext context) {
+  Widget _getStepWidget(BuildContext context, ThemeMode theme) {
     switch (step) {
       case 0:
-        return _buildCurrentPasswordStep(context, key: const ValueKey(0));
+        return _buildCurrentPasswordStep(context, theme, key: const ValueKey(0));
       case 1:
-        return _buildNewPasswordStep(context, key: const ValueKey(1));
+        return _buildNewPasswordStep(context, theme, key: const ValueKey(1));
       case 2:
         return _buildCongratulationsStep(context, key: const ValueKey(2));
       default:
@@ -292,7 +292,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
   }
 
   /// --- Step 1 UI: Current Password ---
-  Widget _buildCurrentPasswordStep(BuildContext context, {Key? key}) {
+  Widget _buildCurrentPasswordStep(BuildContext context, ThemeMode theme, {Key? key}) {
     return Column(
       key: key,
       mainAxisSize: MainAxisSize.min,
@@ -317,7 +317,9 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
             hintText: 'Current password',
             hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
             filled: true,
-            fillColor: Colors.grey.shade200,
+            fillColor: theme == ThemeMode.dark
+                ? darkmodeLight
+                : Colors.grey.shade200,
             contentPadding: const EdgeInsets.symmetric(
               vertical: 14,
               horizontal: 12,
@@ -388,7 +390,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
   }
 
   /// --- Step 2 UI: New Password ---
-  Widget _buildNewPasswordStep(BuildContext context, {Key? key}) {
+  Widget _buildNewPasswordStep(BuildContext context, ThemeMode theme, {Key? key}) {
     return Column(
       key: key,
       mainAxisSize: MainAxisSize.min,
@@ -413,7 +415,9 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
             hintText: 'New password',
             hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
             filled: true,
-            fillColor: Colors.grey.shade200,
+            fillColor: theme == ThemeMode.dark
+                ? darkmodeLight
+                : Colors.grey.shade200,
             contentPadding: const EdgeInsets.symmetric(
               vertical: 14,
               horizontal: 12,
@@ -442,7 +446,9 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog>
             hintText: 'Re-enter new password',
             hintStyle: AppTextStyles.primaryBold.copyWith(color: Colors.grey),
             filled: true,
-            fillColor: Colors.grey.shade200,
+            fillColor: theme == ThemeMode.dark
+                ? darkmodeLight
+                : Colors.grey.shade200,
             contentPadding: const EdgeInsets.symmetric(
               vertical: 14,
               horizontal: 12,

@@ -22,6 +22,7 @@ class _JournalState extends State<Journal> {
   List<JournalEntry> filteredJournals = [];
   bool isLoading = false;
   final TextEditingController _searchController = TextEditingController();
+  bool _hasText = false;
 
   final ScrollController _scrollController = ScrollController();
 
@@ -30,6 +31,11 @@ class _JournalState extends State<Journal> {
     super.initState();
     refreshJournals();
     _searchController.addListener(_filterJournals);
+    _searchController.addListener(() {
+      setState(() {
+        _hasText = _searchController.text.isNotEmpty;
+      });
+    });
   }
 
   Future refreshJournals() async {
@@ -113,6 +119,14 @@ class _JournalState extends State<Journal> {
                     decoration: InputDecoration(
                       hintText: 'Search your notes',
                       prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _hasText
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                              },
+                            )
+                          : null,
                       filled: true,
                       fillColor: themeManager.themeMode.value == ThemeMode.dark ? darkmodeFore : Colors.white,
                       contentPadding: const EdgeInsets.symmetric(vertical: 10), // Smaller height

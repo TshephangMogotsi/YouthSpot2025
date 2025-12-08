@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:vector_math/vector_math.dart' as v_math;
 
-import '../../../../../config/constants.dart';
 import '../../../../../config/theme_manager.dart';
 import '../../../../../services/services_locator.dart';
 

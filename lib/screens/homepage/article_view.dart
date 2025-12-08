@@ -152,7 +152,7 @@ class _ArticleViewState extends State<ArticleView> {
                 PrimaryPadding(
                   child: Text(
                     widget.article.title,
-                      style: AppTextStyles.title
+                    style: AppTextStyles.title,
                     // style: const TextStyle(
                     //   fontSize: 20,
                     //   fontWeight: FontWeight.bold,
@@ -169,16 +169,19 @@ class _ArticleViewState extends State<ArticleView> {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 11),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 11,
+                            ),
                             decoration: BoxDecoration(
                               color: kSSIorange,
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
                               '2 days ago',
-                                style: AppTextStyles.secondarySmallBold.copyWith(
-                              color: Colors.white,
-                            ),
+                              style: AppTextStyles.secondarySmallBold.copyWith(
+                                color: Colors.white,
+                              ),
                               // style: AppTextStyles.secondarySemiBold.copyWith(
                               //   fontSize: 12,
                               //   color: Colors.white,
@@ -202,9 +205,7 @@ class _ArticleViewState extends State<ArticleView> {
                   ),
                 ),
                 const Height20(),
-                const PrimaryPadding(
-                  child: Text('Listen to this article'),
-                ),
+                const PrimaryPadding(child: Text('Listen to this article')),
                 const Height20(),
                 PrimaryPadding(
                   child: Container(
@@ -212,9 +213,13 @@ class _ArticleViewState extends State<ArticleView> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: articlePlayerBackgroundColor,
+                      color: theme == ThemeMode.dark
+                          ? backgroundColorDark
+                          : articlePlayerBackgroundColor,
                       border: Border.all(
-                        color: Colors.grey[400]!.withValues(alpha: .7),
+                        color: theme == ThemeMode.dark
+                            ? Colors.transparent
+                            : Colors.grey[400]!.withValues(alpha: .7),
                         width: 1.5,
                       ),
                       borderRadius: BorderRadius.circular(50),
@@ -238,15 +243,12 @@ class _ArticleViewState extends State<ArticleView> {
                                 ? Icons.stop_circle_rounded
                                 : Icons.play_circle_fill_rounded,
                             size: 32,
-                            color: iconColor,
+                            color: kSSIorange,
                           ),
                         ),
                         const Width10(),
                         Expanded(
-                          child: Container(
-                            height: 2,
-                            color: progressBarColor,
-                          ),
+                          child: Container(height: 2, color: progressBarColor),
                         ),
                         const Width10(),
                       ],
@@ -265,7 +267,7 @@ class _ArticleViewState extends State<ArticleView> {
                         // style: const TextStyle(
                         //   fontSize: 15.0,
                         // ),
-                          style: AppTextStyles.primaryRegular
+                        style: AppTextStyles.primaryRegular,
                       ),
                       const SizedBox(height: 16.0),
                     ],
@@ -281,7 +283,4 @@ class _ArticleViewState extends State<ArticleView> {
   }
 }
 
-enum ButtonState {
-  playing,
-  stopped,
-}
+enum ButtonState { playing, stopped }

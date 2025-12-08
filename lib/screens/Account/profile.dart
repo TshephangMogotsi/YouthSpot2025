@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:youthspot/auth/auth_service.dart';
 import 'package:youthspot/config/constants.dart';
+import 'package:youthspot/config/theme_manager.dart';
 import 'package:youthspot/global_widgets/primary_button.dart';
 import 'package:youthspot/global_widgets/primary_scaffold.dart';
 import 'package:youthspot/global_widgets/primary_padding.dart';
@@ -13,6 +14,8 @@ import 'package:youthspot/global_widgets/initials_avatar.dart';
 import 'package:youthspot/screens/homepage/my_spot/goals/widgets/date_picker_2.dart';
 import 'package:youthspot/auth/widget/custom_phone_field2.dart';
 import 'package:youthspot/config/font_constants.dart';
+
+import '../../services/services_locator.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -216,143 +219,151 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return PrimaryScaffold(
-      child: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    Center(
-                      child: InitialsAvatar(
-                        fullName: _fullNameController.text,
-                        radius: 50,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: PrimaryPadding(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 16),
-                            Text(
-                              "Profile Information",
-                              style: AppTextStyles.primaryBigBold.copyWith(fontSize: 26),
-                            ),
-                            const SizedBox(height: 8),
-                            FieldWithLiveValidation(
-                              title: "Username",
-                              hintText: "Username",
-                              controller: _userNameController,
-                              errorText: _usernameError,
-                              onChanged: (value) => setState(() {
-                                _usernameError = _validateUsername(value);
-                              }),
-                              validator: _validateUsername,
-                            ),
-                            const SizedBox(height: 20),
-                            FieldWithLiveValidation(
-                              title: "Full Name",
-                              hintText: "Full Name",
-                              controller: _fullNameController,
-                              errorText: _fullNameError,
-                              onChanged: (value) => setState(() {
-                                _fullNameError = _validateFullName(value);
-                              }),
-                              validator: _validateFullName,
-                            ),
-                            const SizedBox(height: 20),
-                            FieldWithLiveValidation(
-                              title: "Email",
-                              hintText: "johndoe@mail.com",
-                              controller: _emailController,
-                              errorText: _emailError,
-                              readOnly: true, // Email is read-only since it's from auth system
-                              onChanged: (value) => setState(() {
-                                _emailError = _validateEmail(value);
-                              }),
-                              validator: _validateEmail,
-                            ),
-                            const SizedBox(height: 20),
-                            RegisterPhoneField(
-                              title: 'Mobile Number',
-                              controller: _mobileController,
-                              errorText: _mobileError,
-                              onChanged: (val) => setState(() {
-                                _mobileError = _validateMobileNumber(val);
-                              }),
-                              initialCountryCode: "BW",
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
+    final themeManager = getIt<ThemeManager>();
+    return ValueListenableBuilder(
+      valueListenable: themeManager.themeMode,
+      builder: (context, theme, child) {
+        return PrimaryScaffold(
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 10),
+                        Center(
+                          child: InitialsAvatar(
+                            fullName: _fullNameController.text,
+                            radius: 50,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Container(
+                          decoration: BoxDecoration(
+                             color: theme == ThemeMode.dark
+                                  ? darkmodeLight
+                                  : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: PrimaryPadding(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: DropdownWithLiveValidation(
-                                    title: "Gender",
-                                    hintText: "Select Gender",
-                                    value: selectedGender,
-                                    items: genderList,
-                                    errorText: _genderError,
-                                    onChanged: (val) {
-                                      setState(() {
-                                        selectedGender = val;
-                                        _genderError = null;
-                                      });
-                                    },
-                                  ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  "Profile Information",
+                                  style: AppTextStyles.primaryBigBold.copyWith(fontSize: 26),
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        "Date of Birth",
-                                        style: AppTextStyles.primaryBold,
-                                      ),
-                                      const SizedBox(height: 6),
-                                      CustomDatePicker2(
-                                        labelText: "Date of Birth",
-                                        initialDate: dateOfBirth,
-                                        isDoBField: true,
-                                        onDateSelected: (date) {
+                                const SizedBox(height: 8),
+                                FieldWithLiveValidation(
+                                  title: "Username",
+                                  hintText: "Username",
+                                  controller: _userNameController,
+                                  errorText: _usernameError,
+                                  onChanged: (value) => setState(() {
+                                    _usernameError = _validateUsername(value);
+                                  }),
+                                  validator: _validateUsername,
+                                ),
+                                const SizedBox(height: 20),
+                                FieldWithLiveValidation(
+                                  title: "Full Name",
+                                  hintText: "Full Name",
+                                  controller: _fullNameController,
+                                  errorText: _fullNameError,
+                                  onChanged: (value) => setState(() {
+                                    _fullNameError = _validateFullName(value);
+                                  }),
+                                  validator: _validateFullName,
+                                ),
+                                const SizedBox(height: 20),
+                                FieldWithLiveValidation(
+                                  title: "Email",
+                                  hintText: "johndoe@mail.com",
+                                  controller: _emailController,
+                                  errorText: _emailError,
+                                  readOnly: true, // Email is read-only since it's from auth system
+                                  onChanged: (value) => setState(() {
+                                    _emailError = _validateEmail(value);
+                                  }),
+                                  validator: _validateEmail,
+                                ),
+                                const SizedBox(height: 20),
+                                RegisterPhoneField(
+                                  title: 'Mobile Number',
+                                  controller: _mobileController,
+                                  errorText: _mobileError,
+                                  onChanged: (val) => setState(() {
+                                    _mobileError = _validateMobileNumber(val);
+                                  }),
+                                  initialCountryCode: "BW",
+                                ),
+                                const SizedBox(height: 20),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: DropdownWithLiveValidation(
+                                        title: "Gender",
+                                        hintText: "Select Gender",
+                                        value: selectedGender,
+                                        items: genderList,
+                                        errorText: _genderError,
+                                        onChanged: (val) {
                                           setState(() {
-                                            dateOfBirth = date;
+                                            selectedGender = val;
+                                            _genderError = null;
                                           });
                                         },
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            "Date of Birth",
+                                            style: AppTextStyles.primaryBold,
+                                          ),
+                                          const SizedBox(height: 6),
+                                          CustomDatePicker2(
+                                            labelText: "Date of Birth",
+                                            initialDate: dateOfBirth,
+                                            isDoBField: true,
+                                            onDateSelected: (date) {
+                                              setState(() {
+                                                dateOfBirth = date;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                                const SizedBox(height: 32),
+                                _isSaving
+                                    ? const Center(
+                                        child: CircularProgressIndicator(color: kSSIorange),
+                                      )
+                                    : PrimaryButton(
+                                        label: 'Update Profile',
+                                        onTap: _updateProfile,
+                                      ),
+                                const SizedBox(height: 36),
                               ],
                             ),
-                            const SizedBox(height: 32),
-                            _isSaving
-                                ? const Center(
-                                    child: CircularProgressIndicator(color: kSSIorange),
-                                  )
-                                : PrimaryButton(
-                                    label: 'Update Profile',
-                                    onTap: _updateProfile,
-                                  ),
-                            const SizedBox(height: 36),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+        );
+      }
     );
   }
 }

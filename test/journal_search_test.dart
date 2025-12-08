@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:youthspot/db/models/journal_model.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   group('Journal Search Functionality', () {
@@ -112,6 +113,47 @@ void main() {
 
       expect(filteredJournals.length, equals(1));
       expect(filteredJournals.first.title, equals('Grocery Shopping'));
+    });
+  });
+
+  group('Journal Search Clear Button', () {
+    test('TextEditingController should be clearable', () {
+      final controller = TextEditingController();
+      
+      // Set text
+      controller.text = 'test search';
+      expect(controller.text, equals('test search'));
+      expect(controller.text.isNotEmpty, true);
+      
+      // Clear text
+      controller.clear();
+      expect(controller.text, equals(''));
+      expect(controller.text.isEmpty, true);
+      
+      controller.dispose();
+    });
+
+    test('hasText state should update based on controller text', () {
+      final controller = TextEditingController();
+      bool hasText = false;
+      
+      // Simulate listener behavior
+      controller.addListener(() {
+        hasText = controller.text.isNotEmpty;
+      });
+      
+      // Initially empty
+      expect(hasText, false);
+      
+      // Add text
+      controller.text = 'search query';
+      expect(hasText, true);
+      
+      // Clear text
+      controller.clear();
+      expect(hasText, false);
+      
+      controller.dispose();
     });
   });
 }

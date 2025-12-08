@@ -149,9 +149,28 @@ void main() {
       controller.text = 'search query';
       expect(hasText, true);
       
-      // Clear text
+      // Clear text - this should trigger the listener
       controller.clear();
       expect(hasText, false);
+      
+      controller.dispose();
+    });
+
+    test('TextEditingController.clear() triggers listener', () {
+      final controller = TextEditingController();
+      int listenerCallCount = 0;
+      
+      controller.addListener(() {
+        listenerCallCount++;
+      });
+      
+      // Set text should trigger listener
+      controller.text = 'test';
+      expect(listenerCallCount, 1);
+      
+      // Clear should also trigger listener
+      controller.clear();
+      expect(listenerCallCount, 2);
       
       controller.dispose();
     });

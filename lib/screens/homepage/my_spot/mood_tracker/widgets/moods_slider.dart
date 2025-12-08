@@ -77,7 +77,7 @@ class _ReviewSliderState extends State<ReviewSlider>
     WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
   }
 
-  _afterLayout(_) {
+  void _afterLayout(_) {
     widget.onChange(widget.initialValue);
   }
 
@@ -119,7 +119,7 @@ class _ReviewSliderState extends State<ReviewSlider>
     _xOffset = x - (oneStepWidth * _animationValue);
   }
 
-  _calcAnimatedValueFormDragX(x, innerWidth) {
+  dynamic _calcAnimatedValueFormDragX(x, innerWidth) {
     x = x - _xOffset;
     return x /
         (innerWidth - widget.circleDiameter) *
@@ -278,7 +278,7 @@ class MeasureLine extends StatelessWidget {
               child: Container(
                 width: width,
                 //Color of the line
-                color: theme == ThemeMode.dark ? darkModeBg : const Color(0xFFDFDFDF),
+                color: theme == ThemeMode.dark ? const Color(0xFFB8B4B4) : const Color(0xFFDFDFDF),
                 height: 5,
               ),
             );
@@ -343,7 +343,7 @@ class MyPainter extends CustomPainter {
         activeIndex != oldDelegate.activeIndex;
   }
 
-  _drawEye(canvas, size) {
+  void _drawEye(canvas, size) {
     var angle = 0.0;
     var wide = 0.0;
 
@@ -387,7 +387,7 @@ class MyPainter extends CustomPainter {
     );
   }
 
-  _drawMouth(Canvas canvas, size) {
+  void _drawMouth(Canvas canvas, size) {
     var upperY = size.height * 0.70;
     var lowerY = size.height * 0.77;
     var middleY = (lowerY - upperY) / 2 + upperY;
@@ -509,7 +509,7 @@ class MyIndicator extends StatelessWidget {
   final double width;
   final double circleDiameter;
 
-  _buildIndicator() {
+  GestureDetector _buildIndicator() {
     var opacityOfYellow = possition > 0.5 ? 1.0 : possition * 2;
     return GestureDetector(
       onHorizontalDragStart: onDragStart,

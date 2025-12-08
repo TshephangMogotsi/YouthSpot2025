@@ -15,7 +15,7 @@ class CustomTextField extends StatefulWidget {
     this.controller,
     this.isPasswordField,
     this.validator,
-    this.maxLines = 1,
+    this.maxLines = 4,
     this.isOnWhiteBackground = false,
     this.fillColor, // New parameter for fillColor
   });

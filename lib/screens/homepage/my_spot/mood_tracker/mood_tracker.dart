@@ -38,7 +38,8 @@ class _MoodTrackerState extends State<MoodTracker> {
   }
 
   //controller for mood description
-  final TextEditingController moodDescriptionController = TextEditingController();
+  final TextEditingController moodDescriptionController =
+      TextEditingController();
   //form key
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -52,9 +53,16 @@ class _MoodTrackerState extends State<MoodTracker> {
     setState(() => isLoading = true);
     final now = DateTime.now();
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
-    final startOfDayString = dateFormat.format(DateTime(now.year, now.month, now.day, 0, 0, 0));
-    final endOfDayString = dateFormat.format(DateTime(now.year, now.month, now.day, 23, 59, 59));
-    isMoodRecorded = await SSIDatabase.instance.isMoodToday(startOfDayString, endOfDayString);
+    final startOfDayString = dateFormat.format(
+      DateTime(now.year, now.month, now.day, 0, 0, 0),
+    );
+    final endOfDayString = dateFormat.format(
+      DateTime(now.year, now.month, now.day, 23, 59, 59),
+    );
+    isMoodRecorded = await SSIDatabase.instance.isMoodToday(
+      startOfDayString,
+      endOfDayString,
+    );
     setState(() => isLoading = false);
   }
 
@@ -71,10 +79,7 @@ class _MoodTrackerState extends State<MoodTracker> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Mood Tracker',
-                      style: headingStyle,
-                    ),
+                    Text('Mood Tracker', style: headingStyle),
                     PillButton2(
                       title: 'Calendar',
                       onTap: () async {
@@ -95,148 +100,170 @@ class _MoodTrackerState extends State<MoodTracker> {
               const PrimaryDivider(),
               isLoading
                   ? const Expanded(
-                      child: Center(child: CircularProgressIndicator()))
+                      child: Center(child: CircularProgressIndicator()),
+                    )
                   : !isMoodRecorded
-                      ? Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              PrimaryPadding(
-                                child: PrimaryContainer(
-                                  child: Column(
-                                    children: [
-                                      const Height10(),
-                                      Text(
-                                        'How are you feeling today?',
-                                        style: TextStyle(
-                                          color: theme == ThemeMode.dark
-                                              ? Colors.white
-                                              : properBlack,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const Height20(),
-                                      const Height10(),
-                                      ReviewSlider(
-                                        optionStyle: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 16,
-                                          color: theme == ThemeMode.dark
-                                              ? Colors.white
-                                              : properBlack,
-                                        ),
-                                        onChange: (value) {
-                                          setState(() {
-                                            if (value == 0) {
-                                              mood = 'terrible';
-                                              moodColor = const Color(0xFFFF8A80); // Pastel Red
-                                            } else if (value == 1) {
-                                              mood = 'bad';
-                                              moodColor = const Color(0xFFFFCC80); // Pastel Orange
-                                            } else if (value == 2) {
-                                              mood = 'okay';
-                                              moodColor = const Color(0xFFFFF59D); // Pastel Yellow
-                                            } else if (value == 3) {
-                                              mood = 'good';
-                                              moodColor = const Color(0xFFA5D6A7); // Pastel Green
-                                            } else if (value == 4) {
-                                              mood = 'great';
-                                              moodColor = const Color(0xFF90CAF9); // Pastel Blue
-                                            }
-                                          });
-                                        },
-                                      ),
-                                      const Height10(),
-                                      CustomTextField(
-                                        hintText: 'Why do you feel like that...',
-                                        controller: moodDescriptionController,
-                                        isOnWhiteBackground: true,
-                                      ),
-                                      const SizedBox(height: 20),
-                                      PrimaryButton(
-                                        label: "Submit",
-                                        onTap: () async {
-                                          if (mood.isEmpty) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                content: Text("Please select your mood!"),
-                                              ),
-                                            );
-                                            return;
-                                          }
-                                          DateTime now = DateTime.now();
-                                          String dateTimeString = DateFormat(
-                                            'yyyy-MM-dd HH:mm:ss',
-                                          ).format(now);
-                                          if (kDebugMode) {
-                                            print('DateTime as string: $dateTimeString');
-                                          }
-                                          await addMood(
-                                            mood: mood,
-                                            description: moodDescriptionController.text,
-                                            date: dateTimeString,
-                                          );
-                                          await initMood();
-                                          moodDescriptionController.clear();
-                                        },
-                                      ),
-                                      const Height10(),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Congratulations!',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: theme == ThemeMode.dark
-                                      ? Colors.white
-                                      : Colors.black,
-                                  fontSize: 30,
-                                ),
-                              ),
-                              const Height10(),
-                              Text(
-                                'You have already recorded your mood today',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: theme == ThemeMode.dark
-                                        ? Colors.white
-                                        : properBlack,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              Lottie.asset(
-                                'assets/QuizResultsAnimations/trophy.json',
-                                width: 140,
-                                repeat: true,
-                                reverse: false,
-                                animate: true,
-                              ),
-                              Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 70),
-                                child: Text(
-                                  'Go to Mood Calendar to see your mood',
-                                  style: TextStyle(
+                  ? Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          PrimaryPadding(
+                            child: PrimaryContainer(
+                              child: Column(
+                                children: [
+                                  const Height10(),
+                                  Text(
+                                    'How are you feeling today?',
+                                    style: TextStyle(
                                       color: theme == ThemeMode.dark
                                           ? Colors.white
                                           : properBlack,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500),
-                                ),
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const Height20(),
+                                  const Height10(),
+                                  ReviewSlider(
+                                    optionStyle: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: theme == ThemeMode.dark
+                                          ? Colors.white
+                                          : properBlack,
+                                    ),
+                                    onChange: (value) {
+                                      setState(() {
+                                        if (value == 0) {
+                                          mood = 'terrible';
+                                          moodColor = const Color(
+                                            0xFFFF8A80,
+                                          ); // Pastel Red
+                                        } else if (value == 1) {
+                                          mood = 'bad';
+                                          moodColor = const Color(
+                                            0xFFFFCC80,
+                                          ); // Pastel Orange
+                                        } else if (value == 2) {
+                                          mood = 'okay';
+                                          moodColor = const Color(
+                                            0xFFFFF59D,
+                                          ); // Pastel Yellow
+                                        } else if (value == 3) {
+                                          mood = 'good';
+                                          moodColor = const Color(
+                                            0xFFA5D6A7,
+                                          ); // Pastel Green
+                                        } else if (value == 4) {
+                                          mood = 'great';
+                                          moodColor = const Color(
+                                            0xFF90CAF9,
+                                          ); // Pastel Blue
+                                        }
+                                      });
+                                    },
+                                  ),
+                                  const Height10(),
+                                  CustomTextField(
+                                    hintText: 'Why do you feel like that...',
+                                    controller: moodDescriptionController,
+                                    isOnWhiteBackground: true,
+                                    fillColor: theme == ThemeMode.dark
+                                        ? darkmodeLight
+                                        : Colors.grey.shade200,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  PrimaryButton(
+                                    label: "Submit",
+                                    onTap: () async {
+                                      if (mood.isEmpty) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              "Please select your mood!",
+                                            ),
+                                          ),
+                                        );
+                                        return;
+                                      }
+                                      DateTime now = DateTime.now();
+                                      String dateTimeString = DateFormat(
+                                        'yyyy-MM-dd HH:mm:ss',
+                                      ).format(now);
+                                      if (kDebugMode) {
+                                        print(
+                                          'DateTime as string: $dateTimeString',
+                                        );
+                                      }
+                                      await addMood(
+                                        mood: mood,
+                                        description:
+                                            moodDescriptionController.text,
+                                        date: dateTimeString,
+                                      );
+                                      await initMood();
+                                      moodDescriptionController.clear();
+                                    },
+                                  ),
+                                  const Height10(),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
+                      ),
+                    )
+                  : Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Congratulations!',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: theme == ThemeMode.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                              fontSize: 30,
+                            ),
+                          ),
+                          const Height10(),
+                          Text(
+                            'You have already recorded your mood today',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: theme == ThemeMode.dark
+                                  ? Colors.white
+                                  : properBlack,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Lottie.asset(
+                            'assets/QuizResultsAnimations/trophy.json',
+                            width: 140,
+                            repeat: true,
+                            reverse: false,
+                            animate: true,
+                          ),
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 70),
+                            child: Text(
+                              'Go to Mood Calendar to see your mood',
+                              style: TextStyle(
+                                color: theme == ThemeMode.dark
+                                    ? Colors.white
+                                    : properBlack,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
             ],
           ),
         );
@@ -249,11 +276,7 @@ class _MoodTrackerState extends State<MoodTracker> {
     required String description,
     required String date,
   }) async {
-    final moodObject = Mood(
-      mood: mood,
-      description: description,
-      date: date,
-    );
+    final moodObject = Mood(mood: mood, description: description, date: date);
 
     // Add the mood entry to the database
     await SSIDatabase.instance.addMood(moodObject);
